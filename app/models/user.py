@@ -2,6 +2,7 @@
 사용자 모델 정의
 """
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression, func
 
 from app.db.database import Base
@@ -43,6 +44,43 @@ class User(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     last_login_at = Column(DateTime, nullable=True)
     
+    # 관계 설정 (진단 및 학습 관련)
+    test_sessions = relationship("TestSession", back_populates="user", cascade="all, delete-orphan")
+    diagnosis_results = relationship("DiagnosisResult", back_populates="user", cascade="all, delete-orphan")
+    learning_history = relationship("LearningLevelHistory", back_populates="user", cascade="all, delete-orphan")
+    
+    # 문제 풀이 관련 관계 (향후 추가 예정)
+    # problem_submissions = relationship("ProblemSubmission", back_populates="user")
+    # user_preferences = relationship("UserPreference", back_populates="user")
+    
     def __repr__(self):
         """사용자 객체의 문자열 표현"""
-        return f"<User(id={self.id}, name={self.name}, student_id={self.student_id}, role={self.role})>" 
+        return f"<User(id={self.id}, name={self.name}, student_id={self.student_id}, role={self.role})>"
+    
+    @property
+    def is_student(self) -> bool:
+        """학생 여부 확인"""
+        return self.role == "student"
+    
+    @property
+    def is_professor(self) -> bool:
+        """교수 여부 확인"""
+        return self.role == "professor"
+    
+    @property
+    def is_admin(self) -> bool:
+        """관리자 여부 확인"""
+        return self.role == "admin"
+    
+    def get_latest_diagnosis_result(self):
+        """최신 진단 결과 가져오기"""
+        if self.diagnosis_results:
+            return max(self.diagnosis_results, key=lambda x: x.calculated_at)
+        return None
+    
+    def get_current_learning_level(self, subject: str = None) -> float:
+        """현재 학습 수준 가져오기"""
+        latest_result = self.get_latest_diagnosis_result()
+        if latest_result:
+            return latest_result.learning_level
+        return 0.0 

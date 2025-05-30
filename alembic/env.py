@@ -16,7 +16,18 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.models.user import Base
+# 모든 모델을 import하여 MetaData에 포함시킴
+from app.models.user import Base, User
+from app.models.question import (
+    Question, Subject, Tag, AnswerOption, 
+    CorrectAnswer, Explanation, TestSet, TestQuestion, 
+    TestAttempt, UserAnswer, Source, question_tags
+)
+from app.models.diagnosis import (
+    TestSession, TestResponse, DiagnosisResult, 
+    LearningLevelHistory
+)
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

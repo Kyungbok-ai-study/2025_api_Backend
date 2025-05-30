@@ -7,7 +7,7 @@ pgvector 확장을 사용하여 텍스트 임베딩 저장 기능 포함
 import enum
 from typing import List, Optional
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, DateTime, Enum, JSON, Float, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, DateTime, Enum, JSON, Float, UniqueConstraint, Table
 from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.ext.mutable import MutableList, MutableDict
@@ -20,8 +20,17 @@ except ImportError:
     PGVECTOR_AVAILABLE = False
     print("경고: pgvector 모듈이 설치되지 않았습니다. 'pip install pgvector'로 설치해주세요.")
 
-from ..database import Base
-from .user import User  # User 모델 가져오기 (FK 관계를 위해)
+from app.db.database import Base
+# User import는 관계 설정에서 문자열로 처리하여 순환 import 방지
+
+# Question-Tag 관계 테이블 정의
+question_tags = Table(
+    'question_tags',
+    Base.metadata,
+    Column('question_id', Integer, ForeignKey('questions.id'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True),
+    Column('created_at', DateTime, default=datetime.utcnow)
+)
 
 
 class QuestionType(str, enum.Enum):
@@ -56,7 +65,7 @@ class Subject(Base):
     
     # 관계 설정
     children = relationship("Subject", backref="parent", remote_side=[id])
-    questions = relationship("Question", back_populates="subject")
+    questions = relationship("Question", back_populates="subject_rel")
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -70,7 +79,7 @@ class Tag(Base):
     name = Column(String(50), nullable=False, unique=True)
     
     # 관계 설정
-    questions = relationship("Question", secondary="question_tags", back_populates="tags")
+    questions = relationship("Question", secondary=question_tags, back_populates="tags")
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -105,7 +114,7 @@ class Question(Base):
     source_id = Column(Integer, ForeignKey("sources.id"), nullable=True)
     
     # 메타데이터
-    metadata = Column(JSONB, nullable=True)
+    question_metadata = Column(JSONB, nullable=True)
     
     # 이미지 URL 목록 (이미지가 포함된 문제의 경우)
     image_urls = Column(MutableList.as_mutable(ARRAY(String)), nullable=True)
@@ -114,16 +123,13 @@ class Question(Base):
     if PGVECTOR_AVAILABLE:
         embedding = Column(Vector(1536), nullable=True)  # OpenAI 1536 차원 임베딩
     
-    # 관계 설정
-    subject = relationship("Subject", back_populates="questions")
-    source = relationship("Source", back_populates="questions")
-    options = relationship("AnswerOption", back_populates="question", cascade="all, delete-orphan")
-    correct_answers = relationship("CorrectAnswer", back_populates="question", cascade="all, delete-orphan")
-    tags = relationship("Tag", secondary="question_tags", back_populates="questions")
-    explanations = relationship("Explanation", back_populates="question", cascade="all, delete-orphan")
+    # 진단 테스트 관련 필드
+    is_active = Column(Boolean, default=True, nullable=False)  # 문제 활성화 상태
+    subject_name = Column(String(100), nullable=True)  # 과목명 (진단용)
+    choices = Column(ARRAY(String), nullable=True)  # 객관식 선택지 (간단 버전)
+    correct_answer = Column(Text, nullable=True)  # 정답 (간단 버전)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # 문자열 참조로 순환 import 방지
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     updated_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
@@ -136,6 +142,21 @@ class Question(Base):
     usage_count = Column(Integer, default=0)
     correct_rate = Column(Float, default=0.0)
     
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 관계 설정
+    subject_rel = relationship("Subject", back_populates="questions")
+    source = relationship("Source", back_populates="questions")
+    options = relationship("AnswerOption", back_populates="question", cascade="all, delete-orphan")
+    correct_answers = relationship("CorrectAnswer", back_populates="question", cascade="all, delete-orphan")
+    tags = relationship("Tag", secondary=question_tags, back_populates="questions")
+    explanations = relationship("Explanation", back_populates="question", cascade="all, delete-orphan")
+    
+    # 진단 테스트 관련 관계
+    test_responses = relationship("TestResponse", back_populates="question")
+    
+    # 문자열 참조로 User 관계 설정
     created_by = relationship("User", foreign_keys=[created_by_id])
     updated_by = relationship("User", foreign_keys=[updated_by_id])
 
@@ -189,16 +210,6 @@ class Explanation(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class QuestionTag(Base):
-    """문제-태그 연결 모델 (M:N 관계)"""
-    __tablename__ = "question_tags"
-
-    question_id = Column(Integer, ForeignKey("questions.id"), primary_key=True)
-    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-
 class TestSet(Base):
     """테스트 세트 모델 (문제 묶음)"""
     __tablename__ = "test_sets"
@@ -212,17 +223,16 @@ class TestSet(Base):
     is_published = Column(Boolean, default=False)
     
     # 메타데이터
-    metadata = Column(JSONB, nullable=True)
+    test_metadata = Column(JSONB, nullable=True)
+    
+    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # 관계 설정
     subject = relationship("Subject")
     questions = relationship("TestQuestion", back_populates="test_set")
     attempts = relationship("TestAttempt", back_populates="test_set")
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    
     created_by = relationship("User", foreign_keys=[created_by_id])
 
 
@@ -236,11 +246,11 @@ class TestQuestion(Base):
     display_order = Column(Integer, nullable=True)
     points = Column(Float, default=1.0)
     
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
     # 관계 설정
     test_set = relationship("TestSet", back_populates="questions")
     question = relationship("Question")
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
     
     # 테스트 내 질문 중복 방지
     __table_args__ = (
@@ -267,15 +277,15 @@ class TestAttempt(Base):
     
     # 메타데이터 및 상태 저장
     status = Column(String(20), default="in_progress")  # in_progress, completed, abandoned
-    metadata = Column(JSONB, nullable=True)
+    attempt_metadata = Column(JSONB, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # 관계 설정
     user = relationship("User")
     test_set = relationship("TestSet", back_populates="attempts")
     answers = relationship("UserAnswer", back_populates="test_attempt", cascade="all, delete-orphan")
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class UserAnswer(Base):
@@ -290,16 +300,15 @@ class UserAnswer(Base):
     
     is_correct = Column(Boolean, nullable=True)
     points_earned = Column(Float, nullable=True)
-    
     time_spent_seconds = Column(Integer, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # 관계 설정
     test_attempt = relationship("TestAttempt", back_populates="answers")
     question = relationship("Question")
     answer_option = relationship("AnswerOption")
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 # 임베딩 생성 및 저장을 위한 함수 정의

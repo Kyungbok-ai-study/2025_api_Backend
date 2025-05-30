@@ -1,0 +1,71 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Set up test environment
+      run: |
+        export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db
+        export SECRET_KEY=test_secret_key
+        export JWT_SECRET_KEY=test_jwt_secret
+    
+    - name: Run tests
+      run: |
+        pytest -v
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+        SECRET_KEY: test_secret_key
+        JWT_SECRET_KEY: test_jwt_secret
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Railway
+      uses: booleangate/deploy-to-railway@v1
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        
+    - name: Notify deployment success
+      run: |
+        echo "🚀 Deployment completed successfully!"
+        echo "📱 API URL: https://kbu-ai-team.kro.kr"
+        echo "📚 API Docs: https://kbu-ai-team.kro.kr/docs" 
