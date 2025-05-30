@@ -9,6 +9,7 @@ git init
 git add .
 git commit -m "feat : CampusON API 사이트 생성"
 git branch -M main
+git remote -v
 git remote add origin https://github.com/Kyungbok-ai-study/2025_api_Backend.git
 git push -u origin main
 ```
