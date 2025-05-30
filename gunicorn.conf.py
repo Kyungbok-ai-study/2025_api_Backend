@@ -19,14 +19,14 @@ keepalive = 5
 graceful_timeout = 30
 
 # 로깅 설정
-accesslog = "/app/logs/access.log"
-errorlog = "/app/logs/error.log"
+accesslog = "-"  # stdout으로 출력
+errorlog = "-"   # stderr로 출력
 loglevel = "info"
 access_log_format = '%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D'
 
 # 프로세스 설정
-user = 1000
-group = 1000
+user = None  # Railway에서 자동 처리
+group = None
 tmp_upload_dir = None
 
 # 보안 설정
