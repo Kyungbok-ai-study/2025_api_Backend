@@ -4,7 +4,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, and_, func
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 from app.models.diagnosis import (
@@ -49,7 +49,7 @@ class DiagnosisService:
             
             if existing_session:
                 # 기존 세션이 만료되지 않았다면 해당 세션 반환
-                if existing_session.expires_at and existing_session.expires_at > datetime.utcnow():
+                if existing_session.expires_at and existing_session.expires_at > datetime.now(timezone.utc):
                     return await self._build_test_response(db, existing_session)
                 else:
                     # 만료된 세션은 EXPIRED로 변경
@@ -75,7 +75,7 @@ class DiagnosisService:
                 status=DiagnosisStatus.ACTIVE,
                 max_time_minutes=60,
                 total_questions=30,
-                expires_at=datetime.utcnow() + timedelta(hours=2),  # 2시간 후 만료
+                expires_at=datetime.now(timezone.utc) + timedelta(hours=2),  # 2시간 후 만료
                 description=f"{subject} 진단 테스트"
             )
             
@@ -115,7 +115,7 @@ class DiagnosisService:
             if not test_session:
                 raise ValueError("유효하지 않은 테스트 세션입니다.")
             
-            if test_session.expires_at and test_session.expires_at < datetime.utcnow():
+            if test_session.expires_at and test_session.expires_at < datetime.now(timezone.utc):
                 test_session.status = DiagnosisStatus.EXPIRED
                 db.commit()
                 raise ValueError("테스트 시간이 만료되었습니다.")
@@ -148,7 +148,7 @@ class DiagnosisService:
                     is_correct=is_correct,
                     score=score,
                     time_spent_seconds=answer_item.time_spent,
-                    answered_at=datetime.utcnow()
+                    answered_at=datetime.now(timezone.utc)
                 )
                 
                 db.add(test_response)
@@ -188,20 +188,24 @@ class DiagnosisService:
                 subject_breakdown=calculation_details.subject_breakdown,
                 feedback_message=feedback_message,
                 recommended_next_steps=recommended_steps,
-                calculated_at=datetime.utcnow()
+                calculated_at=datetime.now(timezone.utc)
             )
             
             db.add(diagnosis_result)
             
             # 테스트 세션 완료 처리
             test_session.status = DiagnosisStatus.COMPLETED
-            test_session.completed_at = datetime.utcnow()
+            test_session.completed_at = datetime.now(timezone.utc)
             
-            # 학습 수준 이력 저장
-            await self._save_learning_history(db, user_id, diagnosis_result, test_session.subject)
-            
+            # 먼저 커밋하여 diagnosis_result.id 생성
             db.commit()
             db.refresh(diagnosis_result)
+            
+            # 학습 수준 이력 저장 (diagnosis_result.id가 이제 사용 가능)
+            await self._save_learning_history(db, user_id, diagnosis_result, test_session.subject)
+            
+            # 최종 커밋
+            db.commit()
             
             logger.info(f"진단 테스트 완료: user_id={user_id}, learning_level={learning_level:.3f}")
             
@@ -494,7 +498,7 @@ class DiagnosisService:
             previous_level=previous_level,
             level_change=level_change,
             change_percentage=change_percentage,
-            measured_at=datetime.utcnow()
+            measured_at=datetime.now(timezone.utc)
         )
         
         db.add(history)

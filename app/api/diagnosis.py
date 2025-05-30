@@ -1,5 +1,5 @@
 """
-진단 테스트 API 엔드포인트
+진단 API 라우터
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

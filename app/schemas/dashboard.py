@@ -68,18 +68,12 @@ class SubjectProgress(BaseModel):
 
 class LearningProgressResponse(BaseModel):
     """학습 진행 상황 응답"""
-    user_id: int
-    period_days: int
-    overall_progress: float = Field(..., ge=0.0, le=100.0, description="전체 진행률 (%)")
-    learning_trend: List[LearningTrendPoint] = Field(..., description="학습 추세")
-    subject_progress: List[SubjectProgress] = Field(..., description="과목별 진행 상황")
+    current_level: float = Field(..., ge=0.0, le=1.0, description="현재 학습 수준")
+    progress_trend: List[Dict[str, Any]] = Field(..., description="학습 진행 추세")
+    subject_breakdown: Dict[str, float] = Field(..., description="과목별 성과")
+    weekly_goals: Dict[str, Any] = Field(..., description="주간 목표")
+    achievements_this_period: List[str] = Field(..., description="기간 내 성취")
     
-    # 목표 관련
-    current_goal: Optional[Dict[str, Any]] = None
-    goal_achievement_rate: Optional[float] = Field(None, ge=0.0, le=100.0)
-    
-    generated_at: datetime
-
     class Config:
         from_attributes = True
 
@@ -100,26 +94,12 @@ class LearningPattern(BaseModel):
 
 class PerformanceAnalyticsResponse(BaseModel):
     """성과 분석 응답"""
-    user_id: int
-    analysis_type: str
-    
-    # 강점/약점 분석
-    strengths: List[StrengthWeaknessItem] = Field(default_factory=list)
-    weaknesses: List[StrengthWeaknessItem] = Field(default_factory=list)
-    
-    # 학습 패턴
-    learning_patterns: List[LearningPattern] = Field(default_factory=list)
-    
-    # 개선 추천사항
-    improvement_recommendations: List[str] = Field(default_factory=list)
-    
-    # 비교 데이터 (동급생 대비)
-    peer_comparison: Optional[Dict[str, Any]] = None
-    
-    generated_at: datetime
-
-    class Config:
-        from_attributes = True
+    overall_metrics: Dict[str, float] = Field(..., description="전체 지표")
+    strength_analysis: List[str] = Field(..., description="강점 분석")
+    weakness_analysis: List[str] = Field(..., description="약점 분석")
+    improvement_suggestions: List[str] = Field(..., description="개선 제안")
+    comparative_analysis: Dict[str, Any] = Field(..., description="비교 분석")
+    time_series_data: List[Dict[str, Any]] = Field(..., description="시계열 데이터")
 
 class RecommendationItem(BaseModel):
     """추천 항목"""
@@ -129,29 +109,16 @@ class RecommendationItem(BaseModel):
     priority: str = Field(..., description="우선순위")
     estimated_time: Optional[int] = Field(None, description="예상 소요 시간 (분)")
     difficulty: Optional[int] = Field(None, ge=1, le=5)
-
-class RecommendationSummaryResponse(BaseModel):
-    """추천 시스템 요약 응답"""
-    user_id: int
     
-    # 현재 추천 상태
-    total_recommended_problems: int = Field(..., ge=0)
-    new_recommendations: int = Field(..., ge=0)
-    
-    # 맞춤형 추천
-    personalized_recommendations: List[RecommendationItem] = Field(..., max_items=20)
-    
-    # 학습 경로
-    suggested_learning_path: List[str] = Field(default_factory=list)
-    next_milestone: Optional[str] = None
-    
-    # AI 추천 정확도
-    recommendation_accuracy: Optional[float] = Field(None, ge=0.0, le=1.0)
-    
-    generated_at: datetime
-
     class Config:
         from_attributes = True
+
+class RecommendationResponse(BaseModel):
+    """추천 응답"""
+    personalized_items: List[RecommendationItem] = Field(..., description="개인 맞춤 추천")
+    trending_topics: List[str] = Field(..., description="인기 주제")
+    skill_gap_recommendations: List[RecommendationItem] = Field(..., description="스킬 갭 기반 추천")
+    adaptive_path: Dict[str, Any] = Field(..., description="적응형 학습 경로")
 
 class StudyPlanItem(BaseModel):
     """학습 계획 항목"""
@@ -165,31 +132,46 @@ class StudyPlanItem(BaseModel):
     prerequisites: List[str] = Field(default_factory=list, description="사전 요구사항")
     learning_objectives: List[str] = Field(default_factory=list, description="학습 목표")
     recommended_day: int = Field(..., ge=1, le=7, description="추천 요일 (1=월요일)")
-
-class WeeklyStudyPlanResponse(BaseModel):
-    """주간 학습 계획 응답"""
-    user_id: int
-    week_start_date: date
-    week_end_date: date
     
-    # 학습 계획
-    study_items: List[StudyPlanItem] = Field(..., description="학습 항목들")
-    
-    # 시간 배분
-    total_estimated_time: int = Field(..., description="총 예상 시간 (분)")
-    daily_time_distribution: Dict[str, int] = Field(..., description="일별 시간 배분")
-    
-    # 목표 설정
-    weekly_goals: List[str] = Field(default_factory=list)
-    success_criteria: List[str] = Field(default_factory=list)
-    
-    # 적응형 조정
-    adaptations: List[str] = Field(default_factory=list, description="개인 맞춤 조정사항")
-    
-    generated_at: datetime
-
     class Config:
         from_attributes = True
+
+class StudyPlanResponse(BaseModel):
+    """학습 계획 응답"""
+    plan_title: str = Field(..., description="계획 제목")
+    total_duration_hours: float = Field(..., description="총 소요 시간")
+    study_items: List[StudyPlanItem] = Field(..., description="학습 항목들")
+    weekly_schedule: Dict[str, List[str]] = Field(..., description="주간 일정")
+    milestones: List[Dict[str, Any]] = Field(..., description="마일스톤")
+
+class LearningStreakResponse(BaseModel):
+    """학습 연속 기록 응답"""
+    current_streak: int = Field(..., description="현재 연속 기록 (일)")
+    longest_streak: int = Field(..., description="최장 연속 기록 (일)")
+    streak_calendar: Dict[str, bool] = Field(..., description="학습 달력")
+    streak_milestones: List[Dict[str, Any]] = Field(..., description="연속 기록 마일스톤")
+    motivation_message: str = Field(..., description="동기부여 메시지")
+
+class AchievementResponse(BaseModel):
+    """성취 응답"""
+    achievement_id: str = Field(..., description="성취 ID")
+    title: str = Field(..., description="성취 제목")
+    description: str = Field(..., description="성취 설명")
+    icon: str = Field(..., description="아이콘")
+    earned_at: Optional[datetime] = Field(None, description="획득 시간")
+    progress: float = Field(..., ge=0.0, le=1.0, description="진행도")
+    category: str = Field(..., description="카테고리")
+    rarity: str = Field(..., description="희귀도")
+
+class QuickActionResponse(BaseModel):
+    """빠른 액션 응답"""
+    action_id: str = Field(..., description="액션 ID")
+    title: str = Field(..., description="액션 제목")
+    description: str = Field(..., description="액션 설명")
+    icon: str = Field(..., description="아이콘")
+    endpoint: str = Field(..., description="API 엔드포인트")
+    estimated_time: int = Field(..., description="예상 소요 시간")
+    priority: int = Field(..., ge=1, le=5, description="우선순위")
 
 class LearningGoal(BaseModel):
     """학습 목표"""
