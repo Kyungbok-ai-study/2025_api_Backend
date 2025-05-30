@@ -7,7 +7,7 @@
 # 현재 프로젝트를 GitHub에 업로드
 git init
 git add .
-git commit -m "feat : CampusON API 사이트 생성"
+git commit -m "feat: CampusON API 배포 준비 완료 - Railway, Render 설정 파일 추가"
 git branch -M main
 git remote -v
 git remote add origin https://github.com/Kyungbok-ai-study/2025_api_Backend.git
