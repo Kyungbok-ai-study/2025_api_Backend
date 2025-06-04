@@ -1,0 +1,59 @@
+# FastAPI 관련
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# 데이터베이스 관련
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.12.1
+
+# Pydantic 관련
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# 인증 관련
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# 환경 변수 관리
+python-dotenv==1.0.0
+
+# HTTP 클라이언트
+httpx==0.25.2
+requests==2.31.0
+
+# 유틸리티
+python-dateutil==2.8.2
+pytz==2023.3
+
+# 로깅
+loguru==0.7.2
+
+# JSON 처리
+orjson==3.9.10
+
+# 벡터 연산
+numpy==1.24.3
+
+# 개발 도구
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
+isort==5.12.0
+
+# 보안
+cryptography==41.0.7
+
+# 스키마 생성
+email-validator==2.1.0
+
+# 문서화
+markdown==3.5.1
+
+# 파일 처리
+openpyxl==3.1.2
+
+# 개발 서버 재시작
+watchdog==3.0.0 
