@@ -638,9 +638,9 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                 return False
         
         # 선택지가 있는 경우 검증
-        options = question_data.get("options", {})
+            options = question_data.get("options", {})
         if options and len(options) < 2:
-            return False
+                return False
         
         return True
     
