@@ -72,6 +72,16 @@ class Settings(BaseSettings):
     AI_MAX_TOKENS: int = Field(default=2048, description="AI 생성 최대 토큰 수")
     AI_TEMPERATURE: float = Field(default=0.7, description="AI 생성 온도")
     
+    # Gemini AI 설정
+    GEMINI_API_KEY: str = Field(
+        default="AIzaSyCEGkV7L6p5fCJ0V8Bf_WVeO4A-1kBO-X4", 
+        description="Gemini API 키"
+    )
+    GEMINI_MODEL_NAME: str = Field(
+        default="gemini-1.5-flash-latest", 
+        description="Gemini 모델 이름"
+    )
+    
     # 임베딩 모델 설정
     EMBEDDING_MODEL_NAME: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",

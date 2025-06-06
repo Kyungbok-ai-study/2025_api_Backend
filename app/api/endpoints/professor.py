@@ -1,7 +1,7 @@
 """
 교수용 API 엔드포인트
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, desc
 from typing import List, Optional
@@ -9,10 +9,23 @@ from datetime import datetime, date, timedelta
 from pydantic import BaseModel, Field
 
 from app.db.database import get_db
+from app.core.config import settings
 from app.models.user import User
 from app.models.assignment import Assignment, AssignmentSubmission, AssignmentStatus, AssignmentType, ProblemBank
 from app.models.analytics import StudentActivity, StudentWarning, LearningAnalytics, ProfessorDashboardData
 from app.api.endpoints.auth import get_current_user
+from app.schemas.question_upload import (
+    QuestionUploadResponse, 
+    AnswerUploadResponse,
+    ParseAndMatchRequest,
+    ParseAndMatchResponse
+)
+from app.services.question_service import process_files_with_gemini_parser
+from app.services.question_parser import QuestionParser
+import os
+import shutil
+from pathlib import Path
+import json
 
 router = APIRouter(prefix="/professor", tags=["professor"])
 
@@ -559,3 +572,239 @@ async def get_professor_problems(
         })
     
     return {"problems": result} 
+
+# ===== 문제 업로드 관련 엔드포인트들 =====
+
+@router.post("/upload/questions", response_model=QuestionUploadResponse)
+async def upload_questions_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    문제 파일 업로드 (모든 형식 지원)
+    
+    지원 형식: JSON, PDF, 엑셀, 텍스트 등
+    Gemini API가 자동으로 파일 형식을 인식하고 파싱합니다.
+    """
+    check_professor_permission(current_user)
+    
+    # 업로드 디렉토리 생성
+    upload_dir = Path("uploads/questions")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 파일명 생성
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{timestamp}_{current_user.id}_{file.filename}"
+    file_path = upload_dir / safe_filename
+    
+    try:
+        # 파일 저장
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Gemini로 파싱
+        parser = QuestionParser(api_key=settings.GEMINI_API_KEY)
+        result = parser.parse_any_file(str(file_path), content_type="questions")
+        
+        parsed_count = len(result.get("data", []))
+        
+        # 파싱된 데이터를 JSON으로 저장 (디버깅 및 재사용)
+        if parsed_count > 0:
+            json_path = file_path.with_suffix('.parsed.json')
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(result["data"], f, ensure_ascii=False, indent=2)
+        
+        return QuestionUploadResponse(
+            success=True,
+            message=f"문제 파일이 성공적으로 업로드되었습니다. {parsed_count}개의 문제를 파싱했습니다.",
+            file_name=safe_filename,
+            parsed_count=parsed_count
+        )
+        
+    except Exception as e:
+        # 오류 발생 시 파일 삭제
+        if file_path.exists():
+            file_path.unlink()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"파일 업로드 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post("/upload/answers", response_model=AnswerUploadResponse)
+async def upload_answer_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    정답 파일 업로드 (모든 형식 지원)
+    
+    지원 형식: 엑셀, PDF, JSON, CSV 등
+    Gemini API가 자동으로 표 형식의 정답 데이터를 인식하고 파싱합니다.
+    """
+    check_professor_permission(current_user)
+    
+    # 업로드 디렉토리 생성
+    upload_dir = Path("uploads/answers")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 파일명 생성
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{timestamp}_{current_user.id}_{file.filename}"
+    file_path = upload_dir / safe_filename
+    
+    try:
+        # 파일 저장
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Gemini로 파싱
+        parser = QuestionParser(api_key=settings.GEMINI_API_KEY)
+        result = parser.parse_any_file(str(file_path), content_type="answers")
+        
+        answers_data = result.get("data", [])
+        
+        # 연도별로 그룹화
+        from collections import defaultdict
+        answers_by_year = defaultdict(list)
+        
+        for answer in answers_data:
+            year = str(answer.get("year", "unknown"))
+            answers_by_year[year].append(answer)
+        
+        years_found = list(answers_by_year.keys())
+        total_answers = len(answers_data)
+        
+        # 파싱된 데이터를 JSON으로 저장
+        if total_answers > 0:
+            json_path = file_path.with_suffix('.parsed.json')
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(dict(answers_by_year), f, ensure_ascii=False, indent=2)
+        
+        return AnswerUploadResponse(
+            success=True,
+            message=f"정답 파일이 성공적으로 업로드되었습니다. {len(years_found)}개 연도의 {total_answers}개 정답을 찾았습니다.",
+            file_name=safe_filename,
+            years_found=[int(y) for y in years_found if y.isdigit()],
+            total_answers=total_answers
+        )
+        
+    except Exception as e:
+        # 오류 발생 시 파일 삭제
+        if file_path.exists():
+            file_path.unlink()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"파일 업로드 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post("/parse-and-match", response_model=ParseAndMatchResponse)
+async def parse_and_match_questions(
+    request: ParseAndMatchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    업로드된 문제와 정답 파일을 파싱하고 매칭하여 DB에 저장
+    """
+    check_professor_permission(current_user)
+    
+    # 파일 존재 확인
+    question_path = Path(request.question_file_path)
+    answer_path = Path(request.answer_file_path)
+    
+    if not question_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="문제 파일을 찾을 수 없습니다."
+        )
+    
+    if not answer_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="정답 파일을 찾을 수 없습니다."
+        )
+    
+    try:
+        # 문제-정답 매칭 및 저장 (새로운 함수 사용)
+        result = process_files_with_gemini_parser(
+            db=db,
+            question_file_path=str(question_path),
+            answer_file_path=str(answer_path),
+            source_name=request.source_name,
+            create_embeddings=request.create_embeddings,
+            user_id=current_user.id,
+            gemini_api_key=request.gemini_api_key or os.getenv("GEMINI_API_KEY")
+        )
+        
+        if result["success"]:
+            return ParseAndMatchResponse(
+                success=True,
+                message="문제와 정답이 성공적으로 매칭되어 저장되었습니다.",
+                total_questions=result.get("total_questions"),
+                saved_questions=result.get("saved_questions"),
+                save_rate=result.get("save_rate"),
+                results_by_year=result.get("results_by_year")
+            )
+        else:
+            return ParseAndMatchResponse(
+                success=False,
+                message="처리 중 오류가 발생했습니다.",
+                errors=[result.get("error", "알 수 없는 오류")]
+            )
+            
+    except Exception as e:
+        return ParseAndMatchResponse(
+            success=False,
+            message="처리 중 예외가 발생했습니다.",
+            errors=[str(e)]
+        )
+
+
+@router.get("/upload/history")
+async def get_upload_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    교수의 업로드 히스토리 조회
+    """
+    check_professor_permission(current_user)
+    
+    # 업로드 디렉토리에서 현재 사용자의 파일 목록 조회
+    question_dir = Path("uploads/questions")
+    answer_dir = Path("uploads/answers")
+    
+    history = []
+    
+    # 문제 파일 목록
+    if question_dir.exists():
+        for file_path in question_dir.glob(f"*_{current_user.id}_*"):
+            stat = file_path.stat()
+            history.append({
+                "type": "questions",
+                "filename": file_path.name,
+                "path": str(file_path),
+                "size": stat.st_size,
+                "uploaded_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+    
+    # 정답 파일 목록
+    if answer_dir.exists():
+        for file_path in answer_dir.glob(f"*_{current_user.id}_*"):
+            stat = file_path.stat()
+            history.append({
+                "type": "answers",
+                "filename": file_path.name,
+                "path": str(file_path),
+                "size": stat.st_size,
+                "uploaded_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+    
+    # 시간순 정렬
+    history.sort(key=lambda x: x["uploaded_at"], reverse=True)
+    
+    return {"history": history} 
