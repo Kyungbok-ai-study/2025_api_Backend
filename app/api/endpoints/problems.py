@@ -184,7 +184,7 @@ async def get_problem_history(
 async def get_review_problems(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    review_type: str = Query("incorrect", regex="^(incorrect|difficult|recent)$", description="복습 유형")
+    review_type: str = Query("incorrect", pattern="^(incorrect|difficult|recent)$", description="복습 유형")
 ):
     """
     복습 문제 조회

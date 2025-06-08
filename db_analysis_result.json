@@ -1,0 +1,2231 @@
+{
+  "timestamp": "2025-06-08T19:04:31.852809",
+  "total_tables": 29,
+  "tables": {
+    "alembic_version": {
+      "columns": 1,
+      "indexes": 0,
+      "foreign_keys": 0,
+      "column_details": [
+        {
+          "name": "version_num",
+          "type": "VARCHAR(32)",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "answer_options": {
+      "columns": 7,
+      "indexes": 1,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "option_text",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "option_label",
+          "type": "VARCHAR(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "display_order",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "assignment_submissions": {
+      "columns": 11,
+      "indexes": 3,
+      "foreign_keys": 3,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "assignment_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "student_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "submission_text",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "attachment_urls",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "submitted_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_late",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "feedback",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "graded_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "graded_by",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "assignments": {
+      "columns": 17,
+      "indexes": 2,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(200)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "assignment_type",
+          "type": "VARCHAR(8)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(9)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "professor_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "professor_school",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "professor_department",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject_name",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "published_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "due_date",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "max_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "allow_late_submission",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "instructions",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "attachment_urls",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "class_statistics": {
+      "columns": 13,
+      "indexes": 2,
+      "foreign_keys": 0,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "school",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "analysis_date",
+          "type": "DATE",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "active_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "average_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "average_attendance",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "critical_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "warning_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "correct_answers": {
+      "columns": 6,
+      "indexes": 1,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "answer_option_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "answer_text",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "diagnosis_results": {
+      "columns": 22,
+      "indexes": 4,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_session_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "learning_level",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "max_possible_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "accuracy_rate",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_questions",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "correct_answers",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_time_spent",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "difficulty_breakdown",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "subject_breakdown",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "feedback_message",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "recommended_next_steps",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "percentile_rank",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "improvement_from_previous",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "calculated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "choice_strategy_analysis",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "elimination_effectiveness",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "decision_confidence_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "cognitive_load_analysis",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "explanations": {
+      "columns": 5,
+      "indexes": 1,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "content",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "learning_analytics": {
+      "columns": 16,
+      "indexes": 3,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "student_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "analysis_date",
+          "type": "DATE",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "week_of_year",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "month",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "year",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_activities",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "login_count",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "assignments_submitted",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "tests_taken",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "average_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "total_study_time_minutes",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "class_rank",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "class_percentile",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "learning_level_history": {
+      "columns": 11,
+      "indexes": 6,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "diagnosis_result_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "learning_level",
+          "type": "DOUBLE PRECISION",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "previous_level",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "level_change",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "change_percentage",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "measurement_context",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "notes",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "measured_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "multi_choice_test_responses": {
+      "columns": 13,
+      "indexes": 2,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "session_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "selected_choice_index",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "selected_choice_content",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_correct",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "eliminated_choices",
+          "type": "ARRAY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "confidence_level",
+          "type": "VARCHAR(10)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "choice_changes",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "time_spent_seconds",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "choice_timeline",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "elimination_strategy",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "decision_pattern",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "answered_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "multi_choice_test_sessions": {
+      "columns": 9,
+      "indexes": 3,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_session_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "choices",
+          "type": "ARRAY",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "correct_choice_index",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "max_choices",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "shuffle_choices",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "choice_metadata",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "problem_bank": {
+      "columns": 15,
+      "indexes": 2,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(200)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "content",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "problem_type",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "difficulty",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "correct_answer",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "choices",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "explanation",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_by",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "school",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "usage_count",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "professor_dashboard_data": {
+      "columns": 17,
+      "indexes": 3,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "professor_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "data_date",
+          "type": "DATE",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "active_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "critical_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "warning_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "total_assignments",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "pending_assignments",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "graded_assignments",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "class_average_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "department_average_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "school_average_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "daily_logins",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "current_online_students",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "question_tags": {
+      "columns": 3,
+      "indexes": 0,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "tag_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "questions": {
+      "columns": 30,
+      "indexes": 1,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "content",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_type",
+          "type": "VARCHAR(15)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "difficulty",
+          "type": "VARCHAR(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "embedding",
+          "type": "NULL",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_active",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject_name",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "correct_answer",
+          "type": "VARCHAR(10)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "approval_status",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "approved_by",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "approved_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "last_modified_by",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "last_modified_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "source_file_path",
+          "type": "VARCHAR(500)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "parsed_data_path",
+          "type": "VARCHAR(500)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "question_number",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "ARRAY",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "options",
+          "type": "JSONB",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "area_name",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "year",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "file_title",
+          "type": "VARCHAR(200)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "file_category",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "ai_explanation",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "explanation_confidence",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "vector_db_indexed",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "rag_indexed",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "llm_training_added",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "integration_completed_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "sources": {
+      "columns": 8,
+      "indexes": 1,
+      "foreign_keys": 0,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "year",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "url",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "student_activities": {
+      "columns": 10,
+      "indexes": 3,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "student_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "activity_type",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "activity_description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "related_assignment_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "related_test_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "time_spent_minutes",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "activity_date",
+          "type": "DATE",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "student_warnings": {
+      "columns": 11,
+      "indexes": 3,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "student_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "professor_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "warning_type",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "severity",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(200)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "related_data",
+          "type": "JSON",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_resolved",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "resolved_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "subjects": {
+      "columns": 7,
+      "indexes": 2,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "code",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "parent_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "tags": {
+      "columns": 3,
+      "indexes": 2,
+      "foreign_keys": 0,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "test_attempts": {
+      "columns": 14,
+      "indexes": 1,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_set_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "started_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "completed_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "total_time_seconds",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "max_score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "correct_count",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "question_count",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "attempt_metadata",
+          "type": "JSONB",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "test_questions": {
+      "columns": 6,
+      "indexes": 2,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_set_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "display_order",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "points",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "test_responses": {
+      "columns": 10,
+      "indexes": 3,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_session_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_answer",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_correct",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "score",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "time_spent_seconds",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "answered_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "confidence_level",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "attempt_count",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        }
+      ]
+    },
+    "test_sessions": {
+      "columns": 11,
+      "indexes": 3,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "subject",
+          "type": "VARCHAR(16)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(9)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "started_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "completed_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "expires_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "max_time_minutes",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "total_questions",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "test_sets": {
+      "columns": 11,
+      "indexes": 1,
+      "foreign_keys": 2,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "description",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "subject_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "time_limit_minutes",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_random_order",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_published",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "test_metadata",
+          "type": "JSONB",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_by_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "user_answers": {
+      "columns": 10,
+      "indexes": 1,
+      "foreign_keys": 3,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "test_attempt_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "question_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "answer_option_id",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "answer_text",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_correct",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "points_earned",
+          "type": "DOUBLE PRECISION",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "time_spent_seconds",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "users": {
+      "columns": 26,
+      "indexes": 4,
+      "foreign_keys": 0,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "school",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "student_id",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "hashed_password",
+          "type": "VARCHAR(200)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "role",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "is_first_login",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "is_active",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "profile_image",
+          "type": "VARCHAR(500)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "last_login_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "terms_agreed",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "privacy_agreed",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "privacy_optional_agreed",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "marketing_agreed",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "identity_verified",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "age_verified",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "verification_method",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "admission_year",
+          "type": "INTEGER",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "phone_number",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "diagnostic_test_completed",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "diagnostic_test_completed_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    },
+    "verification_requests": {
+      "columns": 14,
+      "indexes": 2,
+      "foreign_keys": 1,
+      "column_details": [
+        {
+          "name": "id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "request_number",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "user_id",
+          "type": "INTEGER",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "verification_type",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "reason",
+          "type": "TEXT",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "submitted_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "reviewed_at",
+          "type": "TIMESTAMP",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "reviewer_comment",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "documents",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "primary_key": false
+        },
+        {
+          "name": "reviewed_by",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "primary_key": false
+        },
+        {
+          "name": "rejection_reason",
+          "type": "TEXT",
+          "nullable": true,
+          "primary_key": false
+        }
+      ]
+    }
+  }
+}

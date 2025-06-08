@@ -9,13 +9,14 @@ psycopg2-binary==2.9.9
 alembic==1.12.1
 
 # Pydantic 관련
-pydantic==2.5.0
+pydantic==2.5.2
 pydantic-settings==2.1.0
 
 # 인증 관련
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
+itsdangerous==2.1.2
 
 # 환경 변수 관리
 python-dotenv==1.0.0
@@ -36,6 +37,10 @@ orjson==3.9.10
 
 # 벡터 연산
 numpy==1.24.3
+pgvector==0.2.4
+
+# OpenAI
+openai==1.51.2
 
 # 개발 도구
 pytest==7.4.3
@@ -54,6 +59,21 @@ markdown==3.5.1
 
 # 파일 처리
 openpyxl==3.1.2
+
+# PDF 처리
+PyPDF2==3.0.1
+pdf2image==1.16.3  # PDF를 이미지로 변환
+Pillow==10.1.0  # 이미지 처리
+# PyMuPDF==1.23.8  # fitz 모듈
+
+# AI/ML
+google-generativeai==0.8.3  # Gemini 2.0 지원
+sentence-transformers==2.2.2  # 텍스트 임베딩
+chromadb==0.4.18  # 벡터 데이터베이스
+
+# 데이터 분석 (교수님 평가 데이터 처리용)
+pandas==2.1.4  # 엑셀 데이터 분석
+xlrd==2.0.1  # 구형 엑셀 파일 지원
 
 # 개발 서버 재시작
 watchdog==3.0.0 

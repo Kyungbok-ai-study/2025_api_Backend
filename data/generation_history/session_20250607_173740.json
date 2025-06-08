@@ -1,0 +1,43 @@
+{
+  "user_id": 999,
+  "session_id": "session_20250607_173740",
+  "timestamp": "2025-06-07T17:37:40.080342",
+  "strategy": {
+    "diversification_level": 70,
+    "target_keywords": [
+      "계획",
+      "맥박"
+    ],
+    "alternative_keywords": [
+      "간호진단",
+      "환자확인",
+      "5R원칙"
+    ],
+    "knowledge_base_focus": {
+      "focus_areas": [
+        "depth_focus",
+        "advanced_concepts",
+        "specialized_knowledge"
+      ],
+      "kb_ratio_adjustment": 0.7,
+      "exploration_mode": true
+    },
+    "avoid_patterns": [],
+    "type_distribution": {
+      "multiple_choice": 5
+    },
+    "generation_guidance": {
+      "prioritize_unused_knowledge": false,
+      "expand_keyword_scope": true,
+      "vary_question_approaches": true,
+      "explore_new_concepts": true
+    },
+    "session_id": "session_20250607_173740"
+  },
+  "problems_generated": 5,
+  "keywords_used": [
+    "계획",
+    "맥박"
+  ],
+  "diversification_achieved": true
+}

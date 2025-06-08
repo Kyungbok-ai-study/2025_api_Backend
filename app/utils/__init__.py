@@ -1,15 +1,7 @@
 """
 유틸리티 함수 패키지
+DeepSeek 전환으로 인해 embedding_utils는 더 이상 사용되지 않음
 """
 
-from .embedding_utils import (
-    create_embedding,
-    create_openai_embedding,
-    create_sentence_transformer_embedding
-)
-
-__all__ = [
-    'create_embedding',
-    'create_openai_embedding',
-    'create_sentence_transformer_embedding'
-] 
+# DeepSeek + Qdrant 전환으로 임베딩 유틸리티는 deepseek_service에서 처리
+__all__ = [] 

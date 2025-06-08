@@ -7,6 +7,8 @@ from .user import User
 from .verification import VerificationRequest
 from .assignment import Assignment, AssignmentSubmission, ProblemBank
 from .analytics import StudentActivity, StudentWarning, LearningAnalytics, ClassStatistics, ProfessorDashboardData
+from .question import Question, AnswerOption, CorrectAnswer, Explanation, TestSet, TestQuestion, TestAttempt, UserAnswer
+from .diagnosis import TestSession, TestResponse, DiagnosisResult, LearningLevelHistory, MultiChoiceTestSession, MultiChoiceTestResponse
 
 __all__ = [
     "User",
@@ -18,5 +20,19 @@ __all__ = [
     "StudentWarning",
     "LearningAnalytics",
     "ClassStatistics",
-    "ProfessorDashboardData"
+    "ProfessorDashboardData",
+    "Question",
+    "AnswerOption",
+    "CorrectAnswer", 
+    "Explanation",
+    "TestSet",
+    "TestQuestion",
+    "TestAttempt",
+    "UserAnswer",
+    "TestSession",
+    "TestResponse",
+    "DiagnosisResult",
+    "LearningLevelHistory",
+    "MultiChoiceTestSession",
+    "MultiChoiceTestResponse"
 ] 

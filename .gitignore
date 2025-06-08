@@ -96,7 +96,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .env.*
 .venv
 env/
@@ -167,3 +166,41 @@ temp/
 local_settings.py
 instance/
 .instance/
+
+# API Keys and Environment files
+env.ini
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# AI Model and Vector DB data
+*.bin
+*.model
+*.pkl
+*.pickle
+vector_db/
+qdrant_data/
+ollama_models/
+
+# Test results and logs
+test_results/
+final_test_results.json
+*.log
+logs/
+
+# DeepSeek and Qdrant specific
+deepseek_cache/
+qdrant_storage/
+embeddings_cache/
+
+# Migration scripts (temporary)
+migration_scripts/
+temp_migration/
+backup_migration/
+
+# PyPDF2 and document processing temp files
+temp_docs/
+processed_docs/
+*.pdf.tmp

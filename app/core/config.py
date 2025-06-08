@@ -72,6 +72,19 @@ class Settings(BaseSettings):
     AI_MAX_TOKENS: int = Field(default=2048, description="AI 생성 최대 토큰 수")
     AI_TEMPERATURE: float = Field(default=0.7, description="AI 생성 온도")
     
+    # OpenAI 설정 (RAG 시스템용)
+    OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API 키 (RAG 시스템용)")
+    
+    # Gemini AI 설정
+    GEMINI_API_KEY: str = Field(
+        default="AIzaSyCEGkV7L6p5fCJ0V8Bf_WVeO4A-1kBO-X4", 
+        description="Gemini API 키"
+    )
+    GEMINI_MODEL_NAME: str = Field(
+        default="gemini-1.5-flash-latest", 
+        description="Gemini 모델 이름"
+    )
+    
     # 임베딩 모델 설정
     EMBEDDING_MODEL_NAME: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
@@ -134,7 +147,7 @@ class Settings(BaseSettings):
     MAX_RECOMMENDATIONS: int = Field(default=50, description="최대 추천 문제 수")
     
     class Config:
-        env_file = ".env"
+        env_file = [".env", "env.ini"]  # .env 파일과 env.ini 파일 모두 지원
         env_file_encoding = "utf-8"
         case_sensitive = True
         # .env 파일이 없어도 에러를 발생시키지 않음

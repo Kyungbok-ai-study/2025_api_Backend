@@ -47,10 +47,9 @@ class QuestionType(str, enum.Enum):
 
 class DifficultyLevel(str, enum.Enum):
     """문제 난이도 Enum"""
-    EASY = "easy"
-    MEDIUM = "medium"
-    HARD = "hard"
-    VERY_HARD = "very_hard"
+    LOW = "하"
+    MEDIUM = "중"
+    HIGH = "상"
 
 
 class Subject(Base):
@@ -65,7 +64,6 @@ class Subject(Base):
     
     # 관계 설정
     children = relationship("Subject", backref="parent", remote_side=[id])
-    questions = relationship("Question", back_populates="subject_rel")
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -78,8 +76,7 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False, unique=True)
     
-    # 관계 설정
-    questions = relationship("Question", secondary=question_tags, back_populates="tags")
+    # 관계 설정 (Question과의 관계 제거됨)
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -95,70 +92,64 @@ class Source(Base):
     type = Column(String(50), nullable=True)  # 예: 교재, 시험, 강의자료
     year = Column(Integer, nullable=True)
     
-    # 관계 설정
-    questions = relationship("Question", back_populates="source")
+    # 관계 설정 (Question과의 관계 제거됨)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class Question(Base):
-    """문제 모델"""
+    """문제 모델 - 간소화된 스키마"""
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text, nullable=False)
-    question_type = Column(Enum(QuestionType), nullable=False)
-    difficulty = Column(Enum(DifficultyLevel), nullable=True)
-    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
-    source_id = Column(Integer, ForeignKey("sources.id"), nullable=True)
+    question_number = Column(Integer, nullable=False)  # 문제 번호 (1~22)
+    question_type = Column(Enum(QuestionType), nullable=False, default=QuestionType.MULTIPLE_CHOICE)  # 문제 유형
+    content = Column(Text, nullable=False)  # 문제 내용
+    description = Column(MutableList.as_mutable(ARRAY(String)), nullable=True)  # 문제 설명/지문 (리스트)
+    options = Column(JSONB, nullable=True)  # 선택지 {"1": "선택지1", "2": "선택지2", ...}
+    correct_answer = Column(String(10), nullable=True)  # 정답 (예: "3")
+    subject = Column("subject_name", String(100), nullable=True)  # 과목명 (테이블의 subject_name 컬럼과 매핑)
+    area_name = Column(String(100), nullable=True)  # 영역이름
+    difficulty = Column(String(10), nullable=True)  # 난이도: 하, 중, 상 (직접 문자열 저장)
+    year = Column(Integer, nullable=True)  # 연도
     
-    # 메타데이터
-    question_metadata = Column(JSONB, nullable=True)
+    # 승인 및 수정 이력 관리
+    approval_status = Column(String(20), default="pending")  # pending, approved, rejected
+    approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 승인자 ID
+    approved_at = Column(DateTime, nullable=True)  # 승인 시간
+    last_modified_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 마지막 수정자 ID
+    last_modified_at = Column(DateTime, nullable=True)  # 마지막 수정 시간
+    is_active = Column(Boolean, nullable=False, default=True)  # 활성화 상태
     
-    # 이미지 URL 목록 (이미지가 포함된 문제의 경우)
-    image_urls = Column(MutableList.as_mutable(ARRAY(String)), nullable=True)
+    # AI 해설 및 RAG 통합 관련
+    ai_explanation = Column(Text, nullable=True)  # AI가 생성한 상세 해설
+    explanation_confidence = Column(Float, nullable=True)  # AI 해설 신뢰도 (0.0 ~ 1.0)
+    vector_db_indexed = Column(Boolean, default=False)  # 벡터 DB 인덱싱 여부
+    rag_indexed = Column(Boolean, default=False)  # RAG 시스템 인덱싱 여부
+    llm_training_added = Column(Boolean, default=False)  # LLM 학습 데이터 추가 여부
+    integration_completed_at = Column(DateTime, nullable=True)  # 통합 처리 완료 시간
     
-    # 텍스트 임베딩 (pgvector)
+    # 파일 출처 정보
+    source_file_path = Column(String(500), nullable=True)  # 원본 파일 경로
+    parsed_data_path = Column(String(500), nullable=True)  # 파싱된 JSON 파일 경로
+    file_title = Column(String(200), nullable=True)  # 사용자가 입력한 파일 제목
+    file_category = Column(String(100), nullable=True)  # 파일 카테고리
+    
+    # 임베딩 벡터 (pgvector 사용)
     if PGVECTOR_AVAILABLE:
-        embedding = Column(Vector(1536), nullable=True)  # OpenAI 1536 차원 임베딩
-    
-    # 진단 테스트 관련 필드
-    is_active = Column(Boolean, default=True, nullable=False)  # 문제 활성화 상태
-    subject_name = Column(String(100), nullable=True)  # 과목명 (진단용)
-    choices = Column(ARRAY(String), nullable=True)  # 객관식 선택지 (간단 버전)
-    correct_answer = Column(Text, nullable=True)  # 정답 (간단 버전)
-    
-    # 문자열 참조로 순환 import 방지
-    created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    updated_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    
-    # 질문 복제 정보 추적
-    original_id = Column(Integer, ForeignKey("questions.id"), nullable=True)
-    is_duplicate = Column(Boolean, default=False)
-    duplicate_count = Column(Integer, default=0)
-    
-    # 통계
-    usage_count = Column(Integer, default=0)
-    correct_rate = Column(Float, default=0.0)
+        embedding = Column(Vector(1536), nullable=True)  # OpenAI ada-002 임베딩 차원
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # 관계 설정
-    subject_rel = relationship("Subject", back_populates="questions")
-    source = relationship("Source", back_populates="questions")
-    options = relationship("AnswerOption", back_populates="question", cascade="all, delete-orphan")
+    # 관계 설정 (레거시 호환성을 위해 유지)
+    answer_options = relationship("AnswerOption", back_populates="question", cascade="all, delete-orphan")
     correct_answers = relationship("CorrectAnswer", back_populates="question", cascade="all, delete-orphan")
-    tags = relationship("Tag", secondary=question_tags, back_populates="questions")
     explanations = relationship("Explanation", back_populates="question", cascade="all, delete-orphan")
     
-    # 진단 테스트 관련 관계
-    test_responses = relationship("TestResponse", back_populates="question")
-    
-    # 문자열 참조로 User 관계 설정
-    created_by = relationship("User", foreign_keys=[created_by_id])
-    updated_by = relationship("User", foreign_keys=[updated_by_id])
+    # 진단 테스트 관계 설정
+    test_responses = relationship("TestResponse", back_populates="question", cascade="all, delete-orphan")
 
 
 class AnswerOption(Base):
@@ -172,7 +163,7 @@ class AnswerOption(Base):
     display_order = Column(Integer, nullable=True)
     
     # 관계 설정
-    question = relationship("Question", back_populates="options")
+    question = relationship("Question", back_populates="answer_options")
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

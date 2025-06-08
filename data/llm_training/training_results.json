@@ -1,0 +1,79 @@
+{
+  "timestamp": "2025-06-08T16:49:46.193086",
+  "difficulty_patterns": {
+    "물리치료학과": {
+      "하": {
+        "keywords": [],
+        "characteristics": []
+      },
+      "중": {
+        "keywords": [],
+        "characteristics": []
+      },
+      "상": {
+        "keywords": [],
+        "characteristics": []
+      }
+    },
+    "작업치료학과": {
+      "하": {
+        "keywords": [],
+        "characteristics": []
+      },
+      "중": {
+        "keywords": [],
+        "characteristics": []
+      },
+      "상": {
+        "keywords": [],
+        "characteristics": []
+      }
+    }
+  },
+  "domain_keywords": {
+    "물리치료학과": {},
+    "작업치료학과": {}
+  },
+  "professor_weights": {
+    "물리치료학과": {
+      "박진혁": 1.0,
+      "서준": 1.0,
+      "신장훈": 1.0,
+      "최완석": 1.0,
+      "최태석": 1.0,
+      "허서윤": 1.0
+    },
+    "작업치료학과": {
+      "박진혁": 1.0,
+      "서준": 1.0,
+      "신장훈": 1.0,
+      "최완석": 1.0,
+      "최태석": 1.0,
+      "허서윤": 1.0
+    }
+  },
+  "training_summary": {
+    "물리치료학과": {
+      "total_questions": 0,
+      "professors": [
+        "박진혁",
+        "서준",
+        "신장훈",
+        "최완석",
+        "최태석",
+        "허서윤"
+      ]
+    },
+    "작업치료학과": {
+      "total_questions": 0,
+      "professors": [
+        "박진혁",
+        "서준",
+        "신장훈",
+        "최완석",
+        "최태석",
+        "허서윤"
+      ]
+    }
+  }
+}
