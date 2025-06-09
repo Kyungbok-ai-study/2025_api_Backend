@@ -44,25 +44,31 @@ class QdrantService:
     
     def _init_client(self):
         """Qdrant 클라이언트 초기화"""
+        import warnings
+        
         try:
-            # API 키가 있으면 사용, 없으면 기본 연결
-            if self.api_key and self.api_key.strip():
-                self.client = QdrantClient(
-                    host=self.host, 
-                    port=self.port,
-                    api_key=self.api_key,
-                    https=False,  # 로컬 Docker는 HTTP 사용
-                    prefer_grpc=False  # gRPC 비활성화
-                )
-                logger.info(f"✅ Qdrant 클라이언트 초기화 완료 (API 키 사용): {self.host}:{self.port}")
-            else:
-                self.client = QdrantClient(
-                    host=self.host, 
-                    port=self.port,
-                    https=False,  # 로컬 Docker는 HTTP 사용
-                    prefer_grpc=False  # gRPC 비활성화
-                )
-                logger.info(f"✅ Qdrant 클라이언트 초기화 완료: {self.host}:{self.port}")
+            # SSL 관련 경고 임시 억제
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Api key is used with an insecure connection")
+                
+                # API 키가 있으면 사용, 없으면 기본 연결
+                if self.api_key and self.api_key.strip():
+                    self.client = QdrantClient(
+                        host=self.host, 
+                        port=self.port,
+                        api_key=self.api_key,
+                        https=False,  # 로컬 Docker는 HTTP 사용
+                        prefer_grpc=False  # gRPC 비활성화
+                    )
+                    logger.info(f"✅ Qdrant 클라이언트 초기화 완료 (API 키 사용): {self.host}:{self.port}")
+                else:
+                    self.client = QdrantClient(
+                        host=self.host, 
+                        port=self.port,
+                        https=False,  # 로컬 Docker는 HTTP 사용
+                        prefer_grpc=False  # gRPC 비활성화
+                    )
+                    logger.info(f"✅ Qdrant 클라이언트 초기화 완료: {self.host}:{self.port}")
             
             # 컬렉션 생성 (없는 경우)
             self._ensure_collection()

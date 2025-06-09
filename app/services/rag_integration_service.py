@@ -221,16 +221,16 @@ class RAGIntegrationService:
                 # Fallback 해설 생성
                 fallback_explanation = self._generate_fallback_explanation(question, department)
                 
-                return {
-                    "success": True,
+            return {
+                "success": True,
                     "explanation": fallback_explanation,
                     "confidence": 0.60,
                     "department_style": department,
                     "generated_by": "Fallback System",
-                    "generated_at": datetime.now().isoformat(),
+                "generated_at": datetime.now().isoformat(),
                     "note": "DeepSeek 실패로 인한 대체 해설"
-                }
-                
+            }
+            
         except Exception as e:
             logger.error(f"❌ AI 해설 생성 중 오류: {e}")
             fallback_explanation = self._generate_fallback_explanation(question, department)
@@ -338,13 +338,13 @@ JSON 형식으로 응답해주세요:
             
             # RAG 메타데이터
             rag_metadata = {
-                "question_id": question.id,
+                    "question_id": question.id,
                 "type": "rag_content",
                 "has_explanation": bool(explanation_result.get("explanation")),
                 "explanation_quality": explanation_result.get("confidence", 0.0),
                 "subject": question.subject_name or "일반",
                 "difficulty": question.difficulty.value if question.difficulty else "중",
-                "indexed_at": datetime.now().isoformat()
+                    "indexed_at": datetime.now().isoformat()
             }
             
             # Qdrant에 RAG 전용 벡터 추가
@@ -367,7 +367,7 @@ JSON 형식으로 응답해주세요:
                     "success": False,
                     "error": result.get("error", "RAG 인덱싱 실패")
                 }
-                
+            
         except Exception as e:
             logger.error(f"❌ RAG 인덱싱 중 오류: {e}")
             return {
@@ -538,4 +538,119 @@ JSON 형식으로 응답해주세요:
             }
 
 # 싱글톤 인스턴스
-rag_integration_service = RAGIntegrationService() 
+rag_integration_service = RAGIntegrationService()
+
+# ===== Professor 엔드포인트에서 사용하는 래퍼 함수들 =====
+
+async def save_to_vector_db(question: Question, metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    벡터 DB 저장 - professor.py 호환성을 위한 래퍼 함수
+    """
+    try:
+        service = RAGIntegrationService()
+        if metadata is None:
+            metadata = {}
+        
+        result = await service._store_question_vector(question, metadata)
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ save_to_vector_db 오류: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+async def generate_ai_explanation(question: Question, department: str = "간호학과") -> Dict[str, Any]:
+    """
+    AI 해설 생성 - professor.py 호환성을 위한 래퍼 함수
+    """
+    try:
+        service = RAGIntegrationService()
+        result = await service._generate_ai_explanation(question, department)
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ generate_ai_explanation 오류: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+async def index_to_rag(question: Question, explanation_result: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    RAG 인덱싱 - professor.py 호환성을 위한 래퍼 함수
+    """
+    try:
+        service = RAGIntegrationService()
+        if explanation_result is None:
+            explanation_result = {}
+        
+        result = await service._update_rag_index(question, explanation_result)
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ index_to_rag 오류: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+async def add_to_llm_training(question: Question, explanation_result: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    LLM 훈련 데이터 추가 - professor.py 호환성을 위한 래퍼 함수
+    """
+    try:
+        service = RAGIntegrationService()
+        if explanation_result is None:
+            explanation_result = {}
+        
+        result = await service._add_to_training_data(question, explanation_result)
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ add_to_llm_training 오류: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# 백워드 호환성을 위한 추가 함수들
+async def process_approved_question_sync(question: Question, metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    승인된 문제 동기적 처리 - professor.py 호환성
+    """
+    if metadata is None:
+        metadata = {}
+    
+    return await rag_integration_service.process_approved_question(question, metadata)
+
+def get_rag_stats() -> Dict[str, Any]:
+    """
+    RAG 통계 정보 반환 - professor.py 호환성
+    """
+    try:
+        from datetime import datetime
+        import os
+        
+        return {
+            "total_documents": len(list(Path("data/vector_db").glob("*.json"))),
+            "total_embeddings": len(list(Path("data/rag_index").glob("*.json"))),
+            "embedding_dimensions": 768,  # DeepSeek 임베딩 차원
+            "last_updated": datetime.now().isoformat(),
+            "knowledge_areas": ["간호학과", "물리치료학과", "작업치료학과"],
+            "auto_learning_enabled": True,
+            "indexing_status": "active"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ get_rag_stats 오류: {e}")
+        return {
+            "total_documents": 0,
+            "total_embeddings": 0,
+            "embedding_dimensions": 768,
+            "last_updated": datetime.now().isoformat(),
+            "knowledge_areas": [],
+            "auto_learning_enabled": False,
+            "indexing_status": "error"
+        } 

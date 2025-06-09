@@ -27,7 +27,9 @@ class IntegratedParserMapper:
     """
     
     def __init__(self):
-        self.parser = QuestionParser()
+        # API 키 직접 전달하여 파서 초기화
+        gemini_api_key = "AIzaSyAU_5m68cNAMIBn7m1uQPrYKNFR0oPO3QA"
+        self.parser = QuestionParser(api_key=gemini_api_key)
         self.questions_dir = Path("uploads/questions")
         self.evaluation_dir = Path("data/평가위원 수행결과")
         self.output_dir = Path("data/save_parser")

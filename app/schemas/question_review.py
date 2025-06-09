@@ -33,6 +33,11 @@ class QuestionPreviewItem(BaseModel):
     last_modified_by: Optional[int] = None
     last_modified_at: Optional[datetime] = None
     
+    # AI 분석 정보
+    ai_analysis_status: Optional[str] = Field(None, description="AI 분석 상태")
+    ai_confidence: Optional[str] = Field(None, description="AI 분석 신뢰도")
+    ai_reasoning: Optional[str] = Field(None, description="AI 분석 근거")
+    
     class Config:
         from_attributes = True
 

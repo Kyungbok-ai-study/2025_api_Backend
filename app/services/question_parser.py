@@ -2,7 +2,6 @@
 문제 및 정답 데이터 파싱 서비스 (Gemini 2.0 Flash 기반)
 
 모든 파일 형식을 Gemini API로 통합 처리
-+ 자동 난이도/분야 매핑 시스템 통합
 """
 import json
 from typing import List, Dict, Any, Optional, Union
@@ -13,23 +12,17 @@ from pathlib import Path
 import base64
 import logging
 import re
-import time
 
 from app.models.question import DifficultyLevel
 from app.core.config import settings
-from app.services.difficulty_domain_mapper import difficulty_domain_mapper
-from app.services.department_recognizer import department_recognizer
-from app.services.ai_auto_mapper import ai_auto_mapper
 
 logger = logging.getLogger(__name__)
 
-perf_logger = logging.getLogger(f"{__name__}.performance")
-
+# Poppler 경로 설정 (PDF→이미지 변환용)
 POPPLER_PATH = os.getenv(
     'POPPLER_PATH', 
     r'C:\Users\jaewo\Desktop\2025\2025_backend\Release-24.08.0-0\poppler-24.08.0\Library\bin'
 )
-
 
 class QuestionParser:
     """gemini-2.0-flash-exp 기반 통합 파서"""
@@ -39,7 +32,8 @@ class QuestionParser:
         Args:
             api_key: Gemini API 키 (None인 경우 환경변수에서 가져옴)
         """
-        self.api_key = api_key or settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
+        # 직접 API 키 설정
+        self.api_key = api_key or "AIzaSyAU_5m68cNAMIBn7m1uQPrYKNFR0oPO3QA"
         if self.api_key:
             genai.configure(api_key=self.api_key)
             # Gemini 2.0 Flash 모델 사용 (정확한 모델명으로 수정)
@@ -50,21 +44,17 @@ class QuestionParser:
             self.model = None
             logger.warning("Gemini API 키가 설정되지 않았습니다.")
     
-    async def parse_any_file(self, file_path: str, content_type: str = "auto", department: str = "작업치료학과") -> Dict[str, Any]:
+    def parse_any_file(self, file_path: str, content_type: str = "auto") -> Dict[str, Any]:
         """
         모든 파일 형식을 Gemini로 파싱 (분할 파싱 지원)
-        + 자동 난이도/분야 매핑 적용
         
         Args:
-            file_path: 파일 경로
+            file_path: 파일 경로.
             content_type: "questions", "answers", 또는 "auto" (자동 감지)
-            department: 학과명 (난이도/분야 매핑용)
             
         Returns:
-            파싱된 데이터 (난이도/분야 자동 매핑 적용)
+            파싱된 데이터
         """
-        start_time = time.time()
-        
         if not self.model:
             logger.error("Gemini API가 초기화되지 않았습니다.")
             return {"type": content_type, "data": [], "error": "Gemini API not initialized"}
@@ -109,13 +99,6 @@ Question 테이블:
             # 22개 제한 적용
             if isinstance(all_data, list):
                 all_data = [item for item in all_data if item.get('question_number', 0) <= 22][:22]
-            
-            # 성능 로깅
-            processing_time = time.time() - start_time
-            perf_logger.info(
-                f"파일 파싱 완료: {file_path} "
-                f"({file_size / (1024*1024):.2f}MB, {processing_time:.2f}초, {len(all_data)}개 항목)"
-            )
             
             logger.info(f"분할 파싱 완료: {file_path}, 총 데이터 개수: {len(all_data)}")
             return {"type": content_type if content_type != "auto" else "questions", "data": all_data}
@@ -658,9 +641,9 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                 return False
         
         # 선택지가 있는 경우 검증
-            options = question_data.get("options", {})
+        options = question_data.get("options", {})
         if options and len(options) < 2:
-                return False
+            return False
         
         return True
     

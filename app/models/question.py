@@ -118,7 +118,7 @@ class Question(Base):
     approval_status = Column(String(20), default="pending")  # pending, approved, rejected
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 승인자 ID
     approved_at = Column(DateTime, nullable=True)  # 승인 시간
-    last_modified_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 마지막 수정자 ID
+    last_modified_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 마지막 수정자 ID (생성자 겸용)
     last_modified_at = Column(DateTime, nullable=True)  # 마지막 수정 시간
     is_active = Column(Boolean, nullable=False, default=True)  # 활성화 상태
     

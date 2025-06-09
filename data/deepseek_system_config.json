@@ -1,0 +1,20 @@
+{
+  "system": "DeepSeek + Qdrant v2.0",
+  "vector_dimension": 768,
+  "embedding_model": "DeepSeek Embedding",
+  "initialized_at": "2025-01-27",
+  "departments": [
+    "간호학과",
+    "물리치료학과",
+    "작업치료학과"
+  ],
+  "workflow": [
+    "1. PDF 업로드",
+    "2. Gemini 파싱",
+    "3. JSON 저장",
+    "4. PostgreSQL 1차 저장",
+    "5. 교수 승인",
+    "6. DeepSeek 분류",
+    "7. Qdrant 벡터 저장"
+  ]
+}

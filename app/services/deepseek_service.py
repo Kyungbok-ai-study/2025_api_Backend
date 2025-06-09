@@ -672,5 +672,278 @@ JSON 형식으로 응답해주세요:
         if self._client:
             await self._client.aclose()
 
+    async def classify_content(
+        self,
+        content: str,
+        department: str = "일반학과",
+        subject: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        DeepSeek을 이용한 컨텐츠 분류
+        - 난이도 (쉬움/보통/어려움)
+        - 컨텐츠 유형 (이론/실무/사례/문제)  
+        - 키워드 추출
+        """
+        try:
+            # 학과별 분류 기준 설정
+            classification_criteria = {
+                "간호학과": {
+                    "focus_areas": ["기본간호학", "성인간호학", "아동간호학", "모성간호학", "정신간호학", "지역사회간호학"],
+                    "difficulty_indicators": {
+                        "쉬움": ["기본 개념", "정의", "기초 이론", "간단한 절차"],
+                        "보통": ["임상 적용", "간호 과정", "환자 사정", "중재 계획"],
+                        "어려움": ["복합적 상황", "비판적 사고", "의사결정", "응급상황"]
+                    },
+                    "content_types": {
+                        "이론": ["이론", "개념", "정의", "원리", "지식"],
+                        "실무": ["술기", "절차", "방법", "프로토콜", "가이드라인"],
+                        "사례": ["사례", "상황", "시나리오", "환자", "케이스"],
+                        "문제": ["문제", "질문", "평가", "테스트", "퀴즈"]
+                    }
+                },
+                "물리치료학과": {
+                    "focus_areas": ["운동치료", "물리적 인자치료", "신경계물리치료", "근골격계물리치료", "호흡순환계물리치료"],
+                    "difficulty_indicators": {
+                        "쉬움": ["해부학 기초", "기본 운동", "간단한 측정"],
+                        "보통": ["치료 계획", "운동 프로그램", "평가 방법"],
+                        "어려움": ["복합 장애", "고급 치료법", "연구 분석"]
+                    },
+                    "content_types": {
+                        "이론": ["해부학", "생리학", "병리학", "운동학"],
+                        "실무": ["치료법", "운동법", "측정법", "기기 사용"],
+                        "사례": ["환자 사례", "치료 사례", "재활 과정"],
+                        "문제": ["평가", "진단", "문제 해결"]
+                    }
+                },
+                "작업치료학과": {
+                    "focus_areas": ["일상생활활동", "인지재활", "정신사회작업치료", "감각통합치료", "보조공학"],
+                    "difficulty_indicators": {
+                        "쉬움": ["기본 활동", "단순 평가", "일반적 개념"],
+                        "보통": ["활동 분석", "치료 계획", "평가 도구"],
+                        "어려움": ["복합 중재", "환경 수정", "고급 평가"]
+                    },
+                    "content_types": {
+                        "이론": ["이론적 모델", "발달 이론", "학습 이론"],
+                        "실무": ["활동 치료", "평가 방법", "중재 기법"],
+                        "사례": ["치료 사례", "활동 분석", "중재 결과"],
+                        "문제": ["평가 문제", "사례 분석", "의사결정"]
+                    }
+                }
+            }
+            
+            # 기본 분류 기준 (일반학과용)
+            criteria = classification_criteria.get(department, {
+                "focus_areas": ["기초", "이론", "실습", "응용"],
+                "difficulty_indicators": {
+                    "쉬움": ["기본", "기초", "정의", "개념"],
+                    "보통": ["응용", "실습", "분석", "적용"],
+                    "어려움": ["종합", "평가", "창조", "비판"]
+                },
+                "content_types": {
+                    "이론": ["이론", "개념", "원리"],
+                    "실무": ["실습", "방법", "절차"],
+                    "사례": ["사례", "예시", "상황"],
+                    "문제": ["문제", "질문", "평가"]
+                }
+            })
+            
+            # DeepSeek 분류 프롬프트 생성
+            classification_prompt = self._build_classification_prompt(
+                content, department, subject, criteria
+            )
+            
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"""당신은 {department} 전문 교육 컨텐츠 분류 전문가입니다. 
+                    주어진 텍스트를 분석하여 난이도, 컨텐츠 유형, 핵심 키워드를 정확하게 분류해주세요."""
+                },
+                {
+                    "role": "user", 
+                    "content": classification_prompt
+                }
+            ]
+            
+            # DeepSeek 분류 실행
+            response = await self.chat_completion(
+                messages=messages,
+                temperature=0.3,  # 일관성 있는 분류를 위해 낮은 temperature
+                max_tokens=1024
+            )
+            
+            if not response["success"]:
+                # 실패시 기본 분류 반환
+                return self._get_default_classification(content, department)
+            
+            # 응답 파싱
+            classification_result = self._parse_classification_response(
+                response["content"], department
+            )
+            
+            logger.info(f"✅ DeepSeek 컨텐츠 분류 완료: {department}")
+            return classification_result
+            
+        except Exception as e:
+            logger.error(f"❌ DeepSeek 컨텐츠 분류 실패: {e}")
+            # 오류시 기본 분류 반환
+            return self._get_default_classification(content, department)
+    
+    def _build_classification_prompt(
+        self, 
+        content: str, 
+        department: str, 
+        subject: Optional[str],
+        criteria: Dict[str, Any]
+    ) -> str:
+        """분류를 위한 프롬프트 생성"""
+        
+        focus_areas = ", ".join(criteria.get("focus_areas", []))
+        subject_info = f" (과목: {subject})" if subject else ""
+        
+        prompt = f"""
+다음 {department}{subject_info} 교육 컨텐츠를 분석하여 분류해주세요.
+
+=== 분석할 컨텐츠 ===
+{content[:2000]}  # 너무 긴 컨텐츠는 잘라서 처리
+
+=== 분류 기준 ===
+주요 영역: {focus_areas}
+
+난이도:
+- 쉬움: {', '.join(criteria['difficulty_indicators']['쉬움'])}
+- 보통: {', '.join(criteria['difficulty_indicators']['보통'])}  
+- 어려움: {', '.join(criteria['difficulty_indicators']['어려움'])}
+
+컨텐츠 유형:
+- 이론: {', '.join(criteria['content_types']['이론'])}
+- 실무: {', '.join(criteria['content_types']['실무'])}
+- 사례: {', '.join(criteria['content_types']['사례'])}
+- 문제: {', '.join(criteria['content_types']['문제'])}
+
+=== 요청 분류 형식 ===
+다음 JSON 형식으로 정확히 분류해주세요:
+
+{{
+    "difficulty": "쉬움|보통|어려움",
+    "content_type": "이론|실무|사례|문제", 
+    "keywords": ["키워드1", "키워드2", "키워드3"],
+    "confidence": 0.85,
+    "reasoning": "분류 근거 설명"
+}}
+
+분석하여 JSON만 출력해주세요.
+"""
+        return prompt
+    
+    def _parse_classification_response(
+        self, 
+        response_text: str, 
+        department: str
+    ) -> Dict[str, Any]:
+        """DeepSeek 분류 응답 파싱"""
+        try:
+            # JSON 추출 시도
+            import re
+            
+            # JSON 블록 찾기
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group()
+                classification_data = json.loads(json_str)
+                
+                # 결과 검증 및 정규화
+                result = {
+                    "difficulty": self._normalize_difficulty(
+                        classification_data.get("difficulty", "보통")
+                    ),
+                    "content_type": self._normalize_content_type(
+                        classification_data.get("content_type", "이론")
+                    ),
+                    "keywords": self._normalize_keywords(
+                        classification_data.get("keywords", [])
+                    ),
+                    "confidence": float(classification_data.get("confidence", 0.8)),
+                    "reasoning": classification_data.get("reasoning", "자동 분류"),
+                    "department": department,
+                    "classified_at": datetime.now().isoformat()
+                }
+                
+                return result
+            
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            logger.warning(f"분류 응답 파싱 실패: {e}")
+        
+        # 파싱 실패시 기본값 반환
+        return self._get_default_classification("", department)
+    
+    def _normalize_difficulty(self, difficulty: str) -> str:
+        """난이도 정규화"""
+        difficulty_map = {
+            "쉬움": "쉬움", "easy": "쉬움", "1": "쉬움", "기초": "쉬움",
+            "보통": "보통", "medium": "보통", "2": "보통", "중간": "보통", "중": "보통",
+            "어려움": "어려움", "hard": "어려움", "3": "어려움", "고급": "어려움", "어려운": "어려움"
+        }
+        
+        return difficulty_map.get(difficulty.lower().strip(), "보통")
+    
+    def _normalize_content_type(self, content_type: str) -> str:
+        """컨텐츠 유형 정규화"""
+        type_map = {
+            "이론": "이론", "theory": "이론", "개념": "이론", "원리": "이론",
+            "실무": "실무", "practice": "실무", "실습": "실무", "술기": "실무", "방법": "실무",
+            "사례": "사례", "case": "사례", "예시": "사례", "상황": "사례", "시나리오": "사례",
+            "문제": "문제", "problem": "문제", "질문": "문제", "평가": "문제", "퀴즈": "문제"
+        }
+        
+        return type_map.get(content_type.lower().strip(), "이론")
+    
+    def _normalize_keywords(self, keywords: List[str]) -> List[str]:
+        """키워드 정규화"""
+        if not isinstance(keywords, list):
+            return []
+        
+        # 키워드 정리 (중복 제거, 공백 제거, 길이 제한)
+        normalized = []
+        for keyword in keywords[:10]:  # 최대 10개
+            if isinstance(keyword, str):
+                clean_keyword = keyword.strip()
+                if clean_keyword and len(clean_keyword) <= 50:
+                    normalized.append(clean_keyword)
+        
+        return list(set(normalized))  # 중복 제거
+    
+    def _get_default_classification(self, content: str, department: str) -> Dict[str, Any]:
+        """기본 분류 결과 반환"""
+        # 간단한 키워드 기반 분류
+        content_lower = content.lower()
+        
+        # 기본 난이도 판정
+        if any(word in content_lower for word in ["기본", "기초", "정의", "개념"]):
+            difficulty = "쉬움"
+        elif any(word in content_lower for word in ["고급", "복합", "응급", "비판적"]):
+            difficulty = "어려움"
+        else:
+            difficulty = "보통"
+        
+        # 기본 유형 판정
+        if any(word in content_lower for word in ["사례", "환자", "상황", "케이스"]):
+            content_type = "사례"
+        elif any(word in content_lower for word in ["방법", "절차", "술기", "실습"]):
+            content_type = "실무"
+        elif any(word in content_lower for word in ["문제", "질문", "평가"]):
+            content_type = "문제"
+        else:
+            content_type = "이론"
+        
+        return {
+            "difficulty": difficulty,
+            "content_type": content_type,
+            "keywords": [],
+            "confidence": 0.6,
+            "reasoning": "기본 규칙 기반 분류",
+            "department": department,
+            "classified_at": datetime.now().isoformat()
+        }
+
 # 싱글톤 인스턴스
 deepseek_service = LocalDeepSeekService() 

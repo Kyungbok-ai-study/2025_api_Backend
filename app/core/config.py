@@ -76,9 +76,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API 키 (RAG 시스템용)")
     
     # Gemini AI 설정
-    GEMINI_API_KEY: str = Field(
-        default="AIzaSyCEGkV7L6p5fCJ0V8Bf_WVeO4A-1kBO-X4", 
-        description="Gemini API 키"
+    GEMINI_API_KEY: Optional[str] = Field(
+        default=None, 
+        description="Gemini API 키 (환경변수에서 가져옴)"
     )
     GEMINI_MODEL_NAME: str = Field(
         default="gemini-1.5-flash-latest", 
