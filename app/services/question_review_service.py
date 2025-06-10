@@ -19,9 +19,10 @@ from ..schemas.question_review import (
 from ..core.config import settings
 import logging
 
-# AI 난이도 분석기 임포트
+# AI 난이도 분석기 및 유형 매퍼 임포트
 try:
     from .ai_difficulty_analyzer import difficulty_analyzer
+    from .evaluator_type_mapper import evaluator_type_mapper
     AI_ANALYZER_AVAILABLE = True
 except ImportError:
     AI_ANALYZER_AVAILABLE = False
@@ -71,7 +72,7 @@ class QuestionReviewService:
         logger.info(f"파싱된 데이터 JSON 저장 완료: {json_path}")
         return str(json_path)
     
-    def create_pending_questions(
+    async def create_pending_questions(
         self,
         db: Session,
         parsed_data: List[Dict[str, Any]],
@@ -95,52 +96,177 @@ class QuestionReviewService:
         for item in limited_data:
             logger.info(f"문제 {item.get('question_number')} 생성 시도 중...")
             
-            # 기본 필드 추출
-            question_type = item.get("file_type", "objective")
+            # 기본 필드 추출 (데이터베이스 enum에 맞는 값 사용)
+            question_type = item.get("file_type", "multiple_choice")
             if question_type == "questions":
-                question_type = "objective"
+                question_type = "multiple_choice"
             
-            content = item.get("content", "")
+            # content 안전 처리 - 다양한 필드명 시도
+            content = (item.get("content") or 
+                      item.get("question_content") or 
+                      item.get("text") or 
+                      item.get("question") or 
+                      item.get("problem") or 
+                      f"문제 {item.get('question_number', '?')}번")
+            
+            # content가 빈 문자열이면 강제로 기본값 설정
+            if not content or content.strip() == "":
+                content = f"문제 {item.get('question_number', 'Unknown')}번 - 파싱된 내용 없음"
+                logger.warning(f"문제 {item.get('question_number')}번: content가 비어있어 기본값 사용")
+            
             difficulty = item.get("difficulty", "중")
             
-            # AI 분석 실행
+            # AI 분석 실행 (기존 딥시크 분석기 사용)
             ai_analysis = None
-            if AI_ANALYZER_AVAILABLE and content:
+            if AI_ANALYZER_AVAILABLE and content and content.strip():
                 try:
-                    # 사용자 부서 정보로 학과 판단 (임시로 물리치료로 설정)
+                    # 사용자 부서 정보로 학과 판단
                     department = "물리치료"  # TODO: 사용자 부서에서 가져오기
                     question_number = item.get("question_number", 1)
                     
-                    ai_analysis = difficulty_analyzer.analyze_question_auto(
-                        content, question_number, department
-                    )
+                    # 기존 딥시크 분석기 사용
+                    from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
+                    analyzer = DifficultyAnalyzer()
                     
-                    # AI 분석 결과로 난이도 업데이트
-                    if ai_analysis:
-                        difficulty = ai_analysis.get("difficulty", difficulty)
-                        # 문제 유형도 AI 분석 결과 반영
-                        ai_question_type = ai_analysis.get("question_type", "")
+                    # 문제 내용 기반 딥시크 분석
+                    result = analyzer.analyze_question_auto(content, question_number, department)
+                    
+                    if result:
+                        # 딥시크 분석 결과로 난이도 업데이트
+                        difficulty = result.get("difficulty", "중")
+                        ai_question_type = result.get("question_type", "객관식")
+                        ai_reasoning = result.get("ai_reasoning", "딥시크 AI 분석 완료")
+                        
+                        # AI 문제 유형을 DB enum으로 매핑
+                        type_mapping = {
+                            "객관식": "multiple_choice",
+                            "단답형": "short_answer", 
+                            "서술형": "essay",
+                            "계산형": "calculation",
+                            "임상형": "clinical"
+                        }
+                        db_question_type = type_mapping.get(ai_question_type, "multiple_choice")
+                        
+                        # AI 분석 결과 저장
+                        ai_analysis = {
+                            "ai_difficulty": difficulty,
+                            "ai_question_type": ai_question_type,
+                            "db_question_type": db_question_type,
+                            "ai_confidence": "high" if result.get("ai_reasoning") else "medium",
+                            "ai_reasoning": ai_reasoning,
+                            "analysis_method": "deepseek"
+                        }
+                        
+                        # DB에 저장할 때는 DB enum 타입 사용
+                        question_type = db_question_type
+                        
+                        # 영역이름은 AI 분석 결과 우선, 없으면 평가위원 데이터에서 조회
+                        area_name = result.get("area_name")
+                        if not area_name or area_name == "일반":
+                            year = item.get("year", 2024)
+                            question_number = item.get("question_number", 1)
+                            area_name = evaluator_type_mapper.get_area_name_for_question(
+                                department + "학과", year, question_number
+                            )
+                        item["area_name"] = area_name
                         
                         # JSON 파일에 AI 분석 결과 반영
                         item["difficulty"] = difficulty
                         item["ai_question_type"] = ai_question_type
                         item["ai_analysis_complete"] = True
-                        item["ai_confidence"] = ai_analysis.get("confidence", "medium")
-                        item["ai_reasoning"] = ai_analysis.get("ai_reasoning", "")
+                        item["ai_confidence"] = ai_analysis["ai_confidence"]
+                        item["ai_reasoning"] = ai_reasoning
                         
-                        logger.info(f"🤖 문제 {question_number}: AI 분석 완료 (난이도: {difficulty})")
+                        logger.info(f"🤖 문제 {question_number}: 딥시크 분석 완료 (난이도: {difficulty}, 유형: {ai_question_type})")
+                    else:
+                        # 딥시크 실패 시 폴백
+                        fallback_difficulty = analyzer.predict_difficulty_by_position(question_number, department)
+                        difficulty = fallback_difficulty
+                        
+                        ai_analysis = {
+                            "ai_difficulty": difficulty,
+                            "ai_question_type": "객관식",
+                            "db_question_type": "multiple_choice",
+                            "ai_confidence": "low",
+                            "ai_reasoning": f"딥시크 분석 실패, 문제 위치 기반 예측: {difficulty}",
+                            "analysis_method": "position_based"
+                        }
+                        
+                        question_type = "multiple_choice"
+                        
+                        # 평가위원 데이터에서 영역이름 조회
+                        year = item.get("year", 2024)
+                        question_number = item.get("question_number", 1)
+                        area_name = evaluator_type_mapper.get_area_name_for_question(
+                            department + "학과", year, question_number
+                        )
+                        item["area_name"] = area_name
+                        
+                        item["difficulty"] = difficulty
+                        item["ai_question_type"] = "객관식"
+                        item["ai_analysis_complete"] = True
+                        item["ai_confidence"] = "low"
+                        item["ai_reasoning"] = ai_analysis["ai_reasoning"]
+                        
+                        logger.warning(f"⚠️ 문제 {question_number}: 딥시크 실패, 위치 기반 예측 사용 (난이도: {difficulty})")
+                        
                 except Exception as e:
-                    logger.warning(f"⚠️ AI 분석 실패 (문제 {item.get('question_number')}): {e}")
+                    # 완전 실패 시 위치 기반 폴백
+                    from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
+                    analyzer = DifficultyAnalyzer()
+                    department = "물리치료"
+                    question_number = item.get("question_number", 1)
+                    
+                    fallback_difficulty = analyzer.predict_difficulty_by_position(question_number, department)
+                    difficulty = fallback_difficulty
+                    
+                    ai_analysis = {
+                        "ai_difficulty": difficulty,
+                        "ai_question_type": "객관식",
+                        "db_question_type": "multiple_choice",
+                        "ai_confidence": "low",
+                        "ai_reasoning": f"AI 분석 오류로 위치 기반 예측 사용: {str(e)}",
+                        "analysis_method": "fallback"
+                    }
+                    
+                    question_type = "multiple_choice"
+                    
+                    # 평가위원 데이터에서 영역이름 조회
+                    year = item.get("year", 2024)
+                    question_number = item.get("question_number", 1)
+                    area_name = evaluator_type_mapper.get_area_name_for_question(
+                        department + "학과", year, question_number
+                    )
+                    item["area_name"] = area_name
+                    
+                    item["difficulty"] = difficulty
+                    item["ai_question_type"] = "객관식"
+                    item["ai_analysis_complete"] = False
+                    item["ai_confidence"] = "low"
+                    item["ai_reasoning"] = ai_analysis["ai_reasoning"]
+                    
+                    logger.warning(f"⚠️ AI 분석 실패 (문제 {question_number}): {e} - 위치 기반 폴백 사용 (난이도: {difficulty})")
+
+            # AI 분석이 없는 경우에도 평가위원 데이터에서 영역이름 조회
+            if "area_name" not in item or not item.get("area_name"):
+                # TODO: 사용자 부서 정보에서 가져오기 (현재는 기본값 사용)
+                department = "물리치료"
+                year = item.get("year", 2024)
+                question_number = item.get("question_number", 1)
+                area_name = evaluator_type_mapper.get_area_name_for_question(
+                    department + "학과", year, question_number
+                )
+                item["area_name"] = area_name
 
             # AI 분석 정보를 메타데이터에 포함
             ai_metadata = {}
             if ai_analysis:
                 ai_metadata = {
                     "ai_analysis_complete": True,
-                    "ai_confidence": ai_analysis.get("confidence", "medium"),
+                    "ai_confidence": ai_analysis.get("ai_confidence", "medium"),
                     "ai_reasoning": ai_analysis.get("ai_reasoning", ""),
-                    "position_based_difficulty": ai_analysis.get("position_based", "중"),
-                    "ai_suggested_difficulty": ai_analysis.get("ai_suggested", "중"),
+                    "ai_question_type": ai_analysis.get("ai_question_type", "객관식"),
+                    "ai_difficulty": ai_analysis.get("ai_difficulty", "중"),
                     "analysis_timestamp": datetime.now().isoformat()
                 }
             else:

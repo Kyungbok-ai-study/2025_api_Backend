@@ -12,6 +12,9 @@ from starlette.middleware.sessions import SessionMiddleware
 import json
 import logging
 import time
+import subprocess
+import threading
+import requests
 from contextlib import asynccontextmanager
 import os
 
@@ -26,12 +29,77 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def start_ollama_deepseek():
+    """Ollama 딥시크 서버 시작"""
+    try:
+        # 먼저 Ollama가 실행 중인지 확인
+        try:
+            response = requests.get("http://localhost:11434/api/version", timeout=2)
+            if response.status_code == 200:
+                logger.info("✅ Ollama 서버가 이미 실행 중")
+            else:
+                raise Exception("Ollama 서버 응답 오류")
+        except:
+            logger.info("🚀 Ollama 서버 시작 중...")
+            # Ollama 서버 시작 (백그라운드)
+            subprocess.Popen(
+                ["ollama", "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            time.sleep(3)  # 서버 시작 대기
+        
+        # 딥시크 모델 확인 및 다운로드
+        try:
+            # 딥시크 모델 pull (이미 있으면 스킵됨)
+            logger.info("🤖 딥시크 모델 확인 중...")
+            result = subprocess.run(
+                ["ollama", "pull", "deepseek-r1:8b"],
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='ignore',
+                timeout=300  # 5분 타임아웃
+            )
+            
+            if result.returncode == 0:
+                logger.info("✅ 딥시크 모델 준비 완료")
+                
+                # 모델 테스트
+                test_response = requests.post(
+                    "http://localhost:11434/api/generate",
+                    json={
+                        "model": "deepseek-r1:8b",
+                        "prompt": "Hello",
+                        "stream": False
+                    },
+                    timeout=30
+                )
+                
+                if test_response.status_code == 200:
+                    logger.info("✅ 딥시크 모델 테스트 성공")
+                else:
+                    logger.warning("⚠️ 딥시크 모델 테스트 실패")
+            else:
+                logger.error(f"❌ 딥시크 모델 준비 실패: {result.stderr}")
+                
+        except subprocess.TimeoutExpired:
+            logger.warning("⚠️ 딥시크 모델 다운로드 타임아웃 (백그라운드 진행)")
+        except Exception as e:
+            logger.error(f"❌ 딥시크 모델 준비 중 오류: {e}")
+            
+    except Exception as e:
+        logger.error(f"❌ Ollama 시작 실패: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """애플리케이션 생명주기 관리"""
     # 시작 시 실행
     logger.info("🚀 CampusON API 서버 시작")
     logger.info(f"📊 설정: DEBUG={settings.DEBUG}, DB_ECHO={settings.DATABASE_ECHO}")
+    
+    # Ollama 딥시크 서버 시작 (백그라운드)
+    threading.Thread(target=start_ollama_deepseek, daemon=True).start()
     
     # 데이터베이스 테이블 생성
     try:

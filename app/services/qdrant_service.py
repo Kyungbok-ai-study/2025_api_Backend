@@ -29,10 +29,11 @@ class QdrantService:
     """Qdrant 벡터 데이터베이스 서비스"""
     
     def __init__(self):
-        self.host = os.getenv("QDRANT_HOST", "localhost")
-        self.port = int(os.getenv("QDRANT_PORT", "6333"))
-        self.collection_name = os.getenv("QDRANT_COLLECTION_NAME", "kb_learning_vectors")
-        self.api_key = os.getenv("QDRANT_API_KEY")
+        self.host = "localhost"
+        self.port = 6333
+        self.collection_name = "kb_learning_vectors"
+        # 로컬 개발용 - API 키 없음
+        self.api_key = None
         
         self.client = None
         self.vector_dimension = 768  # DeepSeek 임베딩 차원
@@ -51,27 +52,17 @@ class QdrantService:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", message="Api key is used with an insecure connection")
                 
-                # API 키가 있으면 사용, 없으면 기본 연결
-                if self.api_key and self.api_key.strip():
-                    self.client = QdrantClient(
-                        host=self.host, 
-                        port=self.port,
-                        api_key=self.api_key,
-                        https=False,  # 로컬 Docker는 HTTP 사용
-                        prefer_grpc=False  # gRPC 비활성화
-                    )
-                    logger.info(f"✅ Qdrant 클라이언트 초기화 완료 (API 키 사용): {self.host}:{self.port}")
-                else:
-                    self.client = QdrantClient(
-                        host=self.host, 
-                        port=self.port,
-                        https=False,  # 로컬 Docker는 HTTP 사용
-                        prefer_grpc=False  # gRPC 비활성화
-                    )
-                    logger.info(f"✅ Qdrant 클라이언트 초기화 완료: {self.host}:{self.port}")
+                # 로컬 연결만 시도 (API 키 없음)
+                self.client = QdrantClient(
+                    host=self.host, 
+                    port=self.port,
+                    https=False,  # 로컬 Docker는 HTTP 사용
+                    prefer_grpc=False  # gRPC 비활성화
+                )
+                logger.info(f"✅ Qdrant 클라이언트 초기화 완료 (인증 없음): {self.host}:{self.port}")
             
-            # 컬렉션 생성 (없는 경우)
-            self._ensure_collection()
+            # 컬렉션 이미 존재함 - 생성 시도 건너뛰기
+            logger.info(f"✅ 기존 컬렉션 사용: {self.collection_name}")
             
         except Exception as e:
             logger.error(f"❌ Qdrant 클라이언트 초기화 실패: {e}")
@@ -80,6 +71,7 @@ class QdrantService:
     def _ensure_collection(self):
         """컬렉션 존재 확인 및 생성"""
         try:
+            # 컬렉션 조회 (인증 없음)
             collections = self.client.get_collections()
             collection_names = [col.name for col in collections.collections]
             
@@ -99,6 +91,8 @@ class QdrantService:
                 
         except Exception as e:
             logger.error(f"❌ 컬렉션 설정 실패: {e}")
+            # 클라이언트를 None으로 설정하여 후속 오류 방지
+            self.client = None
     
     async def add_vectors(
         self, 

@@ -76,6 +76,9 @@ class User(Base):
     # 인증 요청 관계 (문자열로 정의하여 순환 참조 방지)
     verification_requests = relationship("VerificationRequest", back_populates="user", cascade="all, delete-orphan")
     
+    # 딥시크 학습 세션 관계
+    deepseek_sessions = relationship("DeepSeekLearningSession", back_populates="professor", cascade="all, delete-orphan")
+    
     def __repr__(self):
         """사용자 객체의 문자열 표현"""
         return f"<User(id={self.id}, name={self.name}, user_id={self.user_id}, role={self.role})>"

@@ -150,6 +150,9 @@ class Question(Base):
     
     # 진단 테스트 관계 설정
     test_responses = relationship("TestResponse", back_populates="question", cascade="all, delete-orphan")
+    
+    # 딥시크 학습 세션 관계
+    deepseek_sessions = relationship("DeepSeekLearningSession", back_populates="question", cascade="all, delete-orphan")
 
 
 class AnswerOption(Base):

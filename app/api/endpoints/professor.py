@@ -866,45 +866,61 @@ async def get_upload_history(
 # ===== 문제 검토 및 승인 관련 엔드포인트들 =====
 
 @router.post("/upload/pdf-with-review")
-async def emergency_upload_test(
+async def upload_pdf_with_review(
     files: List[UploadFile] = File(...),
+    title: str = Form(None),
+    category: str = Form(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """🚨 긴급 테스트용 업로드 엔드포인트"""
+    """PDF 파일 업로드 및 검토용 파싱"""
     try:
-        logger.info("🔥🔥🔥 긴급 업로드 테스트 시작!")
+        logger.info("📚 PDF 업로드 및 파싱 시작")
         check_professor_permission(current_user)
         
-        # 파일 저장 테스트
+        # 파일 저장
         upload_dir = Path("uploads/questions")
         upload_dir.mkdir(parents=True, exist_ok=True)
         
+        # 파일명 형식: {년도}_{카테고리}_{학과}_{교수명}.pdf
+        current_year = datetime.now().year
+        file_category = category if category and category.strip() else "일반"
+        professor_name = current_user.name or f"교수{current_user.id}"
+        department = current_user.department or "일반학과"
+        
+        # 💀 CRITICAL: 파일 저장 + 타입 매핑 (동시 처리)
         saved_files = []
+        file_type_mapping = {}  # 파일경로 -> (타입, 원본파일명)
+        
         for i, file in enumerate(files):
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_filename = f"TEST_{timestamp}_{i}_{file.filename}"
+            # 새로운 파일명 형식 적용
+            safe_filename = f"{current_year}_{file_category}_{department}_{professor_name}_{i+1}.pdf"
             file_path = upload_dir / safe_filename
             
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             
+            # 💀 CRITICAL: 파일 타입 자동 감지 (개별 파일명 기반)
+            original_filename = file.filename.lower()
+            if any(keyword in original_filename for keyword in ["최종답안", "가답안", "정답", "답안", "answer"]):
+                content_type = "answers"  # 정답지
+                logger.info(f"📋 정답지로 인식: {file.filename} -> {Path(file_path).name}")
+            else:
+                content_type = "questions"  # 문제지
+                logger.info(f"📝 문제지로 인식: {file.filename} -> {Path(file_path).name}")
+            
             saved_files.append(str(file_path))
-            logger.info(f"✅ 파일 저장: {file_path}")
+            file_type_mapping[str(file_path)] = (content_type, file.filename)
+            logger.info(f"✅ 파일 저장: {file_path} (타입: {content_type})")
         
-        # 실제 파싱 시도
+        # 파싱 시작
         review_service = QuestionReviewService()
         all_parsed_data = []
         
         for file_path in saved_files:
-            # 파일 타입 자동 감지 (파일명 기반)
-            filename_lower = Path(file_path).name.lower()
-            if any(keyword in filename_lower for keyword in ["최종답안", "가답안", "정답", "답안", "answer"]):
-                content_type = "answers"  # 정답지
-                logger.info(f"🔧 정답지로 인식하여 파싱 시도: {file_path}")
-            else:
-                content_type = "questions"  # 문제지
-                logger.info(f"🔧 문제지로 인식하여 파싱 시도: {file_path}")
+            # 저장된 타입 정보 사용
+            content_type, original_filename = file_type_mapping[file_path]
+            logger.info(f"🔍 파싱 시작: {Path(file_path).name} (타입: {content_type}, 원본: {original_filename})")
                 
             try:
                 # QuestionParser 초기화 (API 키 직접 전달)
@@ -918,29 +934,31 @@ async def emergency_upload_test(
                     logger.warning("⚠️ Gemini 초기화 실패, 더미 데이터 사용")
                     dummy_data = [{
                         "question_number": 1,
-                        "content": f"파싱 실패 - 더미 문제 ({Path(file_path).name})",
+                        "content": f"파싱 실패 - 문제 인식 불가 ({Path(file_path).name})",
                         "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
                         "correct_answer": "1",
-                        "subject": "파싱실패",
-                        "area_name": "테스트",
+                        "subject": "파싱오류",
+                        "area_name": file_category,
                         "difficulty": "중",
-                        "year": 2022
+                        "year": current_year
                     }]
                     all_parsed_data.extend(dummy_data)
                     continue
                 
-                logger.info("실제 파싱 진행...")
-                # 실제 파서 사용 (question_parser.py의 로직 사용)
+                logger.info("파싱 진행...")
+                # 파서 실행
                 try:
                     result = parser.parse_any_file(file_path, content_type)
                     logger.info(f"파싱 결과: {result.get('type')} 타입, {len(result.get('data', []))}개 데이터")
                     
                     if result.get('data'):
                         parsed_data = result.get('data', [])
-                        # 파일 소스 정보 추가
+                        # 파일 소스 정보 + 과목명 추가
                         for item in parsed_data:
                             item["source_file"] = Path(file_path).name
                             item["file_type"] = content_type
+                            # 과목명은 교수 소속 학과로 설정
+                            item["subject"] = current_user.department or "일반학과"
                         
                         logger.info(f"실제 파싱 성공: {len(parsed_data)}개 {content_type}")
                         all_parsed_data.extend(parsed_data)
@@ -949,28 +967,30 @@ async def emergency_upload_test(
                         # 파싱 실패시 더미 데이터 사용
                         dummy_data = [{
                             "question_number": 1,
-                            "content": f"파싱 대체 문제 - {Path(file_path).name}",
+                            "content": f"내용 인식 실패 - {Path(file_path).name}",
                             "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
                             "correct_answer": "1",
-                            "subject": "파싱대체",
-                            "area_name": "테스트",
+                            "subject": current_user.department or "일반학과",
+                            "area_name": "일반",
                             "difficulty": "중",
-                            "year": 2022,
+                            "year": current_year,
                             "source_file": Path(file_path).name,
                             "file_type": content_type
                         }]
                         all_parsed_data.extend(dummy_data)
                         
                 except Exception as parse_error:
-                    logger.error(f"실제 파싱 실패: {parse_error}")
+                    logger.error(f"파싱 실패: {parse_error}")
                     # 파싱 실패 시 더미 데이터
                     dummy_data = [{
                         "question_number": 1,
-                        "content": f"파싱 오류 - 더미 문제 ({Path(file_path).name})",
+                        "content": f"파싱 오류 - 파일 형식 문제 ({Path(file_path).name})",
                         "options": {"1": "A", "2": "B", "3": "C", "4": "D"},
                         "correct_answer": "1",
-                        "subject": "파싱오류",
+                        "subject": current_user.department or "일반학과",
+                        "area_name": "일반",
                         "difficulty": "중",
+                        "year": current_year,
                         "source_file": Path(file_path).name,
                         "file_type": content_type
                     }]
@@ -979,14 +999,17 @@ async def emergency_upload_test(
                     
                     
             except Exception as critical_error:
-                logger.error(f"❌ Critical Error: {critical_error}")
+                logger.error(f"❌ 치명적 오류: {critical_error}")
                 # 치명적 오류 시에도 더미 데이터로 계속 진행
                 dummy_data = [{
                     "question_number": 1,
-                    "content": f"치명적 오류 - 더미 문제 ({Path(file_path).name})",
+                    "content": f"치명적 오류 - 시스템 문제 ({Path(file_path).name})",
                     "options": {"1": "A", "2": "B", "3": "C", "4": "D"},
                     "correct_answer": "1",
-                    "difficulty": "중"
+                    "subject": current_user.department or "일반학과",
+                    "area_name": "일반",
+                    "difficulty": "중",
+                    "year": current_year
                 }]
                 all_parsed_data.extend(dummy_data)
         
@@ -998,74 +1021,125 @@ async def emergency_upload_test(
         
         # 문제지와 정답지 매칭
         if questions_data and answers_data:
-            # QuestionParser의 매칭 로직 사용
-            matched_data = parser.match_questions_with_answers(questions_data, answers_data)
-            logger.info(f"🔗 매칭 완료: {len(matched_data)}개 문제")
-            final_parsed_data = matched_data
+            logger.info(f"문제지 {len(questions_data)}개, 정답지 {len(answers_data)}개 매칭 시작")
+            
+            try:
+                matched_data = parser.match_questions_with_answers(questions_data, answers_data)
+                answered_count = len([m for m in matched_data if m.get("correct_answer")])
+                
+                # 매칭 품질 확인 후 필요시 수동 매칭
+                if not matched_data or answered_count < len(matched_data) * 0.5:
+                    logger.warning(f"자동 매칭 품질 불량, 수동 매칭 실행")
+                    
+                    manual_matched = {}
+                    for q in questions_data:
+                        qnum = q.get("question_number", 1)
+                        manual_matched[qnum] = q.copy()
+                    
+                    for a in answers_data:
+                        qnum = a.get("question_number", 1)
+                        answer = a.get("correct_answer") or a.get("answer", "")
+                        
+                        if qnum in manual_matched and answer and answer.strip():
+                            manual_matched[qnum]["correct_answer"] = answer.strip()
+                            manual_matched[qnum]["answer_source"] = "manual_matched"
+                            manual_matched[qnum]["subject"] = a.get("subject") or manual_matched[qnum].get("subject")
+                        elif qnum in manual_matched:
+                            manual_matched[qnum]["correct_answer"] = ""
+                            manual_matched[qnum]["answer_source"] = "no_answer"
+                    
+                    matched_data = list(manual_matched.values())
+                
+                logger.info(f"매칭 완료: {len(matched_data)}개 문제, {len([m for m in matched_data if m.get('correct_answer')])}개 정답")
+                
+                # content가 없는 문제들 필터링
+                valid_matched = []
+                for item in matched_data:
+                    if item.get("content") and item.get("content").strip():
+                        valid_matched.append(item)
+                    else:
+                        logger.warning(f"⚠️ 문제 {item.get('question_number')} content 없음, 제외")
+                
+                final_parsed_data = valid_matched[:22]  # 22개 제한
+                logger.info(f"✅ 최종 유효 문제: {len(final_parsed_data)}개")
+                
+            except Exception as e:
+                logger.error(f"❌ 매칭 과정 오류: {e}")
+                # 매칭 실패 시 문제지 우선 사용
+                final_parsed_data = questions_data[:22] if questions_data else answers_data[:22]
+                
         elif questions_data:
             # 문제지만 있는 경우
             logger.info("📝 문제지만 사용")
-            final_parsed_data = questions_data
+            # content 있는 것만 필터링
+            valid_questions = [q for q in questions_data if q.get("content") and q.get("content").strip()]
+            final_parsed_data = valid_questions[:22]
+            logger.info(f"✅ 유효한 문제지: {len(final_parsed_data)}개")
+            
         elif answers_data:
             # 정답지만 있는 경우
             logger.info("✅ 정답지만 사용")
-            final_parsed_data = answers_data
+            final_parsed_data = answers_data[:22]
+            
         else:
-            # 아무것도 파싱되지 않으면 기본 더미 데이터
-            logger.warning("⚠️ 파싱된 데이터가 없어 더미 데이터 생성")
-            final_parsed_data = [{
-                "question_number": 1,
-                "content": f"기본 더미 문제 - {files[0].filename}",
-                "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
-                "correct_answer": "1",
-                "subject": "기본더미",
-                "difficulty": "중"
-            }]
+            # 완전 실패 시 에러
+            logger.error("❌ 파싱 완전 실패")
+            raise Exception("PDF 파일에서 문제를 추출할 수 없습니다. 파일 형식을 확인해주세요.")
+        
+        # 파일 제목 설정
+        file_title = title if title and title.strip() else f"{current_year}_{file_category}_{department}_{professor_name}"
         
         json_path = review_service.save_parsed_data_to_json(
-            final_parsed_data, f"REAL_PARSING_{files[0].filename}", current_user.id
+            final_parsed_data, f"{file_title}_{files[0].filename}", current_user.id
         )
         logger.info(f"✅ JSON 저장: {json_path}")
         
-        # DB 저장 테스트
-        questions = review_service.create_pending_questions(
+        # DB 저장
+        questions = await review_service.create_pending_questions(
             db=db,
             parsed_data=final_parsed_data,
             source_file_path=";".join(saved_files),
             parsed_data_path=json_path,
             user_id=current_user.id,
-            file_title="긴급 테스트",
-            file_category="테스트"
+            file_title=file_title,
+            file_category=file_category
         )
         logger.info(f"✅ DB 저장: {len(questions)}개 문제")
         
         return {
             "success": True,
-            "message": f"🔥 긴급 테스트 성공! {len(saved_files)}개 파일, {len(questions)}개 문제 생성",
+            "message": f"✅ 업로드 완료! {len(saved_files)}개 파일, {len(questions)}개 문제 생성",
             "files": saved_files,
             "json_path": json_path,
             "questions": len(questions),
+            "file_info": {
+                "title": file_title,
+                "category": file_category,
+                "department": department,
+                "professor": professor_name,
+                "year": current_year
+            },
             "parser_status": {
                 "completed": True,
-                "message": "✅ 파서 완료됨",
+                "message": "✅ 파싱 완료",
                 "parsed_questions": len(questions),
                 "files_processed": len(saved_files)
             },
             "ai_analysis_status": {
                 "in_progress": True,
-                "message": "🤖 AI가 난이도 분석 중...",
+                "message": "🤖 AI가 분석 중...",
                 "completion_estimate": f"{len(questions) * 15}초 예상",
-                "next_step": "검토 페이지에서 실시간 진행상황 확인 가능"
+                "next_step": "검토 페이지에서 확인 가능"
             },
             "workflow_status": {
-                "current_step": "파서 완료",
+                "current_step": "파싱 완료",
                 "next_step": "AI 분석",
                 "final_step": "검토 및 승인"
             }
         }
         
     except Exception as e:
-        logger.error(f"🔥 긴급 테스트 실패: {e}")
+        logger.error(f"❌ 업로드 실패: {e}")
         import traceback
         logger.error(f"스택 트레이스:\n{traceback.format_exc()}")
         return {"success": False, "error": str(e)}
@@ -1401,11 +1475,11 @@ async def approve_questions(
         
         logger.info(f"✅ 기본 승인 처리 완료: {result.message}")
         
-        # RAG 통합 및 AI 해설 생성 처리 (별도 트랜잭션으로 안전하게 처리)
+        # RAG 통합, AI 해설 생성, 딥시크 학습 처리 (별도 트랜잭션으로 안전하게 처리)
         if approval_action == ApprovalStatus.APPROVED and result.approved_count > 0:
-            logger.info(f"🚀 {result.approved_count}개 문제 승인 완료 - 카테고리별 저장 및 AI 해설 생성 시작")
+            logger.info(f"🚀 {result.approved_count}개 문제 승인 완료 - 카테고리별 저장, AI 해설 생성, 딥시크 학습 시작")
             
-            # 카테고리별 저장 시스템 적용
+            # 1. 카테고리별 저장 시스템 적용
             try:
                 from app.services.category_storage_service import CategoryStorageService
                 
@@ -1432,6 +1506,50 @@ async def approve_questions(
             except Exception as e:
                 logger.error(f"❌ 카테고리별 저장 실패: {e}")
                 # 저장 실패해도 승인은 유지됨
+            
+            # 2. 딥시크 자동 학습 시작
+            try:
+                from app.services.deepseek_learning_service import DeepSeekLearningService
+                
+                deepseek_learning = DeepSeekLearningService()
+                
+                # 각 승인된 문제에 대해 딥시크 학습 처리
+                learning_success_count = 0
+                for question in approved_questions:
+                    try:
+                        learning_result = await deepseek_learning.process_approved_question_for_learning(
+                            question, 
+                            current_user.department,
+                            metadata={
+                                "approver_id": current_user.id,
+                                "approval_batch": True,
+                                "approval_time": datetime.now().isoformat(),
+                                "approval_batch_id": f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                            },
+                            db=db
+                        )
+                        
+                        if learning_result["success"]:
+                            learning_success_count += 1
+                            logger.info(f"🤖 문제 {question.id} 딥시크 학습 완료")
+                        else:
+                            logger.warning(f"⚠️ 문제 {question.id} 딥시크 학습 실패: {learning_result.get('error')}")
+                            
+                    except Exception as learning_error:
+                        logger.error(f"❌ 문제 {question.id} 딥시크 학습 중 오류: {learning_error}")
+                        continue
+                
+                logger.info(f"🎓 딥시크 학습 완료: {learning_success_count}/{len(approved_questions)} 성공")
+                
+                if learning_success_count > 0:
+                    result.message += f" | 딥시크 학습: {learning_success_count}개 완료"
+                else:
+                    result.message += " | 딥시크 학습: 실패"
+                    
+            except Exception as e:
+                logger.error(f"❌ 딥시크 학습 처리 실패: {e}")
+                result.message += " | 딥시크 학습: 오류 발생"
+                # 딥시크 학습 실패해도 승인은 유지됨
             
             try:
                 # 새로운 세션으로 AI 해설 생성 (승인 트랜잭션과 분리)
@@ -2760,3 +2878,174 @@ async def get_ai_learning_patterns(
             "success": False,
             "error": str(e)
         }
+
+
+# ===== 딥시크 학습 관련 엔드포인트들 =====
+
+@router.get("/deepseek/learning-stats")
+async def get_deepseek_learning_stats(
+    current_user: User = Depends(get_current_user)
+):
+    """딥시크 학습 통계 조회"""
+    check_professor_permission(current_user)
+    
+    try:
+        from app.services.deepseek_learning_service import DeepSeekLearningService
+        
+        deepseek_learning = DeepSeekLearningService()
+        stats = await deepseek_learning.get_learning_stats()
+        
+        return {
+            "success": True,
+            "professor_id": current_user.id,
+            "professor_name": current_user.name,
+            "department": current_user.department,
+            "deepseek_stats": stats,
+            "message": "딥시크 학습 통계를 조회했습니다."
+        }
+        
+    except Exception as e:
+        logger.error(f"딥시크 학습 통계 조회 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"딥시크 학습 통계 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post("/deepseek/manual-learning")
+async def trigger_manual_deepseek_learning(
+    request: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """수동 딥시크 학습 트리거"""
+    check_professor_permission(current_user)
+    
+    try:
+        from app.services.deepseek_learning_service import DeepSeekLearningService
+        
+        deepseek_learning = DeepSeekLearningService()
+        
+        # 요청 파라미터
+        department = request.get("department", current_user.department)
+        limit = request.get("limit", 20)
+        
+        logger.info(f"🎓 수동 딥시크 학습 시작: {department}, 제한 {limit}개")
+        
+        # 승인된 문제들로부터 일괄 학습
+        result = await deepseek_learning.batch_learning_from_approved_questions(
+            db=db,
+            department=department,
+            limit=limit
+        )
+        
+        return {
+            "success": result["success"],
+            "professor_id": current_user.id,
+            "professor_name": current_user.name,
+            "department": department,
+            "learning_result": result,
+            "message": f"수동 딥시크 학습이 완료되었습니다. ({result.get('success_count', 0)}/{result.get('processed_count', 0)} 성공)"
+        }
+        
+    except Exception as e:
+        logger.error(f"수동 딥시크 학습 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"수동 딥시크 학습 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post("/deepseek/test-knowledge")
+async def test_deepseek_learned_knowledge(
+    request: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """딥시크 학습된 지식 테스트"""
+    check_professor_permission(current_user)
+    
+    try:
+        from app.services.deepseek_learning_service import DeepSeekLearningService
+        
+        deepseek_learning = DeepSeekLearningService()
+        
+        test_question = request.get("test_question", "")
+        department = request.get("department", current_user.department)
+        
+        if not test_question:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="테스트 문제를 입력해주세요."
+            )
+        
+        logger.info(f"🧪 딥시크 지식 테스트: {department}")
+        
+        # 학습된 지식 테스트
+        result = await deepseek_learning.test_learned_knowledge(
+            test_question=test_question,
+            department=department
+        )
+        
+        return {
+            "success": result["success"],
+            "professor_id": current_user.id,
+            "professor_name": current_user.name,
+            "department": department,
+            "test_result": result,
+            "message": "딥시크 학습된 지식 테스트가 완료되었습니다."
+        }
+        
+    except Exception as e:
+        logger.error(f"딥시크 지식 테스트 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"딥시크 지식 테스트 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.get("/deepseek/model-status")
+async def get_deepseek_model_status(
+    current_user: User = Depends(get_current_user)
+):
+    """딥시크 모델 상태 확인"""
+    check_professor_permission(current_user)
+    
+    try:
+        from app.services.deepseek_service import LocalDeepSeekService
+        
+        deepseek = LocalDeepSeekService()
+        
+        # 모델 사용 가능성 확인
+        model_available = await deepseek.check_model_availability()
+        
+        # 기본 테스트
+        test_result = None
+        if model_available:
+            test_result = await deepseek.chat_completion(
+                messages=[{"role": "user", "content": "안녕하세요, 테스트입니다."}],
+                temperature=0.1
+            )
+        
+        status_info = {
+            "model_available": model_available,
+            "model_name": deepseek.model_name,
+            "ollama_host": deepseek.ollama_host,
+            "embedding_model": deepseek.embedding_model,
+            "test_successful": test_result["success"] if test_result else False,
+            "last_checked": datetime.now().isoformat()
+        }
+        
+        return {
+            "success": True,
+            "professor_id": current_user.id,
+            "professor_name": current_user.name,
+            "model_status": status_info,
+            "message": "딥시크 모델 상태를 확인했습니다."
+        }
+        
+    except Exception as e:
+        logger.error(f"딥시크 모델 상태 확인 오류: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"딥시크 모델 상태 확인 중 오류가 발생했습니다: {str(e)}"
+        )

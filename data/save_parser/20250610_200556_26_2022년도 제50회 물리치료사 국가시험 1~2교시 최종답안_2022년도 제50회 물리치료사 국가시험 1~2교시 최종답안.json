@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "source_file": "2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안.pdf",
+    "parsed_at": "2025-06-10T20:05:56.531918",
+    "parsed_by": 26,
+    "total_questions": 10,
+    "ai_analysis_completed": true,
+    "last_ai_update": "2025-06-10T20:08:03.117401"
+  },
+  "questions": [
+    {
+      "question_number": 1,
+      "content": "갑상샘소포, 난소표면, 침샘 등의 분비샘 표면에서 볼 수 있는 상피조직은?",
+      "description": null,
+      "options": {
+        "1": "이행상피",
+        "2": "단층입방상피",
+        "3": "단층편평상피",
+        "4": "중층편평상피",
+        "5": "거짓중층상피"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "중",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "질문은 갑상샘소포, 난소표면, 침샘 등 특정 분비샘의 표피 조직 유형을 묻는 것으로, 각각의 특수한 상피 세포 구조를 기억하고 이해해야 합니다. 갑상샘 소포는 단순 원세포성 내상피, 난소 표면은 변이가 있음(주로 단순 평상피), 침샘은 변이 있는 다층 원세포성 내상피 등으로, 각각의 세포 형태와 기능적 특징을 연결 짚는 지식이 필요하므로 기본 개념보다 약간 높은 난이도입니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 2,
+      "content": "손목뼈의 몸쪽열(proximal row)에 위치하는 뼈는?",
+      "description": null,
+      "options": {
+        "1": "콩알뼈",
+        "2": "갈고리뼈",
+        "3": "알머리뼈",
+        "4": "큰마름뼈",
+        "5": "작은마름뼈"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "하",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "손목 뼈의 기본 구조와 분류에 관한 질문으로, proximal row(가까운 행)에 속하는 삼각인대골(trapezium), 큰쪽골(radial bone), 작은쪽골(pisiform bone) 중 하나를 묻는 것으로, 단순히 해부학적 기본 개념을 암기하고 이해하는 문제가므로 하난이도입니다. 또한 객관식 문제 형태로 구성되어 있습니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 3,
+      "content": "위팔뼈에서 볼 수 있는 것은?",
+      "description": null,
+      "options": {
+        "1": "도르래",
+        "2": "붓돌기",
+        "3": "큰돌기",
+        "4": "갈고리돌기",
+        "5": "팔꿈치머리"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "중",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "외부에서 관찰 가능한 요소를 묻는 것으로, 기본적인 해부학적 지식을 요구하지만 특정 구조물(대돌기)의 위치와 관련된 이해가 필요합니다. 단순 암기보다 어느 정도 연관성을 파악해야 하며, 물리치료사 국가고시에서 출제될 경우 중간 난이도로 평가됩니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 4,
+      "content": "다음에서 설명하는 윤활관절의 구조물은?\n• 어깨관절과 엉덩관절에 위치한다.\n• 관절오목이 더 깊어지도록 하고 접촉면을 넓혀 주는 섬유연골이다.",
+      "description": null,
+      "options": {
+        "1": "관절원반(articular disc)",
+        "2": "힘줄집(tendon sheath)",
+        "3": "윤활주머니(synovial bursa)",
+        "4": "관절테두리(articular labrum)",
+        "5": "관절주머니(articular capsule)"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "하",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "이 질문은 기본적인 해부학적 지식을 묻는 것으로, 관절 구조 중 윤활관节约의 특징을 단순히 암기한 내용입니다. 어깨과 엉덩관절에 위치한다는 점과 섬유연골( fibrocartilage)이 더 깊어지도록 하고 접촉면을 넓혀준다는 설명은 학습자가 기본 개념만 이해すれば 답할 수 있는 단순한 문제로, 난이도가 하입니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 5,
+      "content": "정강뼈의 안쪽복사에서 발배뼈, 발꿈치뼈 및 목말뼈에 부착되는 인대는?",
+      "description": null,
+      "options": {
+        "1": "세모인대",
+        "2": "목말발배인대",
+        "3": "발꿈치종아리인대",
+        "4": "앞목말종아리인대",
+        "5": "뒤목말종아리인대"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "하",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "정강뼈(ankle bone)의 안쪽부에 부착되는 인대를 묻는 기본적인 해부학 지식 문제로, 특정 구조나 관계를 암기해야 하는 단순한 질문입니다. 응용이나 연관성 분석보다는 기본 개념을 요구하므로 하 난이도에 해당합니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 6,
+      "content": "다음에서 설명하는 목 근육은?\n• 얼굴신경이 지배하는 근육이다.\n• 이는곳은 목과 가슴의 근막이며 닿는곳은 아래턱뼈와 입꼬리이다.\n• 목 피부의 긴장도를 유지하거나 입꼬리를 아래로 당긴다.",
+      "description": null,
+      "options": {
+        "1": "목빗근",
+        "2": "넓은목근",
+        "3": "붓목뿔근",
+        "4": "턱목뿔근",
+        "5": "턱끝목뿔근"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "하",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "이 질문은 목 근육을 설명하는 것으로, 주요 내용으로는 얼굴신경(정확히는 측면신경)에 의한 지배, 목과 가슴의 근막 연결부분, 아래턱뼈와 입꼬리의 부착점 등을 언급하고 있습니다. 하지만 이러한 설명 중에는 오류가 포함되어 있어('얼굴신경이 지배하는 근육'이라는 부분은 사실 얼굴근육을 지배하지만 목 근육은 측면신경(7번 신경)에 의해 주로 지배됩니다). 또한, '목 피부의 긴장도를 유지하거나 입꼬리를 아래로 당긴다.'라는 설명은 실제로는 사두개이근육(masseter muscle)과 같은 경락근육(jaw elevator muscles)의 기능을 묘사하고 있습니다. 따라서 이 질문은 기본적인 해부학적 지식을 암기하는 것이 요구되나, 오답 유발 요소가 포함되어 있어 정확한 이해와 구분이 필요합니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 7,
+      "content": "배곧은근에 관한 설명으로 옳은 것은?",
+      "description": null,
+      "options": {
+        "1": "이는곳은 엉덩뼈이다.",
+        "2": "주 작용은 몸통의 가쪽돌림이다.",
+        "3": "몸통의 깊은층에 위치하는 근육이다.",
+        "4": "배안 장기를 보호하고 복압 형성에 기여한다.",
+        "5": "닿는곳은 셋째~다섯째 갈비연골과 칼돌기이다."
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "중",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "배곧은근은 신경근육계에서 중요한 구조물로, 기본적인 해부학적 개념을 암기해야 하지만, 근육 수축과 이완 메커니즘, 생리학적 기능 등 다양한 연관 지식이 필요합니다. 또한 '옳은 것은'이라는 식으로 구성되어 있어 여러 설명 중 어떤 것이 올바른지 판단하는 능력도 요구됩니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 8,
+      "content": "이는곳이 궁둥뼈결절(ischial tuberosity)인 근육으로 짝지어진 것은?",
+      "description": null,
+      "options": {
+        "1": "두덩근, 긴모음근",
+        "2": "반막근, 두덩정강근",
+        "3": "넙다리빗근, 넙다리두갈래근",
+        "4": "넙다리두갈래근 긴갈래, 반힘줄근",
+        "5": "넙다리두갈래근 짧은갈래, 궁둥구멍근"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "중",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "이 질문은 기본적인 해부학적 지식을 묻고 있습니다. 궁둥뼈결절(ischial tuberosity)에 부착되는 근육을 기억하는 것이 요구되며, 이는 단순 암기보다 근육의 기능적 연관성을 이해해야 할 정도로 중간 난이도입니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 9,
+      "content": "허파조직에 영양분과 산소를 공급하는 동맥은?",
+      "description": null,
+      "options": {
+        "1": "복강동맥(celiac trunk)",
+        "2": "기관지동맥(bronchial artery)",
+        "3": "갈비밑동맥(subcostal artery)",
+        "4": "허파동맥(pulmonary artery)",
+        "5": "팔머리동맥(brachiocephalic trunk)"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "하",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "질문은 폐 조직의 혈액 공급에 관한 기본적인 해부학적 사실을 묻는 것으로, 특정 임상 적용이나 복잡한 분석 없이 단순히 기억해야 하는 내용입니다. 또한 객관식 문제 형태로 구성되어 있습니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    },
+    {
+      "question_number": 10,
+      "content": "다음에서 설명하는 기관은?\n• 우리 몸에서 가장 큰 림프관이다.\n• 왼빗장밑정맥과 왼속목정맥의 합류점에서 순환계로 유입된다.\n• 아래쪽에 팽대부위가 위치한다.",
+      "description": null,
+      "options": {
+        "1": "암죽관",
+        "2": "정맥관",
+        "3": "홀정맥",
+        "4": "오른림프관",
+        "5": "가슴림프관"
+      },
+      "subject": "물리치료 기초",
+      "year": 2022,
+      "source_file": "2025_국가고시_물리치료학과_물리치료학과교수_2.pdf",
+      "file_type": "questions",
+      "difficulty": "중",
+      "ai_question_type": "객관식",
+      "ai_analysis_complete": true,
+      "ai_confidence": "high",
+      "ai_reasoning": "해부학적 기본 개념을 묻는 문제로, 특정 관의 특징(위치, 기능)을 설명하는 것으로 중간 난이도입니다. 단순 암기보다는 여러 특징을 종합적으로 파악하여 정답을 유추해야 하며, 물리치료사 국가고시에서 출제될 경우 객관식 문제가 될 수 있습니다.",
+      "updated_at": "2025-06-10T20:08:03.117401"
+    }
+  ]
+}

@@ -35,9 +35,14 @@ loguru==0.7.2
 # JSON 처리
 orjson==3.9.10
 
-# 벡터 연산
+# 벡터 연산 및 ML 라이브러리
 numpy==1.24.3
 pgvector==0.2.4
+matplotlib==3.8.2
+seaborn==0.13.0
+scikit-learn==1.3.2
+umap-learn==0.5.5
+plotly==5.17.0
 
 # OpenAI
 openai==1.51.2
@@ -70,6 +75,7 @@ Pillow==10.1.0  # 이미지 처리
 google-generativeai==0.8.3  # Gemini 2.0 지원
 sentence-transformers==2.2.2  # 텍스트 임베딩
 chromadb==0.4.18  # 벡터 데이터베이스
+qdrant-client==1.7.0  # QDRANT 벡터 데이터베이스 클라이언트
 
 # 데이터 분석 (교수님 평가 데이터 처리용)
 pandas==2.1.4  # 엑셀 데이터 분석

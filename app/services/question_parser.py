@@ -12,9 +12,15 @@ from pathlib import Path
 import base64
 import logging
 import re
+import requests
+import pandas as pd
 
 from app.models.question import DifficultyLevel
 from app.core.config import settings
+from app.services.question_type_mapper import question_type_mapper
+from app.services.evaluator_type_mapper import evaluator_type_mapper
+# AI 문제 분석기 import 추가
+from app.services.ai_question_analyzer import get_ai_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +50,14 @@ class QuestionParser:
             self.model = None
             logger.warning("Gemini API 키가 설정되지 않았습니다.")
     
-    def parse_any_file(self, file_path: str, content_type: str = "auto") -> Dict[str, Any]:
+    def parse_any_file(self, file_path: str, content_type: str = "auto", department: str = "일반") -> Dict[str, Any]:
         """
         모든 파일 형식을 Gemini로 파싱 (분할 파싱 지원)
         
         Args:
-            file_path: 파일 경로.
+            file_path: 파일 경로
             content_type: "questions", "answers", 또는 "auto" (자동 감지)
+            department: 학과 정보 (딥시크 분석용)
             
         Returns:
             파싱된 데이터
@@ -58,19 +65,18 @@ class QuestionParser:
         if not self.model:
             logger.error("Gemini API가 초기화되지 않았습니다.")
             return {"type": content_type, "data": [], "error": "Gemini API not initialized"}
-        
+
         if not os.path.exists(file_path):
             logger.error(f"파일이 존재하지 않습니다: {file_path}")
             return {"type": content_type, "data": [], "error": "File not found"}
-        
+
         # 파일 크기 확인
         file_size = os.path.getsize(file_path)
         logger.info(f"파일 크기: {file_size / (1024*1024):.2f} MB")
-        
+
         # DB 스키마 정보
         db_schema = """
 우리 데이터베이스 구조:
-
 Question 테이블:
 - question_number: 문제 번호 (정수, 1~22까지만)
 - content: 문제 내용 (텍스트)
@@ -81,28 +87,114 @@ Question 테이블:
 - area_name: 영역이름
 - difficulty: "하", "중", "상" 중 하나
 - year: 연도 (정수)
-
 중요: 22번 문제까지만 파싱하세요. 더 많은 문제가 있어도 22번까지만 처리하고 중단하세요.
 """
-        
+
         try:
             # 파일 확장자에 따라 처리
             file_extension = Path(file_path).suffix.lower()
-            
+
             if file_extension in ['.xlsx', '.xls']:
-                all_data = self._process_excel_file_chunked(file_path, content_type, db_schema)
+                all_data = self._process_excel_file_chunked(file_path, content_type, db_schema, department)
             elif file_extension == '.pdf':
                 all_data = self._process_pdf_with_images(file_path, content_type, db_schema)
             else:
                 all_data = self._process_text_file_chunked(file_path, content_type, db_schema)
-            
+
             # 22개 제한 적용
             if isinstance(all_data, list):
                 all_data = [item for item in all_data if item.get('question_number', 0) <= 22][:22]
-            
+
             logger.info(f"분할 파싱 완료: {file_path}, 총 데이터 개수: {len(all_data)}")
+            
+            # 📊 3단계: AI 기반 문제 분석 (content_type이 questions인 경우)
+            if content_type == "questions" and all_data:
+                try:
+                    logger.info(f"🤖 AI 문제 분석 시작: {len(all_data)}개 문제")
+                    
+                    # AI 분석기 초기화
+                    from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
+                    ai_analyzer = DifficultyAnalyzer()
+                    
+                    # 학과 정보 추출 (department 파라미터 사용)
+                    ai_department = department if department != "일반" else "물리치료학과"
+                    
+                    # 각 문제별 AI 분석
+                    for item in all_data:
+                        try:
+                            content = item.get("content", "")
+                            question_number = item.get("question_number", 1)
+                            
+                            if content and content.strip():
+                                # 딥시크 AI 분석
+                                ai_result = ai_analyzer.analyze_question_auto(content, question_number, ai_department)
+                                
+                                if ai_result:
+                                    # AI 분석 결과 추가
+                                    item["ai_difficulty"] = ai_result.get("difficulty", "중")
+                                    item["ai_question_type"] = ai_result.get("question_type", "객관식")
+                                    item["ai_confidence"] = ai_result.get("confidence", "medium")
+                                    item["ai_reasoning"] = ai_result.get("ai_reasoning", "AI 분석 완료")
+                                    item["ai_analysis_complete"] = True
+                                    item["updated_at"] = datetime.now().isoformat()
+                                    
+                                    # 기본 난이도 업데이트
+                                    item["difficulty"] = ai_result.get("difficulty", "중")
+                                    
+                                    # 영역명은 AI 분석 결과 우선, 없으면 평가위원 데이터에서 조회
+                                    area_name = ai_result.get("area_name")
+                                    if not area_name or area_name == "일반":
+                                        year = item.get("year", 2024)
+                                        area_name = evaluator_type_mapper.get_area_name_for_question(
+                                            ai_department, year, question_number
+                                        )
+                                    item["area_name"] = area_name
+                                    
+                                    logger.info(f"✅ 문제 {question_number} AI 분석 완료: {ai_result.get('difficulty')} 난이도")
+                                else:
+                                    # AI 분석 실패 시 기본값
+                                    item["ai_analysis_complete"] = False
+                                    item["ai_reasoning"] = "AI 분석 불가능으로 기본 규칙 적용"
+                                    
+                                    # 영역명은 평가위원 데이터에서 조회
+                                    year = item.get("year", 2024)
+                                    area_name = evaluator_type_mapper.get_area_name_for_question(
+                                        ai_department, year, question_number
+                                    )
+                                    item["area_name"] = area_name
+                                    
+                                    logger.warning(f"⚠️ 문제 {question_number} AI 분석 실패")
+                            else:
+                                logger.warning(f"⚠️ 문제 {question_number} content 없음으로 AI 분석 건너뜀")
+                                
+                                # 영역명은 평가위원 데이터에서 조회
+                                year = item.get("year", 2024)
+                                area_name = evaluator_type_mapper.get_area_name_for_question(
+                                    ai_department, year, question_number
+                                )
+                                item["area_name"] = area_name
+                                
+                        except Exception as e:
+                            logger.error(f"❌ 문제 {item.get('question_number')} AI 분석 오류: {e}")
+                            item["ai_analysis_complete"] = False
+                            item["ai_reasoning"] = f"AI 분석 오류: {str(e)}"
+                            
+                            # 영역명은 평가위원 데이터에서 조회
+                            year = item.get("year", 2024)
+                            question_number = item.get("question_number", 1)
+                            area_name = evaluator_type_mapper.get_area_name_for_question(
+                                ai_department, year, question_number
+                            )
+                            item["area_name"] = area_name
+                    
+                    logger.info(f"🎯 AI 분석 완료: {len(all_data)}개 문제 처리됨")
+                    
+                except Exception as e:
+                    logger.error(f"❌ AI 분석 전체 실패: {e}")
+                    # AI 분석 실패해도 파싱은 계속 진행
+            
             return {"type": content_type if content_type != "auto" else "questions", "data": all_data}
-                
+
         except Exception as e:
             logger.error(f"분할 파싱 오류 ({file_path}): {e}")
             return {"type": content_type, "data": [], "error": str(e)}
@@ -155,22 +247,57 @@ Question 테이블:
 - 예: ["- 몸에 널리 분포하며, 몸의 구조를 이룸", "- 세포나 기관 사이 틈을 메우고, 기관을 지지·보호함"]
 - JSON 형식으로만 응답해주세요"""
         else:  # answers
-            return f"""이 파일은 시험 정답 데이터입니다.
+            return f"""이 파일은 시험 정답지입니다. 각 문제 번호와 해당 정답을 정확히 추출해주세요.
 
 {db_schema}
 
-위 스키마의 정답 관련 필드들(question_number, correct_answer, subject, area_name, difficulty)을 
-JSON 배열로 변환해주세요.
+답안지에서 다음 정보를 찾아 JSON 배열로 변환해주세요:
 
-중요 제한사항:
-- 22번 문제까지만 파싱하세요. 더 많은 문제가 있어도 22번에서 중단하세요.
+**추출 대상:**
+- question_number: 문제 번호 (1, 2, 3, ... 형태의 숫자)
+- correct_answer: 정답 (1, 2, 3, 4, 5 중 하나)
+- subject: 과목명 (이미지/텍스트에서 식별 가능하면)
+- area_name: 영역명 (이미지/텍스트에서 식별 가능하면)
+- difficulty: 난이도 (이미지/텍스트에서 식별 가능하면, 없으면 null)
+- year: 연도 (파일명이나 내용에서 추출)
 
-JSON 형식으로만 응답해주세요."""
+**답안지 인식 패턴:**
+- "1번: ②", "2번: ①", "3번: ⑤" 형태
+- "1. ②", "2. ①", "3. ⑤" 형태  
+- "문제 1: 정답 2", "문제 2: 정답 1" 형태
+- 표 형태로 된 답안 (문제번호 | 정답)
+- ①②③④⑤ 기호는 1,2,3,4,5로 변환
+
+**출력 예시:**
+[
+  {
+    "question_number": 1,
+    "correct_answer": "2",
+    "subject": null,
+    "area_name": null,
+    "difficulty": null,
+    "year": 2020
+  },
+  {
+    "question_number": 2,
+    "correct_answer": "1",
+    "subject": null,
+    "area_name": null,
+    "difficulty": null,
+    "year": 2020
+  }
+]
+
+**중요 제한사항:**
+- 22번 문제까지만 파싱하세요
+- 정답은 반드시 "1", "2", "3", "4", "5" 중 하나의 문자열로
+- 문제 번호가 명확하지 않은 경우 순서대로 1,2,3... 배정
+- JSON 형식으로만 응답하세요"""
     
 
 
-    def _process_excel_file_chunked(self, file_path: str, content_type: str, db_schema: str) -> List[Dict[str, Any]]:
-        """Excel 파일 분할 처리 (openpyxl 사용)"""
+    async def _process_excel_file_chunked(self, file_path: str, content_type: str, db_schema: str, department: str = "일반") -> List[Dict[str, Any]]:
+        """Excel 파일 분할 처리 (openpyxl 사용) - 문제 유형 자동 배정 포함"""
         try:
             from openpyxl import load_workbook
         except ImportError:
@@ -178,6 +305,29 @@ JSON 형식으로만 응답해주세요."""
             raise ImportError("openpyxl이 필요합니다. pip install openpyxl로 설치하세요.")
         
         all_data = []
+        
+        # 📊 1단계: 문제 유형 매핑 데이터 생성 (content_type이 questions인 경우)
+        if content_type == "questions":
+            try:
+                # 교수명 추출 (파일명에서)
+                professor_name = self._extract_professor_from_filename(file_path)
+                
+                # 문제 유형 매핑 처리
+                logger.info(f"🎯 문제 유형 자동 배정 시작: {professor_name} ({department})")
+                type_result = await question_type_mapper.process_excel_for_question_types(
+                    file_path, professor_name, department
+                )
+                
+                if type_result.get("success"):
+                    logger.info(f"✅ 문제 유형 매핑 완료: {type_result['total_questions']}개 문제")
+                    self.question_type_file_key = type_result["file_key"]
+                else:
+                    logger.warning(f"⚠️ 문제 유형 매핑 실패: {type_result.get('error', '알 수 없는 오류')}")
+                    self.question_type_file_key = None
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ 문제 유형 매핑 과정에서 오류: {e}")
+                self.question_type_file_key = None
         
         try:
             workbook = load_workbook(file_path, read_only=True)
@@ -232,9 +382,106 @@ Excel 데이터:
                                     year_in_sheet = int(match.group(1))
                                 else:
                                     year_in_sheet = 2020  # 기본값
+                                
+                                # 📊 2단계: 각 문제에 유형 정보 추가
                                 for item in sheet_data_parsed:
                                     if not item.get('year') or item.get('year') in [0, None, '']:
                                         item['year'] = year_in_sheet
+                                    
+                                    # 문제 유형 자동 배정 (questions인 경우만)
+                                    if content_type == "questions" and hasattr(self, 'question_type_file_key'):
+                                        question_content = item.get('content', '')
+                                        question_number = item.get('question_number')
+                                        
+                                        # 문제 유형 조회 (기존 규칙 기반)
+                                        question_type = question_type_mapper.get_question_type_for_question(
+                                            question_content, 
+                                            self.question_type_file_key, 
+                                            question_number
+                                        )
+                                        
+                                        # 문제 유형 정보 추가
+                                        item['question_type'] = question_type
+                                        item['type_name'] = question_type_mapper.question_types.get(
+                                            question_type, {}
+                                        ).get('name', question_type)
+                                        
+                                        logger.debug(f"   문제 {question_number}: {question_type} ({item['type_name']})")
+                                
+                                # 📊 3단계: 딥시크 AI 기반 문제 분석 (content_type이 questions인 경우)
+                                if content_type == "questions" and sheet_data_parsed:
+                                    try:
+                                        logger.info(f"🤖 딥시크 AI 문제 분석 시작: {len(sheet_data_parsed)}개 문제")
+                                        
+                                        # 딥시크 분석기 초기화
+                                        from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
+                                        ai_analyzer = DifficultyAnalyzer()
+                                        
+                                        # 학과 정보 변환 (딥시크 분석기 형식에 맞게)
+                                        dept_map = {
+                                            "물리치료학과": "물리치료",
+                                            "작업치료학과": "작업치료",
+                                            "간호학과": "간호"  # 기본값
+                                        }
+                                        ai_department = dept_map.get(department, "물리치료")
+                                        
+                                        # 각 문제별 딥시크 분석
+                                        for item in sheet_data_parsed:
+                                            question_content = item.get('content')
+                                            question_number = item.get('question_number', 1)
+                                            
+                                            if question_content:
+                                                try:
+                                                    # 딥시크 자동 분석 실행
+                                                    deepseek_result = ai_analyzer.analyze_question_auto(
+                                                        question_content, question_number, ai_department
+                                                    )
+                                                    
+                                                    if deepseek_result:
+                                                        # 딥시크 분석 결과를 아이템에 추가
+                                                        item['ai_difficulty'] = deepseek_result.get('difficulty', '중')
+                                                        item['ai_question_type'] = deepseek_result.get('question_type', '객관식')
+                                                        item['ai_reasoning'] = deepseek_result.get('ai_reasoning', '딥시크 AI 분석')
+                                                        item['ai_confidence'] = deepseek_result.get('confidence', 'medium')
+                                                        item['ai_analysis_complete'] = True
+                                                        item['difficulty'] = deepseek_result.get('difficulty', '중')  # 난이도 업데이트
+                                                        
+                                                        logger.debug(f"   문제 {question_number}: 딥시크 분석 완료 (난이도: {item['ai_difficulty']})")
+                                                    else:
+                                                        # 딥시크 실패 시 기본값
+                                                        item['ai_difficulty'] = '중'
+                                                        item['ai_question_type'] = '객관식' 
+                                                        item['ai_reasoning'] = '딥시크 분석 실패, 기본값 사용'
+                                                        item['ai_confidence'] = 'low'
+                                                        item['ai_analysis_complete'] = False
+                                                        item['difficulty'] = '중'
+                                                        
+                                                except Exception as e:
+                                                    logger.debug(f"   문제 {question_number} AI 분석 실패: {e}")
+                                                    # 개별 문제 분석 실패해도 계속 진행
+                                                    item['ai_difficulty'] = '중'
+                                                    item['ai_question_type'] = '객관식'
+                                                    item['ai_reasoning'] = f'AI 분석 오류: {str(e)}'
+                                                    item['ai_confidence'] = 'low'
+                                                    item['ai_analysis_complete'] = False
+                                                    item['difficulty'] = '중'
+                                            else:
+                                                logger.warning(f"   문제 {question_number}: 내용이 없어 AI 분석 스킵")
+                                        
+                                        logger.info(f"✅ 딥시크 AI 문제 분석 완료: {len(sheet_data_parsed)}개")
+                                        
+                                    except Exception as e:
+                                        logger.warning(f"⚠️ 딥시크 AI 문제 분석 실패: {e}")
+                                        # AI 분석 실패해도 기본 파싱은 계속 진행
+                                        for item in sheet_data_parsed:
+                                            if 'ai_difficulty' not in item:
+                                                item['ai_difficulty'] = '중'
+                                                item['ai_question_type'] = '객관식'
+                                                item['ai_reasoning'] = '딥시크 분석기 초기화 실패'
+                                                item['ai_confidence'] = 'low'
+                                                item['ai_analysis_complete'] = False
+                                                item['difficulty'] = '중'
+                                
                                 logger.info(f"시트 '{sheet_name}': {len(sheet_data_parsed)}개 항목 파싱 성공 (연도 보정: {year_in_sheet})")
                                 all_data.extend(sheet_data_parsed)
                             else:
@@ -249,12 +496,61 @@ Excel 데이터:
                     break
             
             workbook.close()
+            
+            # 📊 4단계: AI 분석 및 유형 배정 요약 출력
+            if content_type == "questions" and all_data:
+                # 기존 규칙 기반 유형 통계
+                type_summary = {}
+                # AI 분석 결과 통계
+                ai_type_summary = {}
+                ai_difficulty_summary = {}
+                ai_confidence_summary = {}
+                
+                for item in all_data:
+                    # 기존 규칙 기반 유형
+                    qtype = item.get('question_type', 'unknown')
+                    type_summary[qtype] = type_summary.get(qtype, 0) + 1
+                    
+                    # AI 분석 결과
+                    ai_qtype = item.get('ai_question_type', 'unknown')
+                    ai_type_summary[ai_qtype] = ai_type_summary.get(ai_qtype, 0) + 1
+                    
+                    ai_difficulty = item.get('ai_difficulty', 'unknown')
+                    ai_difficulty_summary[ai_difficulty] = ai_difficulty_summary.get(ai_difficulty, 0) + 1
+                    
+                    ai_confidence = item.get('ai_confidence', 'unknown')
+                    ai_confidence_summary[ai_confidence] = ai_confidence_summary.get(ai_confidence, 0) + 1
+                
+                logger.info(f"🎯 문제 분석 완료 요약:")
+                logger.info(f"   📋 규칙 기반 유형: {type_summary}")
+                logger.info(f"   🤖 AI 분석 유형: {ai_type_summary}")
+                logger.info(f"   📈 AI 난이도 분포: {ai_difficulty_summary}")
+                logger.info(f"   🎯 AI 신뢰도 분포: {ai_confidence_summary}")
+            
             logger.info(f"Excel 파일 처리 완료: 총 {len(all_data)}개 항목")
             return all_data
             
         except Exception as e:
             logger.error(f"Excel 파일 읽기 오류: {e}")
             raise
+    
+    def _extract_professor_from_filename(self, file_path: str) -> str:
+        """파일명에서 교수명 추출"""
+        try:
+            filename = Path(file_path).name
+            # "2. 신장훈_작치_마스터코딩지.xlsx" -> "신장훈"
+            if "_" in filename:
+                parts = filename.split("_")
+                if len(parts) >= 2:
+                    name_part = parts[0].replace("2. ", "").strip()
+                    return name_part
+            
+            # 기본값: 파일명에서 확장자 제거
+            return Path(file_path).stem
+            
+        except Exception as e:
+            logger.warning(f"교수명 추출 실패: {e}")
+            return "Unknown"
     
     def _process_pdf_with_images(self, file_path: str, content_type: str, db_schema: str) -> List[Dict[str, Any]]:
         """PDF 파일을 이미지로 변환하여 Gemini로 처리 (PyPDF2 사용 안함)"""
@@ -277,8 +573,53 @@ Excel 데이터:
             
             logger.info(f"총 {len(page_images)}개 페이지 이미지 생성됨")
             
-            # Gemini가 이미지를 읽고 이해하고 구조화하는 프롬프트
-            gemini_prompt = f"""
+            # 파일 타입별 프롬프트 생성
+            if content_type == "answers":
+                # 답안지 전용 강화 프롬프트
+                gemini_prompt = f"""
+이 이미지는 시험 정답지/답안지입니다. 이미지에서 문제 번호와 정답을 찾아 추출해주세요.
+
+**중요: 이미지에 있는 모든 숫자와 선택지 기호를 꼼꼼히 살펴보세요!**
+
+**찾아야 할 패턴들:**
+1. "1번 ②", "2번 ①", "3번 ④" 
+2. "1. ②", "2. ①", "3. ④"
+3. "문제1 정답②", "문제2 정답①"
+4. "1번문제: ②", "2번문제: ①"
+5. "1-②", "2-①", "3-④"
+6. 표 형태: | 1 | ② | 또는 | 문제1 | 정답② |
+7. "정답: 1②, 2①, 3④..."
+8. 세로로 나열된 형태도 찾아보세요
+
+**선택지 변환 규칙:**
+- ① → "1"
+- ② → "2" 
+- ③ → "3"
+- ④ → "4"
+- ⑤ → "5"
+- 1번 → "1"
+- 2번 → "2"
+- A → "1", B → "2", C → "3", D → "4", E → "5"
+
+**출력 형식 (JSON 배열만):**
+[
+  {{"question_number": 1, "correct_answer": "2", "year": 2021}},
+  {{"question_number": 2, "correct_answer": "1", "year": 2021}},
+  {{"question_number": 3, "correct_answer": "4", "year": 2021}}
+]
+
+**주의사항:**
+- 이미지에서 보이는 모든 문제-정답 쌍을 찾으세요
+- 22번까지만 추출하세요
+- 문제번호가 명확하지 않으면 순서대로 1,2,3... 배정하세요
+- 정답이 보이지 않는 문제는 제외하세요
+- 반드시 JSON 배열 형식으로만 응답하세요
+
+이미지를 자세히 보고 정답지의 모든 정보를 놓치지 마세요!
+"""
+            else:
+                # 문제지 전용 프롬프트
+                gemini_prompt = f"""
 이 이미지를 분석하여 시험 문제를 찾아 구조화된 JSON으로 변환해주세요.
 
 {db_schema}
@@ -288,48 +629,90 @@ Excel 데이터:
 - content: 문제 내용
 - description: 문제 설명/지문이 있다면 배열로
 - options: 선택지 (①②③④⑤ → "1","2","3","4","5")
-- subject: 과목명 (이미지에서 추출 가능하면)
-- area_name: 영역명 (이미지에서 추출 가능하면)
-- difficulty: "하", "중", "상" 중 하나
 - year: 연도 (이미지에서 추출 가능하면)
 
 JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
 """
             
-            # 각 페이지 이미지를 Gemini가 읽고 이해하고 구조화
+            # 💀 CRITICAL: 모든 페이지에서 문제 추출 (22개까지)
+            question_numbers_found = set()
+            
             for page_num, page_image in enumerate(page_images, 1):
-                if len(all_questions) >= 22:
-                    break  # 22개 달성하면 중단
-                
-                logger.info(f"페이지 {page_num} 이미지를 Gemini로 분석 중...")
+                logger.info(f"📖 페이지 {page_num}/{len(page_images)} 이미지 분석 중...")
                 
                 try:
-                    # Gemini가 이미지를 읽고 이해하고 구조화
+                    # Gemini 분석
                     response = self.model.generate_content([gemini_prompt, page_image])
                     
                     if response and response.text:
                         try:
-                            # Gemini 응답 파싱
+                            # 🔍 답안지인 경우 상세 디버깅
+                            if content_type == "answers":
+                                logger.info(f"🔍 페이지 {page_num} Gemini 원본 응답: {response.text[:500]}...")
+                            
+                            # 응답 파싱
                             page_result = self._parse_gemini_response(response.text, content_type)
                             page_questions = page_result.get("data", [])
                             
-                            # 22번 제한 적용
-                            page_questions = [q for q in page_questions if q.get('question_number', 0) <= 22]
+                            # 🔍 답안지인 경우 파싱 결과 로깅
+                            if content_type == "answers":
+                                logger.info(f"🔍 페이지 {page_num} 파싱 결과: {len(page_questions)}개 항목")
+                                for i, q in enumerate(page_questions[:3]):  # 처음 3개만 로깅
+                                    logger.info(f"    항목 {i+1}: {q}")
                             
-                            if page_questions:
-                                logger.info(f"페이지 {page_num}: {len(page_questions)}개 문제 추출")
-                                all_questions.extend(page_questions)
+                            # 유효한 데이터 필터링 (답안지는 다른 검증 기준)
+                            valid_page_data = []
+                            
+                            if content_type == "answers":
+                                # 답안지: question_number와 correct_answer만 있으면 유효
+                                for q in page_questions:
+                                    q_num = q.get('question_number', 0)
+                                    answer = q.get('correct_answer', '')
+                                    
+                                    if (1 <= q_num <= 22 and 
+                                        answer and answer.strip() and answer in ["1", "2", "3", "4", "5"] and
+                                        q_num not in question_numbers_found):
+                                        
+                                        valid_page_data.append(q)
+                                        question_numbers_found.add(q_num)
+                                        logger.info(f"✅ 정답 {q_num}: {answer}")
                             else:
-                                logger.info(f"페이지 {page_num}: 추출된 문제 없음")
+                                # 문제지: 기존 검증 방식
+                                for q in page_questions:
+                                    q_num = q.get('question_number', 0)
+                                    content = q.get('content', '')
+                                    
+                                    if (1 <= q_num <= 22 and 
+                                        content and content.strip() and content != "null" and
+                                        q_num not in question_numbers_found):
+                                        
+                                        valid_page_data.append(q)
+                                        question_numbers_found.add(q_num)
+                                        logger.info(f"✅ 문제 {q_num} 추출 성공")
+                            
+                            if valid_page_data:
+                                all_questions.extend(valid_page_data)
+                                logger.info(f"📄 페이지 {page_num}: {len(valid_page_data)}개 신규 데이터 추가 (총 {len(all_questions)}개)")
+                            else:
+                                logger.warning(f"⚠️ 페이지 {page_num}: 유효한 데이터 없음")
+                                if content_type == "answers" and page_questions:
+                                    logger.warning(f"    원본 데이터: {page_questions}")
                                 
                         except Exception as e:
-                            logger.error(f"페이지 {page_num} 파싱 실패: {e}")
+                            logger.error(f"❌ 페이지 {page_num} 파싱 실패: {e}")
+                            if content_type == "answers":
+                                logger.error(f"    원본 응답: {response.text[:300]}...")
                             continue
                     else:
-                        logger.warning(f"페이지 {page_num}: Gemini 응답 없음")
+                        logger.warning(f"⚠️ 페이지 {page_num}: Gemini 응답 없음")
+                    
+                    # 22개 달성 확인
+                    if len(question_numbers_found) >= 22:
+                        logger.info(f"🎯 22문제 달성! 더 이상 처리하지 않음")
+                        break
                     
                 except Exception as e:
-                    logger.error(f"페이지 {page_num} Gemini 분석 실패: {e}")
+                    logger.error(f"❌ 페이지 {page_num} 전체 실패: {e}")
                     continue
             
             # 최종 22개 제한 적용
@@ -546,81 +929,83 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
         answers: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
-        문제와 정답 매칭 (부분 매칭 지원, 22개 제한)
+        문제와 정답 매칭 (22개 제한)
         
-        정답이 부족한 경우에도 매칭 가능한 범위까지만 완전한 데이터를 반환
+        정답이 없는 문제도 포함시키되 correct_answer를 빈 값으로 설정
         22번 문제까지만 처리합니다.
         """
         # 입력 데이터에 22개 제한 적용
         questions = [q for q in questions if q.get('question_number', 0) <= 22][:22]
         answers = [a for a in answers if a.get('question_number', 0) <= 22]
-        
+
         # 정답을 문제번호로 인덱싱
         answer_map = {}
         for ans in answers:
             q_num = ans.get("question_number")
             if q_num is not None and q_num <= 22:  # 22번까지만
                 answer_map[str(q_num)] = ans
-        
+
         matched_data = []
-        skipped_count = 0
-        
+        matched_count = 0
+
         # 정답이 있는 문제번호 범위 확인
         if answer_map:
             available_answer_numbers = set(answer_map.keys())
             logger.info(f"사용 가능한 정답: {len(available_answer_numbers)}개 문제 ({min(available_answer_numbers) if available_answer_numbers else 'N/A'} ~ {max(available_answer_numbers) if available_answer_numbers else 'N/A'}번)")
         else:
-            logger.warning("정답 데이터가 없습니다.")
+            logger.warning("정답 데이터가 없습니다. 모든 문제를 정답 없이 포함합니다.")
             available_answer_numbers = set()
-        
+
         for question in questions:
             q_num = question.get("question_number")
             if q_num is None:
-                logger.warning(f"문제번호가 없는 문제: {question.get('content', '')[:50]}...")
-                skipped_count += 1
+                logger.warning(f"문제번호가 없는 문제 건너뛰기: {question.get('content', '')[:50]}...")
                 continue
-                
+
             q_num_str = str(q_num)
-            
-            # 정답이 있는 경우만 처리 (완전한 데이터만 반환)
+
+            # 기본 문제 데이터 설정
+            matched_item = {
+                **question,
+                "correct_answer": "",
+                "answer_source": "no_answer"
+            }
+
+            # 정답이 있는 경우 병합
             if q_num_str in answer_map:
                 answer_data = answer_map[q_num_str]
-                
-                # 문제와 정답 데이터 병합
-                matched_item = {
-                    **question,
+                matched_item.update({
                     "correct_answer": answer_data.get("correct_answer") or answer_data.get("answer", ""),
                     "subject": answer_data.get("subject", question.get("subject", "")),
                     "area_name": answer_data.get("area_name", question.get("area_name", "")),
                     "difficulty": answer_data.get("difficulty", question.get("difficulty", "중")),
                     "year": answer_data.get("year", question.get("year")),
                     "answer_source": "matched"
-                }
-                
-                # 필수 필드 검증 (완전한 데이터만 포함)
-                if self._is_complete_question_data(matched_item):
-                    matched_data.append(matched_item)
-                else:
-                    logger.warning(f"불완전한 데이터로 인해 문제 {q_num} 제외")
-                    skipped_count += 1
+                })
+                matched_count += 1
+                logger.debug(f"✅ 문제 {q_num}: 정답 매칭 완료")
             else:
-                # 정답이 없는 문제는 제외 (부분 매칭 정책)
-                logger.debug(f"정답이 없어서 제외된 문제: {q_num}")
-                skipped_count += 1
-        
+                logger.debug(f"⚠️ 문제 {q_num}: 정답 없음, 빈 값으로 설정")
+
+            # 기본 필수 필드 검증 (content만 확인)
+            if matched_item.get("content") and matched_item.get("content").strip():
+                matched_data.append(matched_item)
+            else:
+                logger.warning(f"문제 {q_num}: content가 없어 제외")
+
         # 22개 제한 재적용
         matched_data = matched_data[:22]
-        
+
         # 매칭 결과 로깅
         total_questions = len(questions)
-        matched_count = len(matched_data)
-        
-        logger.info(f"매칭 완료: 전체 {total_questions}개 문제 중 {matched_count}개 완전 매칭 (22개 제한)")
-        logger.info(f"매칭률: {(matched_count/total_questions*100):.1f}%")
-        
-        if skipped_count > 0:
-            logger.info(f"제외된 문제: {skipped_count}개 (정답 없음 또는 불완전한 데이터)")
-        
+        final_count = len(matched_data)
+
+        logger.info(f"📊 매칭 완료:")
+        logger.info(f"  - 전체 문제: {total_questions}개")
+        logger.info(f"  - 최종 포함: {final_count}개")
+        logger.info(f"  - 정답 매칭: {matched_count}개")
+        logger.info(f"  - 정답 없음: {final_count - matched_count}개")
+
         return matched_data
     
     def _is_complete_question_data(self, question_data: Dict[str, Any]) -> bool:
