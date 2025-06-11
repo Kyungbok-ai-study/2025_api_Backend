@@ -354,7 +354,7 @@ class QuestionReviewService:
         self, 
         db: Session, 
         user_id: Optional[int] = None,
-        limit: int = 50
+        limit: int = 300  # 88개 + 여유분으로 200개로 증가
     ) -> List[QuestionPreviewItem]:
         """
         승인 대기 중인 문제들 조회 (교수 ID 기반 지속성)

@@ -32,6 +32,7 @@ class DiagnosisSubject(enum.Enum):
     DATABASE = "database"
     PROGRAMMING = "programming"
     NETWORK = "network"
+    PHYSICAL_THERAPY = "physical_therapy"  # 물리치료학과 추가
 
 class TestSession(Base):
     """진단 테스트 세션"""

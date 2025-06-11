@@ -14,6 +14,7 @@ class DiagnosisSubject(str, Enum):
     DATABASE = "database"
     PROGRAMMING = "programming"
     NETWORK = "network"
+    PHYSICAL_THERAPY = "physical_therapy"  # 물리치료학과 추가
 
 class Difficulty(str, Enum):
     """문제 난이도"""

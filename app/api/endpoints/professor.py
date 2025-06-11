@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.models.user import User
 from app.models.assignment import Assignment, AssignmentSubmission, AssignmentStatus, AssignmentType, ProblemBank
 from app.models.analytics import StudentActivity, StudentWarning, LearningAnalytics, ProfessorDashboardData
+from app.models.question import Question
 from app.api.endpoints.auth import get_current_user
 from app.schemas.question_upload import (
     QuestionUploadResponse, 
@@ -1513,9 +1514,17 @@ async def approve_questions(
                 
                 deepseek_learning = DeepSeekLearningService()
                 
+                # 승인된 문제들 다시 조회 (딥시크 학습용)
+                approved_questions_for_learning = db.query(Question).filter(
+                    and_(
+                        Question.id.in_(question_ids),
+                        Question.approval_status == "approved"
+                    )
+                ).all()
+                
                 # 각 승인된 문제에 대해 딥시크 학습 처리
                 learning_success_count = 0
-                for question in approved_questions:
+                for question in approved_questions_for_learning:
                     try:
                         learning_result = await deepseek_learning.process_approved_question_for_learning(
                             question, 
@@ -1539,7 +1548,7 @@ async def approve_questions(
                         logger.error(f"❌ 문제 {question.id} 딥시크 학습 중 오류: {learning_error}")
                         continue
                 
-                logger.info(f"🎓 딥시크 학습 완료: {learning_success_count}/{len(approved_questions)} 성공")
+                logger.info(f"🎓 딥시크 학습 완료: {learning_success_count}/{len(approved_questions_for_learning)} 성공")
                 
                 if learning_success_count > 0:
                     result.message += f" | 딥시크 학습: {learning_success_count}개 완료"
