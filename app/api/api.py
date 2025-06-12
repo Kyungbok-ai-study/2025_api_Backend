@@ -3,7 +3,7 @@ Main API 라우터 설정
 """
 from fastapi import APIRouter
 
-from app.api.endpoints import auth, diagnosis, problems, dashboard, ai, schools, admin, professor, adaptive_learning, auto_mapping, ai_analysis
+from app.api.endpoints import auth, diagnosis, problems, dashboard, ai, schools, admin, professor, adaptive_learning, auto_mapping, ai_analysis, ensemble_api
 from app.api import rag
 # from app.api.endpoints import security  # aioredis 오류로 임시 비활성화
 
@@ -38,4 +38,7 @@ api_router.include_router(schools.router, prefix="", tags=["학교 정보"])
 api_router.include_router(auto_mapping.router, tags=["자동 매핑"])
 
 # AI 난이도 분석 관련 라우터
-api_router.include_router(ai_analysis.router, prefix="/ai-analysis", tags=["AI 난이도 분석"]) 
+api_router.include_router(ai_analysis.router, prefix="/ai-analysis", tags=["AI 난이도 분석"])
+
+# 앙상블 AI 시스템 라우터
+api_router.include_router(ensemble_api.router, tags=["앙상블 AI"]) 
