@@ -92,6 +92,27 @@ async def get_diagnosis_result(
             detail=f"진단 결과 조회 실패: {str(e)}"
         )
 
+@router.get("/result/{test_session_id}/detailed")
+async def get_detailed_analysis(
+    test_session_id: int,
+    db: Session = Depends(get_db)
+):
+    """상세한 학습 분석 데이터 조회 (클릭 패턴, 개념별 이해도, 시각화 데이터 포함)"""
+    try:
+        # 실제 로그인한 사용자 ID 사용 (물리치료학과 학생)
+        test_user_id = 29
+        
+        return await diagnosis_service.get_detailed_analysis(
+            db=db,
+            user_id=test_user_id,
+            test_session_id=test_session_id
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"상세 분석 조회 실패: {str(e)}"
+        )
+
 @router.get("/history", response_model=List[DiagnosisTestResponse])
 async def get_diagnosis_history(
     limit: int = 10,

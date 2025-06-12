@@ -24,9 +24,9 @@ class LocalDeepSeekService:
     
     def __init__(self):
         # Ollama 서버 설정
-        self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        self.model_name = os.getenv("DEEPSEEK_MODEL_NAME", "deepseek-r1:8b")
-        self.embedding_model = os.getenv("DEEPSEEK_EMBEDDING_MODEL", "nomic-embed-text")
+        self.ollama_host = "http://localhost:11434"
+        self.model_name = "deepseek-r1:8b"
+        self.embedding_model = "nomic-embed-text"
         
         # HTTP 클라이언트 초기화
         self._client = None

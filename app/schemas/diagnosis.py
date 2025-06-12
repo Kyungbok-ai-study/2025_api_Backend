@@ -41,7 +41,7 @@ class DiagnosisAnswerItem(BaseModel):
     """진단 테스트 답안 항목"""
     question_id: int = Field(..., gt=0)
     answer: str = Field(..., min_length=1, max_length=1000)
-    time_spent: Optional[int] = Field(None, ge=0, description="풀이 시간 (초)")
+    time_spent_seconds: Optional[int] = Field(None, ge=0, description="풀이 시간 (초)")
     confidence_level: Optional[int] = None
 
 class QuestionItem(BaseModel):

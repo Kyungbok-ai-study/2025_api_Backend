@@ -192,6 +192,9 @@ class DiagnosisResult(Base):
     percentile_rank = Column(Float, nullable=True, comment="백분위 순위 (0.0-100.0)")
     improvement_from_previous = Column(Float, nullable=True, comment="이전 대비 향상도")
     
+    # AI 분석 데이터 (DeepSeek 분석 결과 저장) - 임시로 주석 처리 (DB 컬럼 없음)
+    # analysis_data = Column(JSON, nullable=True, comment="AI 분석 결과 및 상세 데이터")
+    
     # 타임스탬프
     calculated_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
