@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:15-alpine
+    container_name: campuson_postgres
+    environment:
+      POSTGRES_DB: kb_learning_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - campuson_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d kb_learning_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant 벡터 데이터베이스
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: campuson_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - campuson_network
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+
+  # Redis (캐싱용)
+  redis:
+    image: redis:7-alpine
+    container_name: campuson_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - campuson_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # FastAPI 백엔드 애플리케이션
+  backend:
+    build: .
+    container_name: campuson_backend
+    ports:
+      - "8000:8000"
+    environment:
+      # 데이터베이스 설정
+      DATABASE_URL: postgresql://admin:1234@postgres:5432/kb_learning_db
+      
+      # Qdrant 설정
+      QDRANT_ENABLED: "true"
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      VECTOR_DIMENSION: 768
+      
+      # Redis 설정
+      REDIS_URL: redis://redis:6379/0
+      
+      # 보안 설정
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-key}
+      
+      # AI 설정
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # 환경 설정
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: INFO
+      
+      # CORS 설정
+      ALLOWED_ORIGINS: '["http://localhost:3000","https://your-domain.com"]'
+      
+      # 파일 업로드 설정
+      MAX_FILE_SIZE_MB: 50
+      UPLOAD_DIRECTORY: /app/uploads
+      
+      # Poppler 경로 (우분투 환경)
+      POPPLER_PATH: /usr/bin
+      
+    volumes:
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+    networks:
+      - campuson_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx 리버스 프록시 (선택사항)
+  nginx:
+    image: nginx:alpine
+    container_name: campuson_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - campuson_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  campuson_network:
+    driver: bridge 

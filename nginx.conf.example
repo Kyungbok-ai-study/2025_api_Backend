@@ -1,0 +1,96 @@
+# CampusON 백엔드 Nginx 설정 파일
+# 사용법: sudo cp nginx.conf.example /etc/nginx/sites-available/campuson
+
+server {
+    listen 80;
+    listen [::]:80;
+    
+    # 여기에 실제 도메인을 입력하세요
+    server_name your-domain.com www.your-domain.com;
+    
+    # 예시:
+    # server_name campuson.kyungbok.ac.kr www.campuson.kyungbok.ac.kr;
+    # server_name api.campuson.kr www.api.campuson.kr;
+    # server_name 123.456.789.012;  # IP 주소 직접 사용도 가능
+
+    # 클라이언트 업로드 파일 크기 제한
+    client_max_body_size 50M;
+    
+    # 보안 헤더
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # 메인 API 프록시
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # 타임아웃 설정
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # 정적 파일 서빙 (업로드된 파일)
+    location /uploads/ {
+        alias /opt/campuson/uploads/;
+        expires 1d;
+        add_header Cache-Control "public, immutable";
+        
+        # 보안을 위한 파일 타입 제한
+        location ~* \.(php|jsp|asp|sh|py)$ {
+            deny all;
+        }
+    }
+
+    # API 문서 (개발 환경에서만)
+    location /docs {
+        proxy_pass http://127.0.0.1:8000/docs;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 헬스체크 (로그 제외)
+    location /health {
+        proxy_pass http://127.0.0.1:8000/health;
+        access_log off;
+    }
+
+    # 로봇 차단
+    location /robots.txt {
+        return 200 "User-agent: *\nDisallow: /\n";
+        add_header Content-Type text/plain;
+    }
+
+    # 파비콘 404 에러 방지
+    location /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+}
+
+# HTTPS 설정 (SSL 인증서 설치 후 자동 생성됨)
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name your-domain.com www.your-domain.com;
+#
+#     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#
+#     # 위의 location 블록들을 여기에 복사
+# } 

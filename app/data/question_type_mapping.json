@@ -1,0 +1,231 @@
+{
+  "박진혁_2. 박진혁_물치_마스터코딩지_20250610": {
+    "file_path": "data\\평가위원 수행결과\\평가위원 수행결과_물리치료\\2. 박진혁_물치_마스터코딩지.xlsx",
+    "professor": "박진혁",
+    "department": "일반",
+    "processed_at": "2025-06-10T19:44:59.399574",
+    "total_questions": 22,
+    "type_analysis": {
+      "questions": [
+        {
+          "question_number": 1,
+          "content": "1",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 2,
+          "content": "2",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 3,
+          "content": "3",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 4,
+          "content": "4",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 5,
+          "content": "5",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 6,
+          "content": "6",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 7,
+          "content": "7",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 8,
+          "content": "8",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 9,
+          "content": "9",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 10,
+          "content": "10",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 11,
+          "content": "11",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 12,
+          "content": "12",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 13,
+          "content": "13",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 14,
+          "content": "14",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 15,
+          "content": "15",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 16,
+          "content": "16",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 17,
+          "content": "17",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 18,
+          "content": "18",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 19,
+          "content": "19",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 20,
+          "content": "20",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 21,
+          "content": "21",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        },
+        {
+          "question_number": 22,
+          "content": "22",
+          "detected_type": "multiple_choice",
+          "confidence": 0.2,
+          "reasoning": "키워드/패턴 매칭 실패, 기본값 사용",
+          "alternative_types": [],
+          "manual_review_needed": true
+        }
+      ],
+      "type_stats": {
+        "multiple_choice": 22
+      },
+      "confidence_scores": {
+        "multiple_choice": {
+          "average": 0.20000000000000007,
+          "count": 22,
+          "min": 0.2,
+          "max": 0.2
+        }
+      },
+      "auto_assigned": 0,
+      "manual_required": 22
+    },
+    "type_distribution": {
+      "multiple_choice": {
+        "count": 22,
+        "percentage": 100.0,
+        "name": "객관식"
+      }
+    }
+  }
+}

@@ -1,0 +1,907 @@
+{
+  "test_info": {
+    "title": "물리치료학과 수준 진단테스트",
+    "description": "물리치료사 국가고시 기출문제 기반 학생 수준 진단",
+    "total_questions": 30,
+    "time_limit": 60,
+    "created_at": "2025-06-11T20:33:24.934692",
+    "version": "1.0",
+    "source": "2021-2024년 물리치료사 국가고시 기출"
+  },
+  "scoring_criteria": {
+    "total_score": 100,
+    "score_per_question": 3.3,
+    "difficulty_weights": {
+      "쉬움": 1.0,
+      "보통": 1.2,
+      "어려움": 1.5
+    },
+    "level_classification": {
+      "상급": {
+        "min_score": 80,
+        "description": "국가고시 합격 수준"
+      },
+      "중급": {
+        "min_score": 65,
+        "description": "추가 학습 필요"
+      },
+      "하급": {
+        "min_score": 50,
+        "description": "기초부터 체계적 학습 필요"
+      },
+      "미흡": {
+        "min_score": 0,
+        "description": "전면적 재학습 권장"
+      }
+    }
+  },
+  "questions": [
+    {
+      "question_id": "DIAG_001",
+      "question_number": 1,
+      "content": "이는곳이 궁둥뼈결절(ischial tuberosity)인 근육으로 짝지어진 것은?",
+      "options": {
+        "1": "두덩근, 긴모음근",
+        "2": "반막근, 두덩정강근",
+        "3": "넙다리빗근, 넙다리두갈래근",
+        "4": "넙다리두갈래근 긴갈래, 반힘줄근",
+        "5": "넙다리두갈래근 짧은갈래, 궁둥구멍근"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2022,
+      "original_question_number": 8,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 8,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_193259_26_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2022_8"
+      }
+    },
+    {
+      "question_id": "DIAG_002",
+      "question_number": 2,
+      "content": "위팔세갈래근에 관한 설명으로 옳은 것은?",
+      "options": {
+        "1": "자신경이 지배",
+        "2": "아래팔 뒤침에 작용",
+        "3": "긴갈래와 짧은갈래로 구성",
+        "4": "닿는곳은 자뼈의 팔꿈치머리",
+        "5": "긴갈래 이는곳은 어깨뼈의 관절오목위결절(supraglenoid tubercle)"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2021,
+      "original_question_number": 6,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_6"
+      }
+    },
+    {
+      "question_id": "DIAG_003",
+      "question_number": 3,
+      "content": "다음에서 설명하는 근육은?",
+      "options": {
+        "1": "원엎침근",
+        "2": "긴손바닥근",
+        "3": "자쪽손목굽힘근",
+        "4": "깊은손가락굽힘근",
+        "5": "얕은손가락굽힘근"
+      },
+      "correct_answer": "1",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 7,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_7"
+      }
+    },
+    {
+      "question_id": "DIAG_004",
+      "question_number": 4,
+      "content": "다음에서 설명하는 관절의 형태는?",
+      "options": {
+        "1": "봉합",
+        "2": "인대결합",
+        "3": "못박이관절",
+        "4": "유리연골결합",
+        "5": "섬유연골결합"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 4,
+      "difficulty": 3,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_4"
+      }
+    },
+    {
+      "question_id": "DIAG_005",
+      "question_number": 5,
+      "content": "위팔뼈의 안쪽위관절융기에서 시작하여 닿는곳이 손바닥 널힘줄인 근육은?",
+      "options": {
+        "1": "원엎침근",
+        "2": "긴손바닥근",
+        "3": "노쪽손목굽힘근",
+        "4": "자쪽손목굽힘근",
+        "5": "깊은손가락굽힘근"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 7,
+      "difficulty": 3,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_7"
+      }
+    },
+    {
+      "question_id": "DIAG_006",
+      "question_number": 6,
+      "content": "다음에서 설명하는 인대는?",
+      "options": {
+        "1": "황색인대",
+        "2": "목덜미인대",
+        "3": "가시끝인대",
+        "4": "앞세로인대",
+        "5": "뒤세로인대"
+      },
+      "correct_answer": "1",
+      "subject": "물리치료학과",
+      "area_name": "인체의 구분과 조직",
+      "year": 2021,
+      "original_question_number": 5,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_5"
+      }
+    },
+    {
+      "question_id": "DIAG_007",
+      "question_number": 7,
+      "content": "다음에서 설명하는 구조는?",
+      "options": {
+        "1": "숨뇌",
+        "2": "소뇌",
+        "3": "다리뇌",
+        "4": "중간뇌",
+        "5": "그물체"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2021,
+      "original_question_number": 19,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "신경계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_19"
+      }
+    },
+    {
+      "question_id": "DIAG_008",
+      "question_number": 8,
+      "content": "다음에서 설명하는 뇌신경은?",
+      "options": {
+        "1": "시각신경",
+        "2": "삼차신경",
+        "3": "얼굴신경",
+        "4": "속귀신경",
+        "5": "더부신경"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "신경계통",
+      "year": 2021,
+      "original_question_number": 22,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "신경계/뇌신경",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 3.5,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_22"
+      }
+    },
+    {
+      "question_id": "DIAG_009",
+      "question_number": 9,
+      "content": "날문조임근에서 시작하고 뒤배벽에 고정되어 있으며 온쓸개관과 이자관이 합쳐져 유입되는 소화기관은?",
+      "options": {
+        "1": "빈창자",
+        "2": "샘창자",
+        "3": "오름잘록창자",
+        "4": "가로잘록창자",
+        "5": "내림잘록창자"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 11,
+      "difficulty": 7,
+      "difficulty_level": "보통",
+      "question_type": "종합판단",
+      "domain": "기타",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 9,
+      "points": 4.3,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_11"
+      }
+    },
+    {
+      "question_id": "DIAG_010",
+      "question_number": 10,
+      "content": "다음 설명으로 옳은 것은?",
+      "options": {
+        "1": "동화작용(anabolic action)",
+        "2": "내호흡(internal respiration)",
+        "3": "외호흡(external respiration)",
+        "4": "이화작용(dissimilation action)",
+        "5": "역류기전(countercurrent mechanism)"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2021,
+      "original_question_number": 14,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 9,
+      "points": 4.3,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_14"
+      }
+    },
+    {
+      "question_id": "DIAG_011",
+      "question_number": 11,
+      "content": "결합조직을 구성하는 황색섬유로, 동맥과 허파 등에 많이 분포하는 섬유는?",
+      "options": {
+        "1": "아교섬유",
+        "2": "탄력섬유",
+        "3": "그물섬유",
+        "4": "근원섬유",
+        "5": "근육잔섬유"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 1,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_1"
+      }
+    },
+    {
+      "question_id": "DIAG_012",
+      "question_number": 12,
+      "content": "정맥에 관한 설명으로 옳은 것은?",
+      "options": {
+        "1": "정맥은 동맥보다 중간막이 두껍다.",
+        "2": "정맥판막은 혈액의 역류를 방지한다.",
+        "3": "정맥은 동맥보다 혈관벽의 탄력막이 두껍다.",
+        "4": "정맥은 높은 압력을 유지할 수 있는 압력혈관이다.",
+        "5": "허파정맥은 산소가 적은 혈액을 운반한다."
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 9,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "심폐",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_9"
+      }
+    },
+    {
+      "question_id": "DIAG_013",
+      "question_number": 13,
+      "content": "뇌신경 중에서 벌집뼈의 체판을 통과하는 것은?",
+      "options": {
+        "1": "시신경",
+        "2": "삼차신경",
+        "3": "속귀신경",
+        "4": "후각신경",
+        "5": "혀밑신경"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "신경계통",
+      "year": 2024,
+      "original_question_number": 22,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_22"
+      }
+    },
+    {
+      "question_id": "DIAG_014",
+      "question_number": 14,
+      "content": "갯솜뼈(해면뼈)를 이루는 구조물은?",
+      "options": {
+        "1": "뼈막",
+        "2": "뼈단위",
+        "3": "뼈잔기둥",
+        "4": "하버스관",
+        "5": "폴크만관"
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "인체의 구분과 조직",
+      "year": 2023,
+      "original_question_number": 2,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_2"
+      }
+    },
+    {
+      "question_id": "DIAG_015",
+      "question_number": 15,
+      "content": "다음에서 설명하는 기관은?",
+      "options": {
+        "1": "암죽관",
+        "2": "정맥관",
+        "3": "홀정맥",
+        "4": "오른림프관",
+        "5": "가슴림프관"
+      },
+      "correct_answer": "5",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2022,
+      "original_question_number": 10,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "심폐",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 8,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_193259_26_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2022_10"
+      }
+    },
+    {
+      "question_id": "DIAG_016",
+      "question_number": 16,
+      "content": "성별에 따른 골반 구조에 관한 설명으로 옳은 것은?",
+      "options": {
+        "1": "두덩밑각은 여성이 작다.",
+        "2": "골반출구는 여성이 좁다.",
+        "3": "두덩결합은 남성이 짧다.",
+        "4": "위골반문은 여성은 심장형, 남성은 타원형이다.",
+        "5": "폐쇄구멍은 여성은 세모형, 남성은 타원형이다."
+      },
+      "correct_answer": "5",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 3,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_3"
+      }
+    },
+    {
+      "question_id": "DIAG_017",
+      "question_number": 17,
+      "content": "등세모근에 관한 설명으로 옳은 것은?",
+      "options": {
+        "1": "가슴등신경의 지배를 받는다.",
+        "2": "닿는곳은 어깨뼈의 안쪽모서리이다.",
+        "3": "위등세모근은 어깨뼈를 위로 올린다.",
+        "4": "중간등세모근은 어깨뼈를 앞으로 내민다.",
+        "5": "큰마름근과 작은마름근보다 깊은 층에 위치한다."
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "근육계통",
+      "year": 2024,
+      "original_question_number": 6,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "근골격계/소아/노인",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_6"
+      }
+    },
+    {
+      "question_id": "DIAG_018",
+      "question_number": 18,
+      "content": "대뇌겉질에서 띠이랑과 안쪽이마이랑 사이의 경계를 이루는 것은?",
+      "options": {
+        "1": "띠고랑",
+        "2": "중심고랑",
+        "3": "가쪽고랑",
+        "4": "위관자고랑",
+        "5": "새발톱고랑"
+      },
+      "correct_answer": "1",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 19,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_19"
+      }
+    },
+    {
+      "question_id": "DIAG_019",
+      "question_number": 19,
+      "content": "시상과 가쪽뇌실 주위에서 고리모양을 이루고 기억과 감정에 관여하는 것은?",
+      "options": {
+        "1": "소뇌",
+        "2": "뇌줄기",
+        "3": "사이뇌",
+        "4": "바닥핵",
+        "5": "둘레계통"
+      },
+      "correct_answer": "5",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 20,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_20"
+      }
+    },
+    {
+      "question_id": "DIAG_020",
+      "question_number": 20,
+      "content": "척수에서 교차가 이루어지는 신경로는?",
+      "options": {
+        "1": "적색척수로",
+        "2": "뒤척수소뇌로",
+        "3": "가쪽척수시상로",
+        "4": "가쪽겉질척수로",
+        "5": "뒤기둥-안쪽섬유띠로"
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2024,
+      "original_question_number": 21,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계/신경과학 기본",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_191443_26_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안_2024년도 제52회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2024_21"
+      }
+    },
+    {
+      "question_id": "DIAG_021",
+      "question_number": 21,
+      "content": "연골, 혈액, 림프가 속하는 인체의 조직은?",
+      "options": {
+        "1": "지방조직",
+        "2": "상피조직",
+        "3": "결합조직",
+        "4": "근육조직",
+        "5": "신경조직"
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 1,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타 (생물학적 기본 개념)",
+      "diagnostic_suitability": 7,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_1"
+      }
+    },
+    {
+      "question_id": "DIAG_022",
+      "question_number": 22,
+      "content": "넙다리뼈에서 궁둥구멍근, 속폐쇄근이 닿는 부위는?",
+      "options": {
+        "1": "큰결절",
+        "2": "큰돌기",
+        "3": "작은결절",
+        "4": "작은돌기",
+        "5": "모음근결절"
+      },
+      "correct_answer": "2",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 3,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_3"
+      }
+    },
+    {
+      "question_id": "DIAG_023",
+      "question_number": 23,
+      "content": "몸쪽노자관절 부위에 위치한 구조물은?",
+      "options": {
+        "1": "자패임",
+        "2": "자뼈머리",
+        "3": "등쪽노자인대",
+        "4": "노뼈머리띠인대",
+        "5": "반달세모인대"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 5,
+      "difficulty": 8,
+      "difficulty_level": "어려움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 7,
+      "points": 5.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_5"
+      }
+    },
+    {
+      "question_id": "DIAG_024",
+      "question_number": 24,
+      "content": "다음에서 설명하는 근육은?",
+      "options": {
+        "1": "긴손바닥근",
+        "2": "노쪽손목굽힘근",
+        "3": "자쪽손목굽힘근",
+        "4": "얕은손가락굽힘근",
+        "5": "깊은손가락굽힘근"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "근육계통",
+      "year": 2021,
+      "original_question_number": 7,
+      "difficulty": 8,
+      "difficulty_level": "어려움",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 7,
+      "points": 5.2,
+      "source_info": {
+        "file": "20250611_194427_26_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안_2021년도 제49회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2021_7"
+      }
+    },
+    {
+      "question_id": "DIAG_025",
+      "question_number": 25,
+      "content": "폐쇄신경의 지배를 받는 근육은?",
+      "options": {
+        "1": "큰볼기근",
+        "2": "반힘줄근",
+        "3": "넙다리빗근",
+        "4": "두덩정강근",
+        "5": "넙다리근막긴장근"
+      },
+      "correct_answer": "4",
+      "subject": "물리치료학과",
+      "area_name": "신경계통",
+      "year": 2023,
+      "original_question_number": 8,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계/근골격계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_8"
+      }
+    },
+    {
+      "question_id": "DIAG_026",
+      "question_number": 26,
+      "content": "섬모체근의 수축과 이완을 통해 원근 조절에 관여하는 눈의 구조물은?",
+      "options": {
+        "1": "각막",
+        "2": "망막",
+        "3": "홍채",
+        "4": "맥락막",
+        "5": "수정체"
+      },
+      "correct_answer": "5",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 12,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타(눈의 구조와 기능)",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_12"
+      }
+    },
+    {
+      "question_id": "DIAG_027",
+      "question_number": 27,
+      "content": "근섬유에 활동전위가 전달되었을 때 근육세포질그물에서 방출된 Ca²⁺이 결합하는 부위는?",
+      "options": {
+        "1": "액틴",
+        "2": "미오신머리",
+        "3": "미오신꼬리",
+        "4": "트로포미오신",
+        "5": "트로포닌"
+      },
+      "correct_answer": "5",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 17,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "근골격계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_17"
+      }
+    },
+    {
+      "question_id": "DIAG_028",
+      "question_number": 28,
+      "content": "신경배형성 과정에서 양쪽의 신경주름이 융합되면서 형성된 구조물로 중추신경계로 발달하는 것은?",
+      "options": {
+        "1": "척삭",
+        "2": "신경판",
+        "3": "신경관",
+        "4": "신경고랑",
+        "5": "신경능선"
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2023,
+      "original_question_number": 18,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_192321_26_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안_2023년도 제51회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2023_18"
+      }
+    },
+    {
+      "question_id": "DIAG_029",
+      "question_number": 29,
+      "content": "이자의 랑게르한스섬에서 글루카곤을 분비하는 세포는?",
+      "options": {
+        "1": "알파세포",
+        "2": "베타세포",
+        "3": "델타세포",
+        "4": "감마세포",
+        "5": "세타세포"
+      },
+      "correct_answer": "1",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2022,
+      "original_question_number": 16,
+      "difficulty": 5,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "기타 (생리학/의학교육)",
+      "diagnostic_suitability": 6,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_193259_26_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2022_16"
+      }
+    },
+    {
+      "question_id": "DIAG_030",
+      "question_number": 30,
+      "content": "안구근육과 지배신경의 연결이 옳은 것은?",
+      "options": {
+        "1": "아래빗근 - 도르래신경",
+        "2": "위곧은근 - 갓돌림신경",
+        "3": "아래곧은근 - 눈돌림신경",
+        "4": "가쪽곧은근 - 눈돌림신경",
+        "5": "안쪽곧은근 - 갓돌림신경"
+      },
+      "correct_answer": "3",
+      "subject": "물리치료학과",
+      "area_name": "관절계통",
+      "year": 2022,
+      "original_question_number": 21,
+      "difficulty": 6,
+      "difficulty_level": "보통",
+      "question_type": "기본개념",
+      "domain": "신경계/근골격계",
+      "diagnostic_suitability": 8,
+      "discrimination_power": 7,
+      "points": 4.2,
+      "source_info": {
+        "file": "20250611_193259_26_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안_2022년도 제50회 물리치료사 국가시험 1~2교시 최종답안.json",
+        "unique_id": "2022_21"
+      }
+    }
+  ],
+  "statistics": {
+    "difficulty_distribution": {
+      "쉬움": 8,
+      "보통": 20,
+      "어려움": 2
+    },
+    "domain_distribution": {
+      "근골격계": 11,
+      "신경계": 5,
+      "신경계/뇌신경": 1,
+      "기타": 4,
+      "심폐": 2,
+      "근골격계/소아/노인": 1,
+      "신경계/신경과학 기본": 1,
+      "기타 (생물학적 기본 개념)": 1,
+      "신경계/근골격계": 2,
+      "기타(눈의 구조와 기능)": 1,
+      "기타 (생리학/의학교육)": 1
+    },
+    "type_distribution": {
+      "기본개념": 29,
+      "종합판단": 1
+    },
+    "average_difficulty": 5.2,
+    "average_discrimination": 7.4,
+    "total_questions": 30
+  }
+}

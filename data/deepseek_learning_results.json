@@ -1,0 +1,537 @@
+{
+  "success": true,
+  "total_questions": 88,
+  "success_count": 88,
+  "failure_count": 0,
+  "results": [
+    {
+      "question_number": 1,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 2,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 3,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 4,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 5,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 6,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 7,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 8,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 9,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 10,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 11,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 12,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 13,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 14,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 15,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 16,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 17,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 18,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 19,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 20,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 21,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 22,
+      "year": 2024,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 1,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 2,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 3,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 4,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 5,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 6,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 7,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 8,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 9,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 10,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 11,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 12,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 13,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 14,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 15,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 16,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 17,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 18,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 19,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 20,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 21,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 22,
+      "year": 2023,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 1,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 2,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 3,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 4,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 5,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 6,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 7,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 8,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 9,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 10,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 11,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 12,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 13,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 14,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 15,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 16,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 17,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 18,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 19,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 20,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 21,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 22,
+      "year": 2022,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 1,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 2,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 3,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 4,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 5,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 6,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 7,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 8,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 9,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 10,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 11,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 12,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 13,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 14,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 15,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 16,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 17,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 18,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 19,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 20,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 21,
+      "year": 2021,
+      "success": true,
+      "error": null
+    },
+    {
+      "question_number": 22,
+      "year": 2021,
+      "success": true,
+      "error": null
+    }
+  ],
+  "completion_time": "2025-06-11T19:55:34.226751"
+}
