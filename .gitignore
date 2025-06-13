@@ -204,3 +204,4 @@ backup_migration/
 temp_docs/
 processed_docs/
 *.pdf.tmp
+Release-24.08.0-0/
