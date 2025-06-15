@@ -38,7 +38,7 @@ async def get_my_available_tests(
         available_tests = get_user_available_tests(db, current_user)
         
         # 사용자 학과 정보
-        user_department = current_user.profile_info.get('department', '미분류') if current_user.profile_info else '미분류'
+        user_department = current_user.department or '미분류'
         
         return {
             "status": "success",
@@ -109,7 +109,7 @@ async def get_department_specific_tests(
         department_tests = service.get_department_specific_tests(department)
         
         # 사용자의 접근 권한 확인
-        user_department = current_user.profile_info.get('department', '미분류') if current_user.profile_info else '미분류'
+        user_department = current_user.department or '미분류'
         is_own_department = user_department == department
         
         return {
