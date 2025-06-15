@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '010_department_test_files_integration'
-down_revision = '009_unified_diagnosis_system'
+revision = '010_dept_test_integration'
+down_revision = '009_unified_diagnosis'
 branch_labels = None
 depends_on = None
 

@@ -1,7 +1,7 @@
 """통합 진단 시스템 테이블 생성
 
 Revision ID: 009_unified_diagnosis
-Revises: 008_question_optimization
+Revises: 468e28241915
 Create Date: 2024-12-27 00:00:00.000000
 """
 from alembic import op
@@ -10,7 +10,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers
 revision = '009_unified_diagnosis'
-down_revision = '008_question_optimization'
+down_revision = '468e28241915'
 branch_labels = None
 depends_on = None
 

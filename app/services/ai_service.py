@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
 from ..models.question import Question
-from ..models.problem_generation import ProblemGeneration 
+# ProblemGeneration 모델 제거됨 (통합 시스템으로 전환) 
 from ..db.database import get_db
 from .exaone_service import exaone_service
 
@@ -69,30 +69,22 @@ class AIService:
             # 생성된 내용 파싱
             problem_data = self._parse_generated_content(generated_content)
             
-            # 데이터베이스에 저장
+            # 데이터베이스에 저장 (ProblemGeneration 모델 제거로 임시 비활성화)
             db = next(get_db())
             try:
-                problem = ProblemGeneration(
-                    user_id=user_id,
-                    topic=topic,
-                    difficulty=difficulty,
-                    department=department,
-                    problem_type=problem_type,
-                    generated_content=problem_data,
-                    raw_ai_response=generated_content,
-                    ai_model=self.model_name,
-                    generation_timestamp=datetime.utcnow(),
-                    status="completed"
-                )
+                # TODO: 통합 시스템에서 문제 생성 이력 관리 방법 구현 예정
+                problem_id = 0  # 임시 ID
                 
-                db.add(problem)
-                db.commit()
-                db.refresh(problem)
+                # 생성된 문제를 Question으로 저장 (통합 시스템)
+                from datetime import datetime
+                import random
                 
-                # 생성된 문제를 Question으로도 저장
+                # 임시 문제 번호 생성
+                temp_question_number = random.randint(100000, 999999)
+                
                 question = Question(
                     year=datetime.now().year,
-                    question_number=problem.id,
+                    question_number=temp_question_number,
                     question_content=problem_data.get("question", ""),
                     choices=problem_data.get("options", {}),
                     correct_answer=problem_data.get("correct_answer", ""),
@@ -111,16 +103,17 @@ class AIService:
                     last_modified_by=user_id,
                     is_generated=True,
                     approval_status="pending",
-                    title=f"Exaone 생성 문제 {problem.id}",
+                    title=f"Exaone 생성 문제 {temp_question_number}",
                     file_category="AI_GENERATED"
                 )
                 
                 db.add(question)
                 db.commit()
+                db.refresh(question)
                 
                 result = {
                     "success": True,
-                    "problem_id": problem.id,
+                    "problem_id": question.id,
                     "question_id": question.id,
                     "generated_content": problem_data,
                     "metadata": {
@@ -135,7 +128,7 @@ class AIService:
             finally:
                 db.close()
             
-            logger.info(f"✅ Exaone 문제 생성 완료: user_id={user_id}, problem_id={problem.id}")
+            logger.info(f"✅ Exaone 문제 생성 완료: user_id={user_id}, question_id={question.id}")
             
             return result
             

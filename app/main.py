@@ -19,13 +19,7 @@ from .api import rag, advanced_rag, enterprise_rag
 # 진단 관련 라우터들
 from .api import diagnosis
 
-# 진단테스트 라우터 별도 임포트
-try:
-    from .api.endpoints import diagnostic_test
-    print("✅ 진단테스트 라우터 import 성공")
-except Exception as e:
-    print(f"❌ 진단테스트 라우터 import 실패: {e}")
-    diagnostic_test = None
+# 진단테스트 라우터는 통합 진단 시스템으로 대체됨 (unified_diagnosis.py 사용)
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -52,7 +46,7 @@ app.add_middleware(
 
 # API 라우터 등록
 app.include_router(auth.router)
-app.include_router(endpoints.router)  
+app.include_router(endpoints.api_router)  
 app.include_router(student.router)
 app.include_router(professor.router)
 app.include_router(admin.router)
@@ -60,12 +54,7 @@ app.include_router(admin.router)
 # 진단 라우터 등록
 app.include_router(diagnosis.router, prefix="/api/diagnosis", tags=["진단"])
 
-# 진단테스트 라우터 등록 (조건부)
-if diagnostic_test is not None:
-    app.include_router(diagnostic_test.router, prefix="/api/diagnostic", tags=["진단테스트"])
-    print("✅ 진단테스트 라우터 등록 완료")
-else:
-    print("❌ 진단테스트 라우터 등록 실패")
+# 진단테스트는 통합 진단 시스템으로 대체됨 (/api/diagnosis 경로 사용)
 
 # RAG 관련 라우터들
 app.include_router(rag.router)

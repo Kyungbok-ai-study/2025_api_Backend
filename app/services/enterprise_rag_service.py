@@ -20,7 +20,7 @@ from sqlalchemy import text, func, and_, or_
 
 from ..models.question import Question
 from ..models.user import User
-from ..services.deepseek_service import deepseek_service
+# deepseek_service import 제거됨 (Exaone으로 전환)
 from ..services.qdrant_service import qdrant_service
 from ..services.rag_system import rag_service
 from ..services.rag_integration_service import rag_integration_service
@@ -78,7 +78,8 @@ class EnterpriseRAGService:
         self.advanced_rag = advanced_rag_service
         
         # 엔터프라이즈 기능
-        self.deepseek = deepseek_service
+        # deepseek_service 제거됨 (Exaone으로 전환 예정)
+        self.exaone = None  # TODO: Exaone 서비스 구현 후 초기화
         self.vector_db = qdrant_service
         
         # 성능 메트릭

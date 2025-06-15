@@ -16,7 +16,8 @@ from ..db.database import get_db
 from ..auth.dependencies import get_current_user
 from ..models.user import User
 from ..services.rag_system import RAGService
-from ..services.deepseek_service import deepseek_service
+# deepseek_service 제거됨 (Exaone으로 전환)
+from ..services.exaone_service import exaone_service
 from ..services.qdrant_service import qdrant_service
 from ..services.rag_integration_service import rag_integration_service
 

@@ -2,12 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime
-from app.services.user_service import get_current_user
-from app.services.db_service import get_db
-from app.services.permission_service import check_student_permission
+from app.auth.dependencies import get_current_user
+from app.db.database import get_db
+# permission_service 제거됨 - 간단한 권한 체크로 대체
+
+def check_student_permission(user):
+    """간단한 학생 권한 체크"""
+    if not user:
+        raise HTTPException(status_code=401, detail="인증이 필요합니다")
+    if user.role not in ["student", "admin"]:
+        raise HTTPException(status_code=403, detail="학생 권한이 필요합니다")
+    return True
 from app.models.question import Question
 from app.models.user import User
-from app.utils.logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

@@ -14,7 +14,8 @@ import asyncio
 
 from ..models.question import Question
 from ..core.config import settings
-from .deepseek_service import deepseek_service
+# deepseek_service 제거됨 (Exaone으로 전환)
+from .exaone_service import exaone_service
 from .qdrant_service import qdrant_service
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,8 @@ class RAGIntegrationService:
         self.training_data_path.mkdir(parents=True, exist_ok=True)
         
         # DeepSeek과 Qdrant 서비스 사용
-        self.deepseek = deepseek_service
+        # deepseek 제거됨 (Exaone으로 전환)
+        self.exaone = exaone_service
         self.vector_db = qdrant_service
         
         logger.info("✅ RAG 통합 서비스 초기화 완료 (DeepSeek + Qdrant)")

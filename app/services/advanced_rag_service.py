@@ -35,7 +35,7 @@ from sqlalchemy import text, func, and_, or_
 
 from ..models.question import Question
 from ..models.user import User
-from ..services.deepseek_service import deepseek_service
+# deepseek_service import 제거됨 (Exaone으로 전환)
 from ..services.qdrant_service import qdrant_service
 from ..core.config import settings
 
@@ -45,7 +45,8 @@ class AdvancedRAGService:
     """상용화급 고급 RAG 시스템"""
     
     def __init__(self):
-        self.deepseek = deepseek_service
+        # deepseek_service 제거됨 (Exaone으로 전환 예정)
+        self.exaone = None  # TODO: Exaone 서비스 구현 후 초기화
         self.vector_db = qdrant_service
         
         # 고급 기능 설정

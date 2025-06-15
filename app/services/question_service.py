@@ -20,7 +20,7 @@ from ..models.question import (
     Question, AnswerOption, CorrectAnswer, Explanation,
     Tag, Subject, Source, QuestionType, DifficultyLevel
 )
-from .deepseek_service import deepseek_service
+# deepseek_service import 제로됨 (Exaone으로 전환)
 
 logger = logging.getLogger(__name__)
 
@@ -74,30 +74,15 @@ def create_question_from_parsed_data(
             year=question_data.get("year")
         )
         
-        # DeepSeek 임베딩 생성 (필요한 경우)
+        # 임베딩 생성 부분 - Exaone으로 전환 예정 (현재는 임시 비활성화)
         if create_embedding_vector and content:
             try:
-                embedding_text = content
-                options = question_data.get("options", {})
-                if options:
-                    embedding_text += " " + " ".join(options.values())
-                
-                # DeepSeek 임베딩 생성 (비동기 -> 동기 변환)
-                import asyncio
-                try:
-                    loop = asyncio.get_event_loop()
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                
-                embedding_result = loop.run_until_complete(
-                    deepseek_service.create_embeddings([embedding_text])
-                )
-                
-                if embedding_result["success"] and embedding_result["embeddings"]:
-                    question.embedding = embedding_result["embeddings"][0]
+                # TODO: Exaone 임베딩 서비스로 대체 예정
+                logger.info(f"임베딩 생성 요청 (Exaone 전환 예정): {question.question_number}")
+                # 임시로 None 설정 - Exaone 서비스 구현 후 활성화
+                question.embedding = None
             except Exception as e:
-                logger.warning(f"DeepSeek 임베딩 생성 실패: {e}")
+                logger.warning(f"임베딩 생성 실패: {e}")
         
         # 데이터베이스에 저장
         db.add(question)

@@ -13,7 +13,8 @@ from app.models.diagnosis import (
     DiagnosisStatus, DiagnosisSubject
 )
 from app.models.question import Question, DifficultyLevel
-from app.models.diagnostic_test import DiagnosticTest, DiagnosticQuestion, DiagnosticResponse, DiagnosticSubmission
+# 통합 진단 시스템 모델 사용 (Exaone 전환과 함께 업데이트)
+from app.models.unified_diagnosis import DiagnosisTest, DiagnosisQuestion, DiagnosisResponse, DiagnosisSession
 from app.schemas.diagnosis import (
     DiagnosisTestCreate, DiagnosisTestResponse, DiagnosisResultCreate,
     DiagnosisResultResponse, LearningLevelResponse, DiagnosisAnswerItem
@@ -1817,7 +1818,8 @@ class DiagnosisService:
     ) -> None:
         """DeepSeek AI를 이용한 진단 분석 수행"""
         try:
-            from app.services.deepseek_service import deepseek_service
+            # deepseek_service import 제거됨 (Exaone으로 전환)
+        # from app.services.deepseek_service import deepseek_service
             
             logger.info(f"DeepSeek 분석 시작: test_session_id={test_session.id}")
             
@@ -1826,28 +1828,17 @@ class DiagnosisService:
                 db, diagnosis_result, test_responses, test_session
             )
             
-            # DeepSeek 종합 분석 요청
-            comprehensive_analysis = await deepseek_service.analyze_educational_content(
-                question=f"물리치료학과 진단테스트 종합 분석",
-                difficulty_level="comprehensive",
-                department="물리치료학과",
-                context=analysis_data
-            )
+            # TODO: Exaone으로 종합 분석 대체 예정
+            comprehensive_analysis = {"success": False, "content": "Exaone 전환 대기 중"}
             
-            # 개념별 이해도 분석
-            concept_analysis = await self._analyze_concepts_with_deepseek(
-                deepseek_service, analysis_data
-            )
+            # TODO: Exaone으로 개념별 이해도 분석 대체 예정
+            concept_analysis = {"success": False, "error": "Exaone 전환 대기 중"}
             
-            # 문항별 로그 분석
-            question_log_analysis = await self._analyze_question_logs_with_deepseek(
-                deepseek_service, analysis_data
-            )
+            # TODO: Exaone으로 문항별 로그 분석 대체 예정
+            question_log_analysis = {"success": False, "error": "Exaone 전환 대기 중"}
             
-            # 동료 비교 분석
-            peer_comparison = await self._analyze_peer_comparison_with_deepseek(
-                deepseek_service, analysis_data
-            )
+            # TODO: Exaone으로 동료 비교 분석 대체 예정
+            peer_comparison = {"success": False, "error": "Exaone 전환 대기 중"}
             
             # 분석 결과를 데이터베이스에 저장
             await self._save_deepseek_analysis_results(
@@ -1965,13 +1956,8 @@ JSON 형태로 답변해주세요.
 """
         
         try:
-            result = await deepseek_service.chat_completion(
-                messages=[
-                    {"role": "system", "content": "당신은 물리치료학 전문 교육 분석가입니다."},
-                    {"role": "user", "content": concept_prompt}
-                ],
-                temperature=0.3
-            )
+            # TODO: Exaone 서비스로 대체 예정
+            result = {"success": False, "content": "Exaone 전환 대기 중"}
             
             if result.get("success"):
                 return {
@@ -2014,13 +2000,8 @@ JSON 형태로 답변해주세요.
 """
         
         try:
-            result = await deepseek_service.chat_completion(
-                messages=[
-                    {"role": "system", "content": "당신은 학습 패턴 분석 전문가입니다."},
-                    {"role": "user", "content": log_prompt}
-                ],
-                temperature=0.3
-            )
+            # TODO: Exaone 서비스로 대체 예정
+            result = {"success": False, "content": "Exaone 전환 대기 중"}
             
             if result.get("success"):
                 return {
@@ -2065,13 +2046,8 @@ JSON 형태로 답변해주세요.
 """
         
         try:
-            result = await deepseek_service.chat_completion(
-                messages=[
-                    {"role": "system", "content": "당신은 교육 평가 및 비교 분석 전문가입니다."},
-                    {"role": "user", "content": peer_prompt}
-                ],
-                temperature=0.3
-            )
+            # TODO: Exaone 서비스로 대체 예정
+            result = {"success": False, "content": "Exaone 전환 대기 중"}
             
             if result.get("success"):
                 return {

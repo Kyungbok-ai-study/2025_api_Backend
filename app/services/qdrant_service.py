@@ -21,7 +21,8 @@ try:
 except ImportError:
     QDRANT_AVAILABLE = False
 
-from .deepseek_service import deepseek_service
+# deepseek_service 제거됨 (Exaone으로 전환)
+from .exaone_service import exaone_service
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +107,8 @@ class QdrantService:
         
         try:
             # DeepSeek으로 임베딩 생성
-            embedding_result = await deepseek_service.create_embeddings(texts)
+            # TODO: Exaone 임베딩 서비스로 대체 예정
+            embedding_result = {"success": False, "error": "Exaone 임베딩 전환 대기 중"}
             
             if not embedding_result["success"]:
                 return {"success": False, "error": "임베딩 생성 실패"}
@@ -166,7 +168,8 @@ class QdrantService:
         
         try:
             # 쿼리 임베딩 생성
-            embedding_result = await deepseek_service.create_embeddings([query_text])
+            # TODO: Exaone 임베딩 서비스로 대체 예정
+            embedding_result = {"success": False, "error": "Exaone 임베딩 전환 대기 중"}
             
             if not embedding_result["success"]:
                 return {"success": False, "error": "쿼리 임베딩 생성 실패"}
