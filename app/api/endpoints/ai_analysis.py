@@ -6,7 +6,7 @@ from datetime import datetime
 import logging
 
 from ...models.user import User
-from ..endpoints.auth import get_current_user
+from app.auth.dependencies import get_current_user
 
 logger = logging.getLogger(__name__)
 

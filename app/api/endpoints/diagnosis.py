@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.db.database import get_db
-# from app.auth.dependencies import get_current_user  # 임시로 주석 처리
+from app.auth.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.diagnosis import (
     DiagnosisTestCreate, DiagnosisTestResponse, DiagnosisResultCreate,
@@ -31,16 +31,15 @@ async def get_diagnosis_subjects():
 @router.post("/start", response_model=DiagnosisTestResponse)
 async def start_diagnosis_test(
     test_data: DiagnosisTestCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """진단 테스트 시작 (30문항 형태)"""
     try:
-        # 실제 로그인한 사용자 ID 사용 (물리치료학과 학생)
-        test_user_id = 29
-        
+        # 실제 로그인한 사용자 정보 활용
         return await diagnosis_service.create_test_session(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             subject=test_data.subject.value
         )
     except Exception as e:
@@ -52,16 +51,15 @@ async def start_diagnosis_test(
 @router.post("/submit", response_model=DiagnosisResultResponse)
 async def submit_diagnosis_test(
     result_data: DiagnosisResultCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """진단 테스트 답안 제출 (30문항 형태)"""
     try:
-        # 실제 로그인한 사용자 ID 사용 (물리치료학과 학생)
-        test_user_id = 29
-        
+        # 실제 로그인한 사용자 정보 활용
         return await diagnosis_service.submit_test_answers(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             test_session_id=result_data.test_session_id,
             answers=result_data.answers
         )
@@ -74,16 +72,15 @@ async def submit_diagnosis_test(
 @router.get("/result/{test_session_id}", response_model=LearningLevelResponse)
 async def get_diagnosis_result(
     test_session_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """진단 테스트 결과 조회"""
     try:
-        # 실제 로그인한 사용자 ID 사용 (물리치료학과 학생)
-        test_user_id = 29
-        
+        # 실제 로그인한 사용자 정보 활용
         return await diagnosis_service.get_test_result(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             test_session_id=test_session_id
         )
     except Exception as e:
@@ -95,16 +92,15 @@ async def get_diagnosis_result(
 @router.get("/result/{test_session_id}/detailed")
 async def get_detailed_analysis(
     test_session_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """상세한 학습 분석 데이터 조회 (클릭 패턴, 개념별 이해도, 시각화 데이터 포함)"""
     try:
-        # 실제 로그인한 사용자 ID 사용 (물리치료학과 학생)
-        test_user_id = 29
-        
+        # 실제 로그인한 사용자 정보 활용
         return await diagnosis_service.get_detailed_analysis(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             test_session_id=test_session_id
         )
     except Exception as e:
@@ -117,16 +113,15 @@ async def get_detailed_analysis(
 async def get_diagnosis_history(
     limit: int = 10,
     offset: int = 0,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """사용자 진단 이력 조회"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
-        
+        # 실제 로그인한 사용자 정보 활용
         return await diagnosis_service.get_user_diagnosis_history(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             limit=limit,
             offset=offset
         )
@@ -140,16 +135,14 @@ async def get_diagnosis_history(
 @router.post("/multi-choice/create", response_model=MultiChoiceTestResponse)
 async def create_multi_choice_test(
     test_data: MultiChoiceTestCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """다중 선택지 진단 테스트 생성 (1문제 30선택지)"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
-        
         return await multi_choice_service.create_multi_choice_test(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             test_data=test_data
         )
     except Exception as e:
@@ -161,16 +154,14 @@ async def create_multi_choice_test(
 @router.post("/multi-choice/submit", response_model=MultiChoiceResultResponse)
 async def submit_multi_choice_answer(
     answer_data: MultiChoiceAnswerSubmit,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """다중 선택지 답안 제출 및 결과 분석"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
-        
         return await multi_choice_service.submit_multi_choice_answer(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             answer_data=answer_data
         )
     except Exception as e:
@@ -182,12 +173,11 @@ async def submit_multi_choice_answer(
 @router.get("/multi-choice/sample", response_model=MultiChoiceTestResponse)
 async def get_sample_multi_choice_test(
     subject: DiagnosisSubject = DiagnosisSubject.COMPUTER_SCIENCE,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """샘플 다중 선택지 테스트 조회 (테스트용)"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
         
         # 샘플 데이터 생성
         sample_choices = [
@@ -211,7 +201,7 @@ async def get_sample_multi_choice_test(
         
         return await multi_choice_service.create_multi_choice_test(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             test_data=sample_test_data
         )
     except Exception as e:
@@ -224,12 +214,11 @@ async def get_sample_multi_choice_test(
 async def get_multi_choice_history(
     limit: int = 10,
     offset: int = 0,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """다중 선택지 테스트 이력 조회"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
         
         # 임시로 빈 응답 반환 (실제 구현은 추후)
         return MultiChoiceHistoryResponse(
@@ -251,16 +240,16 @@ async def quick_multi_choice_test(
     confidence_level: str = "medium",
     time_spent_seconds: int = 120,
     eliminated_choices: Optional[List[int]] = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """빠른 다중 선택지 테스트 (개발/테스트용)"""
     try:
-        # 임시 사용자 (테스트용)
-        test_user_id = 1
         
         # 먼저 샘플 테스트 생성
         sample_test = await get_sample_multi_choice_test(
             subject=DiagnosisSubject.COMPUTER_SCIENCE,
+            current_user=current_user,
             db=db
         )
         
@@ -288,7 +277,7 @@ async def quick_multi_choice_test(
         # 답안 제출
         return await multi_choice_service.submit_multi_choice_answer(
             db=db,
-            user_id=test_user_id,
+            user_id=current_user.id,
             answer_data=answer_data
         )
         

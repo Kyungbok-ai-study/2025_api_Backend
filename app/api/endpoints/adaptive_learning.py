@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.db.database import get_db
 from app.models.user import User
-from app.api.endpoints.auth import get_current_user
+from app.auth.dependencies import get_current_user
 from app.services.adaptive_learning_service import adaptive_learning_service
 
 router = APIRouter(prefix="/adaptive-learning", tags=["적응형 학습"])
