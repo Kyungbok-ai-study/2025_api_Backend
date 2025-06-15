@@ -13,7 +13,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.assignment import Assignment, AssignmentSubmission, AssignmentStatus, AssignmentType, ProblemBank
 from app.models.analytics import StudentActivity, StudentWarning, LearningAnalytics, ProfessorDashboardData
-from app.api.endpoints.auth import get_current_user
+from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/professor", tags=["professor"])
 

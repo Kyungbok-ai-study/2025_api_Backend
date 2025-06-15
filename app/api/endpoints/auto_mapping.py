@@ -9,7 +9,7 @@ import logging
 
 from app.db.database import get_db
 from app.models.user import User
-from app.api.endpoints.auth import get_current_user
+from app.auth.dependencies import get_current_user
 
 router = APIRouter(prefix="/professor/auto-mapping", tags=["auto-mapping"])
 logger = logging.getLogger(__name__)

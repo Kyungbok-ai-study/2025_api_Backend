@@ -14,7 +14,7 @@ from app.models.user import User
 from app.models.diagnostic_test import (
     DiagnosticTest, DiagnosticQuestion, DiagnosticSubmission, DiagnosticResponse
 )
-# from app.core.auth import get_current_user  # 임시로 주석 처리
+from app.auth.dependencies import get_current_user
 from app.schemas.diagnostic_test import (
     DiagnosticTestInfo, DiagnosticQuestionResponse, 
     DiagnosticSubmissionCreate, DiagnosticSubmissionResponse,
@@ -29,21 +29,10 @@ async def test_diagnostic_router():
     """진단테스트 라우터 테스트"""
     return {"message": "진단테스트 라우터가 정상 작동합니다!", "status": "ok"}
 
-# 임시 사용자 생성 함수 (테스트용)
-def get_test_user():
-    """테스트용 임시 사용자 반환"""
-    class TestUser:
-        def __init__(self):
-            self.id = 1
-            self.name = "홍길동"
-            self.department = "물리치료학과"
-            self.email = "test@example.com"
-    
-    return TestUser()
-
 @router.get("/check-required/{department}", response_model=Dict[str, Any])
 async def check_diagnostic_test_required(
     department: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -51,8 +40,6 @@ async def check_diagnostic_test_required(
     물리치료학과 학생은 반드시 진단테스트를 완료해야 서비스 이용 가능
     """
     try:
-        # 임시 사용자 (테스트용)
-        current_user = get_test_user()
         # 해당 학과의 활성 진단테스트 조회
         diagnostic_test = db.query(DiagnosticTest).filter(
             and_(
@@ -122,6 +109,7 @@ async def check_diagnostic_test_required(
 @router.get("/start/{department}", response_model=DiagnosticTestStart)
 async def start_diagnostic_test(
     department: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -129,8 +117,6 @@ async def start_diagnostic_test(
     새로운 세션 생성 또는 기존 진행 중인 세션 반환
     """
     try:
-        # 임시 사용자 (테스트용)
-        current_user = get_test_user()
         # 해당 학과의 활성 진단테스트 조회
         diagnostic_test = db.query(DiagnosticTest).filter(
             and_(
@@ -272,14 +258,13 @@ async def start_diagnostic_test(
 @router.post("/submit-answer", response_model=Dict[str, Any])
 async def submit_answer(
     answer_data: DiagnosticAnswerSubmit,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     진단테스트 문제별 답안 제출
     """
     try:
-        # 임시 사용자 (테스트용)
-        current_user = get_test_user()
         # 제출 세션 확인
         submission = db.query(DiagnosticSubmission).filter(
             and_(
@@ -367,6 +352,7 @@ async def submit_answer(
 @router.post("/complete", response_model=DiagnosticSubmissionResponse)
 async def complete_diagnostic_test(
     submission_id: int,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -374,8 +360,6 @@ async def complete_diagnostic_test(
     BKT/DKT 분석을 위한 기본 데이터 수집
     """
     try:
-        # 임시 사용자 (테스트용)
-        current_user = get_test_user()
         # 제출 세션 확인
         submission = db.query(DiagnosticSubmission).filter(
             and_(

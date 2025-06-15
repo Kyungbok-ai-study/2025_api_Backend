@@ -26,23 +26,17 @@ class DepartmentDiagnosisService:
         self.test_loader = diagnosis_test_loader
         
     def get_available_tests_for_user(self, user: User) -> List[Dict[str, Any]]:
-        """사용자 학과에 맞는 사용 가능한 진단테스트 목록 조회"""
+        """사용자 학과에 맞는 사용 가능한 진단테스트 목록 조회 - 엄격한 학과별 분리"""
         try:
             # 사용자 학과 정보 추출
             user_department = self._get_user_department(user)
             
-            # 학과별 진단테스트 조회
+            # 엄격한 학과별 분리: 해당 학과 테스트만 조회
             query = self.db.query(DiagnosisTest).filter(
                 and_(
                     DiagnosisTest.status == "active",
                     DiagnosisTest.is_published == True,
-                    or_(
-                        DiagnosisTest.department == user_department,
-                        DiagnosisTest.department == "전체학과",  # 전체 학과 대상 테스트
-                        DiagnosisTest.subject_area.in_(
-                            self._get_applicable_subjects(user_department)
-                        )
-                    )
+                    DiagnosisTest.department == user_department  # 오직 해당 학과 테스트만
                 )
             )
             
@@ -482,7 +476,7 @@ class DepartmentDiagnosisService:
         return unique_recommendations
     
     def _validate_test_access(self, user: User, test_id: int) -> DiagnosisTest:
-        """테스트 접근 권한 검증"""
+        """테스트 접근 권한 검증 - 엄격한 학과별 분리"""
         test = self.db.query(DiagnosisTest).filter(
             DiagnosisTest.id == test_id
         ).first()
@@ -493,14 +487,11 @@ class DepartmentDiagnosisService:
         if test.status != "active" or not test.is_published:
             raise Exception("비활성화된 테스트입니다.")
         
-        # 학과별 접근 권한 확인
+        # 엄격한 학과별 접근 권한 확인
         user_department = self._get_user_department(user)
-        applicable_subjects = self._get_applicable_subjects(user_department)
         
-        if (test.department != user_department and 
-            test.department != "전체학과" and 
-            test.subject_area not in applicable_subjects):
-            raise Exception("접근 권한이 없는 테스트입니다.")
+        if test.department != user_department:
+            raise Exception(f"접근 권한이 없습니다. {user_department} 학과 학생은 {test.department} 테스트에 접근할 수 없습니다.")
         
         # 만료일 확인
         if test.expire_date and test.expire_date < datetime.now():
