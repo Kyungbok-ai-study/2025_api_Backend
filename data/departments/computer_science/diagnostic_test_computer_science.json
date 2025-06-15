@@ -1,0 +1,91 @@
+{
+  "test_info": {
+    "title": "컴퓨터공학과 수준 진단테스트",
+    "description": "프로그래밍, 자료구조, 알고리즘, 데이터베이스, 네트워크 등 컴퓨터공학 전반 지식 진단",
+    "total_questions": 30,
+    "time_limit": 60,
+    "created_at": "2025-06-15T13:30:00.000Z",
+    "version": "1.0",
+    "source": "IT 자격증 기출문제 및 컴퓨터공학 전공서적 기반"
+  },
+  "scoring_criteria": {
+    "total_score": 100,
+    "score_per_question": 3.3,
+    "difficulty_weights": {
+      "쉬움": 1.0,
+      "보통": 1.2,
+      "어려움": 1.5
+    },
+    "level_classification": {
+      "상급": {
+        "min_score": 80,
+        "description": "IT 자격증 합격 수준"
+      },
+      "중급": {
+        "min_score": 65,
+        "description": "추가 학습 필요"
+      },
+      "하급": {
+        "min_score": 50,
+        "description": "기초부터 체계적 학습 필요"
+      },
+      "미흡": {
+        "min_score": 0,
+        "description": "전면적 재학습 권장"
+      }
+    }
+  },
+  "questions": [
+    {
+      "question_id": "CS_001",
+      "question_number": 1,
+      "content": "다음 중 시간복잡도가 O(log n)인 알고리즘은?",
+      "options": {
+        "1": "선형 탐색",
+        "2": "이진 탐색",
+        "3": "버블 정렬",
+        "4": "삽입 정렬",
+        "5": "선택 정렬"
+      },
+      "correct_answer": "2",
+      "subject": "컴퓨터공학과",
+      "area_name": "알고리즘",
+      "year": 2024,
+      "original_question_number": 1,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "자료구조및알고리즘",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 8,
+      "points": 3.5,
+      "source_info": {
+        "file": "computer_science_questions.json",
+        "unique_id": "CS_001"
+      }
+    }
+  ],
+  "statistics": {
+    "difficulty_distribution": {
+      "쉬움": 10,
+      "보통": 15,
+      "어려움": 5
+    },
+    "domain_distribution": {
+      "자료구조및알고리즘": 8,
+      "프로그래밍": 6,
+      "데이터베이스": 5,
+      "네트워크": 4,
+      "운영체제": 4,
+      "소프트웨어공학": 3
+    },
+    "type_distribution": {
+      "기본개념": 20,
+      "종합판단": 8,
+      "응용문제": 2
+    },
+    "average_difficulty": 5.0,
+    "average_discrimination": 7.5,
+    "total_questions": 30
+  }
+} 

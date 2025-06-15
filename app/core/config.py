@@ -182,7 +182,7 @@ class ProductionSettings(Settings):
 class TestSettings(Settings):
     """테스트 환경 설정"""
     DEBUG: bool = True
-    DATABASE_URL: str = "sqlite:///./test.db"
+    DATABASE_URL: str = "postgresql://admin:1234@localhost:5432/kb_learning_test_db"
     SECRET_KEY: str = "test-secret-key"
 
 def get_environment_settings() -> Settings:

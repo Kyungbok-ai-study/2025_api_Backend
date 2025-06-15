@@ -22,8 +22,8 @@ pip install -r requirements.txt
 # PostgreSQL 실행 (Docker 사용시)
 docker run --name campuson-db -e POSTGRES_PASSWORD=campuson123 -e POSTGRES_DB=campuson_dev -p 5432:5432 -d postgres:15
 
-# 또는 SQLite 사용 (간단 테스트용)
-# .env 파일에서 DATABASE_URL을 sqlite:///./campuson.db로 변경
+# 테스트용 데이터베이스 설정
+# .env 파일에서 DATABASE_URL을 postgresql://admin:1234@localhost:5432/kb_learning_test_db로 변경
 ```
 
 ### 3. 환경 변수 설정

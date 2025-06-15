@@ -1,0 +1,91 @@
+{
+  "test_info": {
+    "title": "경영학과 수준 진단테스트",
+    "description": "경영학 원론, 마케팅, 재무관리, 회계, 조직행동 등 경영학 전반 지식 진단",
+    "total_questions": 30,
+    "time_limit": 60,
+    "created_at": "2025-06-15T13:30:00.000Z",
+    "version": "1.0",
+    "source": "경영학 인증시험 및 MBA 입시문제 기반"
+  },
+  "scoring_criteria": {
+    "total_score": 100,
+    "score_per_question": 3.3,
+    "difficulty_weights": {
+      "쉬움": 1.0,
+      "보통": 1.2,
+      "어려움": 1.5
+    },
+    "level_classification": {
+      "상급": {
+        "min_score": 80,
+        "description": "MBA 입학 수준"
+      },
+      "중급": {
+        "min_score": 65,
+        "description": "추가 학습 필요"
+      },
+      "하급": {
+        "min_score": 50,
+        "description": "기초부터 체계적 학습 필요"
+      },
+      "미흡": {
+        "min_score": 0,
+        "description": "전면적 재학습 권장"
+      }
+    }
+  },
+  "questions": [
+    {
+      "question_id": "BIZ_001",
+      "question_number": 1,
+      "content": "마케팅 믹스(Marketing Mix)의 4P에 해당하지 않는 것은?",
+      "options": {
+        "1": "Product (제품)",
+        "2": "Price (가격)",
+        "3": "Place (유통)",
+        "4": "Promotion (촉진)",
+        "5": "Process (과정)"
+      },
+      "correct_answer": "5",
+      "subject": "경영학과",
+      "area_name": "마케팅",
+      "year": 2024,
+      "original_question_number": 1,
+      "difficulty": 3,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "마케팅관리",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 8,
+      "points": 3.5,
+      "source_info": {
+        "file": "business_questions.json",
+        "unique_id": "BIZ_001"
+      }
+    }
+  ],
+  "statistics": {
+    "difficulty_distribution": {
+      "쉬움": 10,
+      "보통": 15,
+      "어려움": 5
+    },
+    "domain_distribution": {
+      "마케팅관리": 6,
+      "재무관리": 6,
+      "인사조직": 5,
+      "회계": 5,
+      "경영전략": 4,
+      "생산운영": 4
+    },
+    "type_distribution": {
+      "기본개념": 18,
+      "종합판단": 8,
+      "사례분석": 4
+    },
+    "average_difficulty": 4.8,
+    "average_discrimination": 7.6,
+    "total_questions": 30
+  }
+} 

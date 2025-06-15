@@ -1,38 +1,16 @@
 """
-진단 테스트 관련 데이터베이스 모델
+진단 테스트 관련 데이터베이스 모델 (Legacy - 마이그레이션 예정)
+
+⚠️ 주의: 이 파일은 통합 진단 시스템(unified_diagnosis.py)으로 마이그레이션 예정입니다.
+새로운 개발은 unified_diagnosis.py를 사용하세요.
 """
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey, JSON, ARRAY
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ENUM
-import enum
 
 from app.db.database import Base
-
-class DiagnosisStatus(enum.Enum):
-    """진단 테스트 상태"""
-    ACTIVE = "active"
-    COMPLETED = "completed"
-    EXPIRED = "expired"
-    CANCELLED = "cancelled"
-
-class QuestionType(enum.Enum):
-    """문제 유형"""
-    MULTIPLE_CHOICE = "multiple_choice"
-    SHORT_ANSWER = "short_answer"
-    TRUE_FALSE = "true_false"
-    ESSAY = "essay"
-    MULTI_CHOICE_SELECTION = "multi_choice_selection"  # 새로운 타입: 1문제 30선택지
-
-class DiagnosisSubject(enum.Enum):
-    """진단 과목"""
-    COMPUTER_SCIENCE = "computer_science"
-    DATA_STRUCTURE = "data_structure"
-    ALGORITHM = "algorithm"
-    DATABASE = "database"
-    PROGRAMMING = "programming"
-    NETWORK = "network"
-    PHYSICAL_THERAPY = "physical_therapy"  # 물리치료학과 추가
+from app.models.enums import DiagnosisStatus, QuestionType, DiagnosisSubject
 
 class TestSession(Base):
     """진단 테스트 세션"""

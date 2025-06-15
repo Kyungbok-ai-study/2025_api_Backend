@@ -1,10 +1,9 @@
 """
-문제 및 답변 데이터 모델
+문제 및 답변 데이터 모델 - 최적화된 버전
 
 파싱된 문제, 답변, 정답, 유형 등을 저장하기 위한 SQLAlchemy 모델
-pgvector 확장을 사용하여 텍스트 임베딩 저장 기능 포함
+JSONB 필드를 활용한 메타데이터 통합으로 컬럼 수 50% 감소
 """
-import enum
 from typing import List, Optional
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, DateTime, Enum, JSON, Float, UniqueConstraint, Table
@@ -21,7 +20,7 @@ except ImportError:
     print("경고: pgvector 모듈이 설치되지 않았습니다. 'pip install pgvector'로 설치해주세요.")
 
 from app.db.database import Base
-# User import는 관계 설정에서 문자열로 처리하여 순환 import 방지
+from app.models.enums import QuestionType, DifficultyLevel, QuestionStatus
 
 # Question-Tag 관계 테이블 정의
 question_tags = Table(
@@ -31,26 +30,6 @@ question_tags = Table(
     Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True),
     Column('created_at', DateTime, default=datetime.utcnow)
 )
-
-
-class QuestionType(str, enum.Enum):
-    """문제 유형 Enum"""
-    MULTIPLE_CHOICE = "multiple_choice"  # 객관식
-    SHORT_ANSWER = "short_answer"        # 주관식
-    TRUE_FALSE = "true_false"            # O/X
-    MATCHING = "matching"                # 짝 맞추기
-    ORDERING = "ordering"                # 순서 맞추기
-    FILL_IN_BLANK = "fill_in_blank"      # 빈칸 채우기
-    ESSAY = "essay"                      # 서술형
-    OTHER = "other"                      # 기타
-
-
-class DifficultyLevel(str, enum.Enum):
-    """문제 난이도 Enum"""
-    LOW = "하"
-    MEDIUM = "중"
-    HIGH = "상"
-
 
 class Subject(Base):
     """과목/주제 모델"""
@@ -68,7 +47,6 @@ class Subject(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
 class Tag(Base):
     """태그 모델"""
     __tablename__ = "tags"
@@ -76,10 +54,7 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False, unique=True)
     
-    # 관계 설정 (Question과의 관계 제거됨)
-    
     created_at = Column(DateTime, default=datetime.utcnow)
-
 
 class Source(Base):
     """문제 출처 모델"""
@@ -92,68 +67,269 @@ class Source(Base):
     type = Column(String(50), nullable=True)  # 예: 교재, 시험, 강의자료
     year = Column(Integer, nullable=True)
     
-    # 관계 설정 (Question과의 관계 제거됨)
-    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
 
 class Question(Base):
-    """문제 모델 - 간소화된 스키마"""
+    """최적화된 문제 모델 - 30개 컬럼에서 15개 컬럼으로 최적화"""
     __tablename__ = "questions"
 
+    # 기본 식별자
     id = Column(Integer, primary_key=True, index=True)
-    question_number = Column(Integer, nullable=False)  # 문제 번호 (1~22)
-    question_type = Column(Enum(QuestionType), nullable=False, default=QuestionType.MULTIPLE_CHOICE)  # 문제 유형
-    content = Column(Text, nullable=False)  # 문제 내용
-    description = Column(MutableList.as_mutable(ARRAY(String)), nullable=True)  # 문제 설명/지문 (리스트)
-    options = Column(JSONB, nullable=True)  # 선택지 {"1": "선택지1", "2": "선택지2", ...}
-    correct_answer = Column(String(10), nullable=True)  # 정답 (예: "3")
-    subject = Column("subject_name", String(100), nullable=True)  # 과목명 (테이블의 subject_name 컬럼과 매핑)
-    area_name = Column(String(100), nullable=True)  # 영역이름
-    difficulty = Column(String(10), nullable=True)  # 난이도: 하, 중, 상 (직접 문자열 저장)
-    year = Column(Integer, nullable=True)  # 연도
+    question_number = Column(Integer, nullable=False, index=True)
+    question_type = Column(Enum(QuestionType), nullable=False, default=QuestionType.MULTIPLE_CHOICE)
     
-    # 승인 및 수정 이력 관리
-    approval_status = Column(String(20), default="pending")  # pending, approved, rejected
-    approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 승인자 ID
-    approved_at = Column(DateTime, nullable=True)  # 승인 시간
-    last_modified_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # 마지막 수정자 ID (생성자 겸용)
-    last_modified_at = Column(DateTime, nullable=True)  # 마지막 수정 시간
-    is_active = Column(Boolean, nullable=False, default=True)  # 활성화 상태
+    # 핵심 내용
+    content = Column(Text, nullable=False)
+    description = Column(ARRAY(String), nullable=True)  # 문제 설명/지문
+    options = Column(JSONB, nullable=True)  # 선택지 {"1": "선택지1", "2": "선택지2"}
+    correct_answer = Column(String(10), nullable=True)
     
-    # AI 해설 및 RAG 통합 관련
-    ai_explanation = Column(Text, nullable=True)  # AI가 생성한 상세 해설
-    explanation_confidence = Column(Float, nullable=True)  # AI 해설 신뢰도 (0.0 ~ 1.0)
-    vector_db_indexed = Column(Boolean, default=False)  # 벡터 DB 인덱싱 여부
-    rag_indexed = Column(Boolean, default=False)  # RAG 시스템 인덱싱 여부
-    llm_training_added = Column(Boolean, default=False)  # LLM 학습 데이터 추가 여부
-    integration_completed_at = Column(DateTime, nullable=True)  # 통합 처리 완료 시간
+    # 분류 정보 (통합)
+    classification = Column(JSONB, nullable=True)  # {
+    #     "subject": "간호학",
+    #     "area": "기본간호", 
+    #     "difficulty": "중",
+    #     "year": 2024
+    # }
     
-    # 파일 출처 정보
-    source_file_path = Column(String(500), nullable=True)  # 원본 파일 경로
-    parsed_data_path = Column(String(500), nullable=True)  # 파싱된 JSON 파일 경로
-    file_title = Column(String(200), nullable=True)  # 사용자가 입력한 파일 제목
-    file_category = Column(String(100), nullable=True)  # 파일 카테고리
+    # 메타데이터 (통합)
+    question_metadata = Column(JSONB, nullable=True)  # {
+    #     "keywords": ["혈압", "측정"],
+    #     "learning_objectives": ["혈압측정 방법 이해"],
+    #     "estimated_time": 120,
+    #     "points": 5.0
+    # }
     
-    # 임베딩 벡터 (pgvector 사용)
+    # 상태 관리 (통합)
+    status_info = Column(JSONB, nullable=True)  # {
+    #     "approval_status": "approved",
+    #     "approved_by": 123,
+    #     "approved_at": "2024-01-01T00:00:00",
+    #     "is_active": true,
+    #     "last_modified_by": 456,
+    #     "last_modified_at": "2024-01-01T00:00:00"
+    # }
+    
+    # AI 및 RAG 통합 정보 (통합)
+    ai_integration = Column(JSONB, nullable=True)  # {
+    #     "ai_explanation": "상세 해설 내용",
+    #     "explanation_confidence": 0.95,
+    #     "vector_db_indexed": true,
+    #     "rag_indexed": true,
+    #     "llm_training_added": true,
+    #     "integration_completed_at": "2024-01-01T00:00:00"
+    # }
+    
+    # 파일 출처 정보 (통합)
+    source_info = Column(JSONB, nullable=True)  # {
+    #     "file_path": "uploads/exam_2024.pdf",
+    #     "parsed_data_path": "data/parsed/exam_2024.json",
+    #     "file_title": "2024년 기출문제",
+    #     "file_category": "국가고시"
+    # }
+    
+    # 임베딩 벡터 (최적화된 차원)
     if PGVECTOR_AVAILABLE:
-        embedding = Column(Vector(1536), nullable=True)  # OpenAI ada-002 임베딩 차원
+        embedding = Column(Vector(768), nullable=True)  # 768차원으로 축소 (효율성 개선)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # 기본 타임스탬프 (필수)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
-    # 관계 설정 (레거시 호환성을 위해 유지)
+    # 관계 설정 (기존 호환성 유지)
     answer_options = relationship("AnswerOption", back_populates="question", cascade="all, delete-orphan")
     correct_answers = relationship("CorrectAnswer", back_populates="question", cascade="all, delete-orphan")
     explanations = relationship("Explanation", back_populates="question", cascade="all, delete-orphan")
-    
-    # 진단 테스트 관계 설정
     test_responses = relationship("TestResponse", back_populates="question", cascade="all, delete-orphan")
-    
-    # 딥시크 학습 세션 관계
-    deepseek_sessions = relationship("DeepSeekLearningSession", back_populates="question", cascade="all, delete-orphan")
 
+    
+    def __repr__(self):
+        return f"<Question(id={self.id}, number={self.question_number}, type={self.question_type})>"
+    
+    # 편의 메서드들 (기존 호환성)
+    
+    @property
+    def subject(self):
+        """과목명 반환"""
+        return self.classification.get("subject") if self.classification else None
+    
+    @property
+    def area_name(self):
+        """영역명 반환"""
+        return self.classification.get("area") if self.classification else None
+    
+    @property
+    def difficulty(self):
+        """난이도 반환"""
+        return self.classification.get("difficulty") if self.classification else None
+    
+    @property
+    def year(self):
+        """연도 반환"""
+        return self.classification.get("year") if self.classification else None
+    
+    @property
+    def approval_status(self):
+        """승인 상태 반환"""
+        return self.status_info.get("approval_status", "pending") if self.status_info else "pending"
+    
+    @property
+    def approved_by(self):
+        """승인자 반환"""
+        return self.status_info.get("approved_by") if self.status_info else None
+    
+    @property
+    def approved_at(self):
+        """승인 시간 반환"""
+        return self.status_info.get("approved_at") if self.status_info else None
+    
+    @property
+    def last_modified_by(self):
+        """마지막 수정자 반환"""
+        return self.status_info.get("last_modified_by") if self.status_info else None
+    
+    @property
+    def last_modified_at(self):
+        """마지막 수정 시간 반환"""
+        return self.status_info.get("last_modified_at") if self.status_info else None
+    
+    @property
+    def is_active(self):
+        """활성화 상태 반환"""
+        return self.status_info.get("is_active", True) if self.status_info else True
+    
+    @property
+    def ai_explanation(self):
+        """AI 해설 반환"""
+        return self.ai_integration.get("ai_explanation") if self.ai_integration else None
+    
+    @property
+    def explanation_confidence(self):
+        """AI 해설 신뢰도 반환"""
+        return self.ai_integration.get("explanation_confidence") if self.ai_integration else None
+    
+    @property
+    def vector_db_indexed(self):
+        """벡터 DB 인덱싱 여부 반환"""
+        return self.ai_integration.get("vector_db_indexed", False) if self.ai_integration else False
+    
+    @property
+    def rag_indexed(self):
+        """RAG 인덱싱 여부 반환"""
+        return self.ai_integration.get("rag_indexed", False) if self.ai_integration else False
+    
+    @property
+    def llm_training_added(self):
+        """LLM 학습 데이터 추가 여부 반환"""
+        return self.ai_integration.get("llm_training_added", False) if self.ai_integration else False
+    
+    @property
+    def source_file_path(self):
+        """원본 파일 경로 반환"""
+        return self.source_info.get("file_path") if self.source_info else None
+    
+    @property
+    def parsed_data_path(self):
+        """파싱된 데이터 경로 반환"""
+        return self.source_info.get("parsed_data_path") if self.source_info else None
+    
+    @property
+    def file_title(self):
+        """파일 제목 반환"""
+        return self.source_info.get("file_title") if self.source_info else None
+    
+    @property
+    def file_category(self):
+        """파일 카테고리 반환"""
+        return self.source_info.get("file_category") if self.source_info else None
+    
+    # 설정 메서드들
+    
+    def set_classification(self, subject=None, area=None, difficulty=None, year=None):
+        """분류 정보 설정"""
+        if not self.classification:
+            self.classification = {}
+        
+        if subject is not None:
+            self.classification["subject"] = subject
+        if area is not None:
+            self.classification["area"] = area
+        if difficulty is not None:
+            self.classification["difficulty"] = difficulty
+        if year is not None:
+            self.classification["year"] = year
+    
+    def set_status_info(self, approval_status=None, approved_by=None, approved_at=None,
+                       is_active=None, last_modified_by=None, last_modified_at=None):
+        """상태 정보 설정"""
+        if not self.status_info:
+            self.status_info = {}
+        
+        if approval_status is not None:
+            self.status_info["approval_status"] = approval_status
+        if approved_by is not None:
+            self.status_info["approved_by"] = approved_by
+        if approved_at is not None:
+            self.status_info["approved_at"] = approved_at
+        if is_active is not None:
+            self.status_info["is_active"] = is_active
+        if last_modified_by is not None:
+            self.status_info["last_modified_by"] = last_modified_by
+        if last_modified_at is not None:
+            self.status_info["last_modified_at"] = last_modified_at
+    
+    def set_ai_integration(self, ai_explanation=None, explanation_confidence=None,
+                          vector_db_indexed=None, rag_indexed=None, llm_training_added=None,
+                          integration_completed_at=None):
+        """AI 통합 정보 설정"""
+        if not self.ai_integration:
+            self.ai_integration = {}
+        
+        if ai_explanation is not None:
+            self.ai_integration["ai_explanation"] = ai_explanation
+        if explanation_confidence is not None:
+            self.ai_integration["explanation_confidence"] = explanation_confidence
+        if vector_db_indexed is not None:
+            self.ai_integration["vector_db_indexed"] = vector_db_indexed
+        if rag_indexed is not None:
+            self.ai_integration["rag_indexed"] = rag_indexed
+        if llm_training_added is not None:
+            self.ai_integration["llm_training_added"] = llm_training_added
+        if integration_completed_at is not None:
+            self.ai_integration["integration_completed_at"] = integration_completed_at
+    
+    def set_source_info(self, file_path=None, parsed_data_path=None, 
+                       file_title=None, file_category=None):
+        """파일 출처 정보 설정"""
+        if not self.source_info:
+            self.source_info = {}
+        
+        if file_path is not None:
+            self.source_info["file_path"] = file_path
+        if parsed_data_path is not None:
+            self.source_info["parsed_data_path"] = parsed_data_path
+        if file_title is not None:
+            self.source_info["file_title"] = file_title
+        if file_category is not None:
+            self.source_info["file_category"] = file_category
+    
+    def set_metadata(self, keywords=None, learning_objectives=None, 
+                    estimated_time=None, points=None):
+        """메타데이터 설정"""
+        if not self.question_metadata:
+            self.question_metadata = {}
+        
+        if keywords is not None:
+            self.question_metadata["keywords"] = keywords
+        if learning_objectives is not None:
+            self.question_metadata["learning_objectives"] = learning_objectives
+        if estimated_time is not None:
+            self.question_metadata["estimated_time"] = estimated_time
+        if points is not None:
+            self.question_metadata["points"] = points
+
+# 나머지 모델들은 기존과 동일하게 유지하되 Question과의 관계만 유지
 
 class AnswerOption(Base):
     """답변 선택지 모델 (객관식 문제용)"""
@@ -171,7 +347,6 @@ class AnswerOption(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
 class CorrectAnswer(Base):
     """정답 모델"""
     __tablename__ = "correct_answers"
@@ -188,7 +363,6 @@ class CorrectAnswer(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
 class Explanation(Base):
     """문제 해설 모델"""
     __tablename__ = "explanations"
@@ -203,6 +377,8 @@ class Explanation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+# TestSet, TestQuestion, TestAttempt, UserAnswer 모델들도 기존과 동일하게 유지
+# (공간상 생략하지만 실제로는 모두 포함)
 
 class TestSet(Base):
     """테스트 세트 모델 (문제 묶음)"""
@@ -229,7 +405,6 @@ class TestSet(Base):
     attempts = relationship("TestAttempt", back_populates="test_set")
     created_by = relationship("User", foreign_keys=[created_by_id])
 
-
 class TestQuestion(Base):
     """테스트 세트 내의 문제 항목 모델"""
     __tablename__ = "test_questions"
@@ -248,9 +423,8 @@ class TestQuestion(Base):
     
     # 테스트 내 질문 중복 방지
     __table_args__ = (
-        UniqueConstraint("test_set_id", "question_id", name="uq_test_question"),
+        UniqueConstraint('test_set_id', 'question_id', name='uq_test_question'),
     )
-
 
 class TestAttempt(Base):
     """사용자 테스트 시도 모델"""
@@ -281,7 +455,6 @@ class TestAttempt(Base):
     test_set = relationship("TestSet", back_populates="attempts")
     answers = relationship("UserAnswer", back_populates="test_attempt", cascade="all, delete-orphan")
 
-
 class UserAnswer(Base):
     """사용자 답변 모델"""
     __tablename__ = "user_answers"
@@ -303,39 +476,3 @@ class UserAnswer(Base):
     test_attempt = relationship("TestAttempt", back_populates="answers")
     question = relationship("Question")
     answer_option = relationship("AnswerOption")
-
-
-# 임베딩 생성 및 저장을 위한 함수 정의
-def create_embedding(text: str, model: str = "text-embedding-ada-002") -> List[float]:
-    """
-    텍스트에 대한 임베딩 생성
-    
-    Args:
-        text (str): 임베딩할 텍스트
-        model (str): 사용할 OpenAI 임베딩 모델
-        
-    Returns:
-        List[float]: 임베딩 벡터
-    """
-    try:
-        # OpenAI 클라이언트 가져오기
-        import openai
-        from openai import OpenAI
-        
-        client = OpenAI()
-        
-        # OpenAI API를 호출하여 임베딩 생성
-        response = client.embeddings.create(
-            model=model,
-            input=text
-        )
-        
-        # 임베딩 벡터 반환
-        return response.data[0].embedding
-    
-    except ImportError:
-        print("경고: OpenAI 모듈이 설치되지 않았습니다. 'pip install openai'로 설치해주세요.")
-        return []
-    except Exception as e:
-        print(f"임베딩 생성 오류: {str(e)}")
-        return [] 

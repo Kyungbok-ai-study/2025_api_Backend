@@ -1,0 +1,90 @@
+{
+  "test_info": {
+    "title": "의학과 수준 진단테스트",
+    "description": "해부학, 생리학, 병리학, 약리학 등 의학 기초 및 임상의학 지식 진단",
+    "total_questions": 30,
+    "time_limit": 60,
+    "created_at": "2025-06-15T13:30:00.000Z",
+    "version": "1.0",
+    "source": "의사국가고시 기출문제 및 의학교육 표준교과서 기반"
+  },
+  "scoring_criteria": {
+    "total_score": 100,
+    "score_per_question": 3.3,
+    "difficulty_weights": {
+      "쉬움": 1.0,
+      "보통": 1.2,
+      "어려움": 1.5
+    },
+    "level_classification": {
+      "상급": {
+        "min_score": 80,
+        "description": "의사국가고시 합격 수준"
+      },
+      "중급": {
+        "min_score": 65,
+        "description": "추가 학습 필요"
+      },
+      "하급": {
+        "min_score": 50,
+        "description": "기초부터 체계적 학습 필요"
+      },
+      "미흡": {
+        "min_score": 0,
+        "description": "전면적 재학습 권장"
+      }
+    }
+  },
+  "questions": [
+    {
+      "question_id": "MED_001",
+      "question_number": 1,
+      "content": "심장의 해부학적 구조에 대한 설명으로 옳은 것은?",
+      "options": {
+        "1": "우심방은 체정맥혈을 받는다",
+        "2": "좌심실벽이 우심실벽보다 얇다",
+        "3": "삼첨판은 좌심방과 좌심실 사이에 있다",
+        "4": "대동맥판은 세 개의 첨판으로 구성된다",
+        "5": "관상동맥은 우심실에서 분지한다"
+      },
+      "correct_answer": "1",
+      "subject": "의학과",
+      "area_name": "해부학",
+      "year": 2024,
+      "original_question_number": 1,
+      "difficulty": 4,
+      "difficulty_level": "쉬움",
+      "question_type": "기본개념",
+      "domain": "기초의학",
+      "diagnostic_suitability": 9,
+      "discrimination_power": 8,
+      "points": 3.5,
+      "source_info": {
+        "file": "medical_questions.json",
+        "unique_id": "MED_001"
+      }
+    }
+  ],
+  "statistics": {
+    "difficulty_distribution": {
+      "쉬움": 8,
+      "보통": 16,
+      "어려움": 6
+    },
+    "domain_distribution": {
+      "기초의학": 12,
+      "임상의학": 10,
+      "예방의학": 4,
+      "의학윤리": 2,
+      "의료법규": 2
+    },
+    "type_distribution": {
+      "기본개념": 18,
+      "종합판단": 8,
+      "임상추론": 4
+    },
+    "average_difficulty": 5.5,
+    "average_discrimination": 7.8,
+    "total_questions": 30
+  }
+} 

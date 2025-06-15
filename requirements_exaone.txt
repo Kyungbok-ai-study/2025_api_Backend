@@ -1,0 +1,24 @@
+# Exaone 로컬 AI 전용 의존성
+# Ollama 기반 Exaone-deep:7.8b 모델 실행용
+
+# HTTP 클라이언트 (Ollama API 통신용)
+httpx==0.25.2
+requests==2.31.0
+
+# 벡터 임베딩
+numpy==1.24.3
+
+# JSON 처리
+orjson==3.9.9
+
+# 비동기 처리
+asyncio-tools==0.1.2
+
+# 캐싱
+redis==5.0.1
+
+# 성능 모니터링
+psutil==5.9.6
+
+# 로깅
+loguru==0.7.2 

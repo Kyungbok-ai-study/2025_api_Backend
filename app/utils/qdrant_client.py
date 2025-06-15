@@ -62,7 +62,7 @@ def create_collection(collection_name: str, vector_size: int = 1536):
     
     Args:
         collection_name: 컬렉션 이름
-        vector_size: 벡터 차원 (기본값: OpenAI 임베딩 크기)
+        vector_size: 벡터 차원 (기본값: 768차원)
     """
     if not QDRANT_AVAILABLE:
         logger.warning("QDRANT가 설치되지 않아 컬렉션을 생성할 수 없습니다.")
