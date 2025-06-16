@@ -38,13 +38,13 @@ app = FastAPI(
     version="3.0.0"
 )
 
-# CORS 설정 - 개발 환경용 관대한 설정
+# CORS 설정 - 환경별 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 개발 환경에서는 모든 도메인 허용
+    allow_origins=settings.ALLOWED_ORIGINS if not settings.DEBUG else ["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # 모든 HTTP 메소드 허용
-    allow_headers=["*"],  # 모든 헤더 허용
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # API 라우터 등록

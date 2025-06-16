@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     
     # CORS 설정
     ALLOWED_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
+        default=["https://kbu-ai-tutor.kr", "https://www.kbu-ai-tutor.kr", "http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
         description="허용된 CORS 오리진"
     )
     ALLOWED_METHODS: List[str] = Field(
