@@ -31,7 +31,7 @@ api_router.include_router(rag.router)
 # api_router.include_router(security.router, prefix="/security", tags=["보안 서비스"])  # 임시 비활성화
 
 # 학교 정보 관련 라우터
-api_router.include_router(schools.router, prefix="", tags=["학교 정보"])
+api_router.include_router(schools.router, prefix="/schools", tags=["학교 정보"])
 
 # 자동 매핑 관련 라우터
 api_router.include_router(auto_mapping.router, tags=["자동 매핑"])

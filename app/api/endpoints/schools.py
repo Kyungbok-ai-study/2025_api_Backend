@@ -239,7 +239,7 @@ def get_default_departments_data():
     ]
     return pd.DataFrame(departments_data)
 
-@router.get("/schools/search")
+@router.get("/search")
 async def search_schools(
     query: str = Query(..., description="학교명 검색어")
 ):
@@ -311,7 +311,7 @@ async def search_schools(
         print(f"[ERROR] 검색 중 오류: {str(e)}")
         raise HTTPException(status_code=500, detail=f"서버 오류: {str(e)}")
 
-@router.get("/schools/{school_name}/departments")
+@router.get("/{school_name}/departments")
 async def get_school_departments(
     school_name: str,
     query: Optional[str] = Query(None, description="학과명 검색어")
@@ -403,7 +403,7 @@ async def get_school_departments(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 오류: {str(e)}")
 
-@router.get("/schools/popular")
+@router.get("/popular")
 async def get_popular_schools():
     """
     인기 대학교 목록 반환

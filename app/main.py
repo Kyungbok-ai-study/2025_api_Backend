@@ -49,7 +49,7 @@ app.add_middleware(
 
 # API 라우터 등록
 app.include_router(auth.router, prefix="/api/auth", tags=["인증"])
-app.include_router(endpoints.api_router)  
+app.include_router(endpoints.api_router, prefix="/api")  
 app.include_router(student.router, prefix="/api/student", tags=["학생"])
 app.include_router(professor.router, prefix="/api/professor", tags=["교수-정리됨"])
 app.include_router(admin.router, prefix="/api/admin", tags=["관리자"])
