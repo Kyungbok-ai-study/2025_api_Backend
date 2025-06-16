@@ -21,13 +21,16 @@ class LocalExaoneService:
     """로컬 Exaone AI 서비스 (Ollama 기반)"""
     
     def __init__(self):
-        # Ollama 설정
+        # Ollama 설정 (최적화된 설정 로드)
         self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        self.model_name = "exaone-deep:7.8b"
+        self.model_name = self._load_optimized_model_name()
         self.embedding_model = "mxbai-embed-large"
         
-        # HTTP 클라이언트
-        self.client = httpx.AsyncClient(timeout=300.0)
+        # 최적화된 파라미터 로드
+        self.optimization_config = self._load_optimization_config()
+        
+        # HTTP 클라이언트 (더 긴 타임아웃)
+        self.client = httpx.AsyncClient(timeout=600.0)
         
         # 캐시 및 통계
         self.conversation_cache = {}
@@ -39,7 +42,43 @@ class LocalExaoneService:
             "cache_hits": 0
         }
         
-        logger.info(f"✅ 로컬 Exaone 서비스 초기화 완료")
+        logger.info(f"✅ 로컬 Exaone 서비스 초기화 완료 (최적화 모드)")
+
+    def _load_optimized_model_name(self) -> str:
+        """최적화된 모델 이름 로드"""
+        try:
+            # 최적화된 모델이 있는지 확인
+            import subprocess
+            result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
+            if "exaone-max" in result.stdout:
+                logger.info("🚀 최적화된 Exaone-Max 모델 사용")
+                return "exaone-max"
+        except:
+            pass
+        
+        logger.info("🔧 기본 Exaone 모델 사용")
+        return "exaone-deep:7.8b"
+    
+    def _load_optimization_config(self) -> Dict[str, Any]:
+        """최적화 설정 로드"""
+        try:
+            config_path = Path("data/exaone_optimization.json")
+            if config_path.exists():
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                logger.info("⚡ 최적화 설정 로드 완료")
+                return config
+        except Exception as e:
+            logger.warning(f"최적화 설정 로드 실패: {e}")
+        
+        # 기본 설정
+        return {
+            "max_tokens": 2048,
+            "temperature": 0.7,
+            "top_k": 40,
+            "top_p": 0.9,
+            "context_length": 4096
+        }
 
     async def check_model_availability(self) -> bool:
         """모델 사용 가능성 확인"""
@@ -85,16 +124,18 @@ class LocalExaoneService:
                 logger.info("💾 캐시에서 응답 반환")
                 return self.conversation_cache[cache_key]
             
-            # Ollama API 호출
+            # Ollama API 호출 (최적화된 설정 적용)
             payload = {
                 "model": self.model_name,
                 "prompt": prompt,
                 "stream": False,
                 "options": {
-                    "temperature": temperature,
-                    "num_predict": max_tokens or 2048,
-                    "top_k": 40,
-                    "top_p": 0.9
+                    "temperature": temperature if temperature != 0.7 else self.optimization_config.get("temperature", 0.8),
+                    "num_predict": max_tokens or self.optimization_config.get("max_tokens", 4096),
+                    "top_k": self.optimization_config.get("top_k", 50),
+                    "top_p": self.optimization_config.get("top_p", 0.95),
+                    "repeat_penalty": self.optimization_config.get("repeat_penalty", 1.1),
+                    "num_ctx": self.optimization_config.get("context_length", 8192)
                 }
             }
             

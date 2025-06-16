@@ -117,10 +117,13 @@ async def get_dashboard_stats(
             VerificationRequest.status == 'pending'
         ).count()
         
-        # 오늘 활성 사용자 (오늘 로그인한 사용자)
+        # 오늘 활성 사용자 (오늘 로그인한 사용자) - JSON 필드 조회 방식으로 수정
         today = datetime.now().date()
         active_users_today = db.query(User).filter(
-            func.date(User.last_login_at) == today
+            and_(
+                User.account_status.isnot(None),
+                func.date(func.cast(User.account_status['last_login_at'].astext, text('TIMESTAMP'))) == today
+            )
         ).count()
         
         # 이번 주 신규 가입자

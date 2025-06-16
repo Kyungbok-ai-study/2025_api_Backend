@@ -1,0 +1,190 @@
+{
+  "diagnostic_tests_summary": {
+    "generated_at": "2025-06-16T15:00:26.131638",
+    "total_departments": 2,
+    "departments": [
+      {
+        "department": "물리치료학과",
+        "code": "PT",
+        "total_rounds": 10,
+        "available_rounds": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tests_detail": [
+          {
+            "round": 1,
+            "focus_area": "물리치료학 기초",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 2,
+            "focus_area": "운동치료학",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 3,
+            "focus_area": "신경계 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 4,
+            "focus_area": "근골격계 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 5,
+            "focus_area": "심폐 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 6,
+            "focus_area": "소아 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 7,
+            "focus_area": "노인 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 8,
+            "focus_area": "스포츠 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 9,
+            "focus_area": "정형외과 물리치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 10,
+            "focus_area": "종합 평가",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          }
+        ],
+        "total_questions": 300
+      },
+      {
+        "department": "작업치료학과",
+        "code": "OT",
+        "total_rounds": 10,
+        "available_rounds": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tests_detail": [
+          {
+            "round": 1,
+            "focus_area": "작업치료학 기초",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 2,
+            "focus_area": "일상생활활동(ADL)",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 3,
+            "focus_area": "인지재활치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 4,
+            "focus_area": "작업수행분석",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 5,
+            "focus_area": "정신사회작업치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 6,
+            "focus_area": "소아작업치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 7,
+            "focus_area": "신체장애작업치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 8,
+            "focus_area": "감각통합치료",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 9,
+            "focus_area": "보조공학",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          },
+          {
+            "round": 10,
+            "focus_area": "종합 평가",
+            "questions": 30,
+            "time_limit": 60,
+            "status": "활성"
+          }
+        ],
+        "total_questions": 300
+      }
+    ],
+    "total_tests": 20,
+    "total_questions": 600
+  }
+}

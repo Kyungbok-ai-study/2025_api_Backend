@@ -1,0 +1,482 @@
+[
+  {
+    "question_id": "nursing_001",
+    "question_number": 1,
+    "question_text": "성인의 정상 체온 범위는?",
+    "choices": [
+      "35.5°C ~ 36.5°C",
+      "36.0°C ~ 37.5°C",
+      "37.0°C ~ 38.0°C",
+      "38.0°C ~ 39.0°C",
+      "39.0°C ~ 40.0°C"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "기본간호학",
+    "question_type": "기초지식"
+  },
+  {
+    "question_id": "nursing_002",
+    "question_number": 2,
+    "question_text": "혈압측정 시 수축기 혈압의 정상 범위는?",
+    "choices": [
+      "90mmHg 미만",
+      "90-119mmHg",
+      "120-139mmHg",
+      "140-159mmHg",
+      "160mmHg 이상"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "생리학",
+    "question_type": "측정 및 평가"
+  },
+  {
+    "question_id": "nursing_003",
+    "question_number": 3,
+    "question_text": "감염 예방을 위한 손 위생의 가장 효과적인 방법은?",
+    "choices": [
+      "찬물로 5초간 씻기",
+      "비누와 따뜻한 물로 20초간 씻기",
+      "알코올 겔로 5초간 문지르기",
+      "뜨거운 물로 10초간 씻기",
+      "물티슈로 닦기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "감염관리",
+    "question_type": "감염예방"
+  },
+  {
+    "question_id": "nursing_004",
+    "question_number": 4,
+    "question_text": "당뇨병 환자의 혈당 정상 목표치는?",
+    "choices": [
+      "70-100mg/dL",
+      "100-140mg/dL",
+      "140-180mg/dL",
+      "180-220mg/dL",
+      "220mg/dL 이상"
+    ],
+    "correct_answer": "1",
+    "difficulty_level": "중급",
+    "domain": "성인간호학",
+    "question_type": "질병관리"
+  },
+  {
+    "question_id": "nursing_005",
+    "question_number": 5,
+    "question_text": "심폐소생술(CPR) 시 가슴압박의 깊이는?",
+    "choices": [
+      "2-3cm",
+      "3-4cm",
+      "5-6cm",
+      "7-8cm",
+      "9-10cm"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "응급간호학",
+    "question_type": "응급처치"
+  },
+  {
+    "question_id": "nursing_006",
+    "question_number": 6,
+    "question_text": "신생아의 정상 호흡수는?",
+    "choices": [
+      "10-15회/분",
+      "15-20회/분",
+      "20-30회/분",
+      "30-40회/분",
+      "40-50회/분"
+    ],
+    "correct_answer": "4",
+    "difficulty_level": "기본",
+    "domain": "아동간호학",
+    "question_type": "생리적 지표"
+  },
+  {
+    "question_id": "nursing_007",
+    "question_number": 7,
+    "question_text": "임신 중 엽산 복용의 주된 목적은?",
+    "choices": [
+      "빈혈 예방",
+      "신경관 결손 예방",
+      "조산 예방",
+      "임신중독증 예방",
+      "체중 증가 조절"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "모성간호학",
+    "question_type": "임신관리"
+  },
+  {
+    "question_id": "nursing_008",
+    "question_number": 8,
+    "question_text": "노인환자 간호 시 가장 주의해야 할 안전사고는?",
+    "choices": [
+      "화상",
+      "낙상",
+      "질식",
+      "중독",
+      "감전"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "노인간호학",
+    "question_type": "안전관리"
+  },
+  {
+    "question_id": "nursing_009",
+    "question_number": 9,
+    "question_text": "격리실 출입 시 개인보호구 착용 순서는?",
+    "choices": [
+      "손 위생 → 가운 → 마스크 → 장갑",
+      "마스크 → 가운 → 장갑 → 손 위생",
+      "손 위생 → 마스크 → 가운 → 장갑",
+      "장갑 → 가운 → 마스크 → 손 위생",
+      "가운 → 마스크 → 장갑 → 손 위생"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "감염관리",
+    "question_type": "감염예방"
+  },
+  {
+    "question_id": "nursing_010",
+    "question_number": 10,
+    "question_text": "정신질환자와의 치료적 의사소통에서 가장 중요한 것은?",
+    "choices": [
+      "신속한 문제 해결",
+      "경청과 공감",
+      "전문지식 전달",
+      "행동 수정 지시",
+      "가족 상담"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "정신간호학",
+    "question_type": "의사소통"
+  },
+  {
+    "question_id": "nursing_011",
+    "question_number": 11,
+    "question_text": "수술 전 환자 금식 시간은?",
+    "choices": [
+      "2시간",
+      "4시간",
+      "6시간",
+      "8시간",
+      "12시간"
+    ],
+    "correct_answer": "4",
+    "difficulty_level": "기본",
+    "domain": "수술간호학",
+    "question_type": "수술 준비"
+  },
+  {
+    "question_id": "nursing_012",
+    "question_number": 12,
+    "question_text": "욕창 예방을 위한 체위 변경 주기는?",
+    "choices": [
+      "30분마다",
+      "1시간마다",
+      "2시간마다",
+      "4시간마다",
+      "6시간마다"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "기본간호학",
+    "question_type": "욕창관리"
+  },
+  {
+    "question_id": "nursing_013",
+    "question_number": 13,
+    "question_text": "약물 투여 시 확인해야 할 5R은?",
+    "choices": [
+      "환자, 약물, 용량, 경로, 시간",
+      "환자, 약물, 용량, 농도, 기간",
+      "약물, 용량, 경로, 시간, 효과",
+      "환자, 용량, 경로, 시간, 부작용",
+      "약물, 농도, 경로, 시간, 반응"
+    ],
+    "correct_answer": "1",
+    "difficulty_level": "기본",
+    "domain": "약물관리",
+    "question_type": "투약안전"
+  },
+  {
+    "question_id": "nursing_014",
+    "question_number": 14,
+    "question_text": "관장액의 적절한 온도는?",
+    "choices": [
+      "25-30°C",
+      "30-35°C",
+      "37-40°C",
+      "40-45°C",
+      "45-50°C"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "기본간호학",
+    "question_type": "간호술기"
+  },
+  {
+    "question_id": "nursing_015",
+    "question_number": 15,
+    "question_text": "혈당 측정 시 채혈 부위는?",
+    "choices": [
+      "손가락 끝",
+      "손가락 옆면",
+      "손바닥",
+      "손목",
+      "팔꿈치"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "진단검사",
+    "question_type": "검사기법"
+  },
+  {
+    "question_id": "nursing_016",
+    "question_number": 16,
+    "question_text": "기관지 천식 환자의 응급 증상은?",
+    "choices": [
+      "기침",
+      "가래",
+      "호흡곤란과 천명음",
+      "흉통",
+      "발열"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "성인간호학",
+    "question_type": "질병관리"
+  },
+  {
+    "question_id": "nursing_017",
+    "question_number": 17,
+    "question_text": "신생아 수유 시 트림시키는 이유는?",
+    "choices": [
+      "소화 촉진",
+      "공기 배출",
+      "수면 유도",
+      "체온 유지",
+      "성장 촉진"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "아동간호학",
+    "question_type": "영양관리"
+  },
+  {
+    "question_id": "nursing_018",
+    "question_number": 18,
+    "question_text": "유치도뇨관 관리에서 가장 중요한 것은?",
+    "choices": [
+      "정기적 교체",
+      "무균적 관리",
+      "충분한 수분 섭취",
+      "적절한 고정",
+      "정기적 세척"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "기본간호학",
+    "question_type": "간호술기"
+  },
+  {
+    "question_id": "nursing_019",
+    "question_number": 19,
+    "question_text": "임종 간호에서 가족에게 제공해야 할 우선적 지지는?",
+    "choices": [
+      "경제적 지원 정보",
+      "종교적 위로",
+      "정서적 지지",
+      "의학적 설명",
+      "법적 절차 안내"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "기본간호학",
+    "question_type": "임종간호"
+  },
+  {
+    "question_id": "nursing_020",
+    "question_number": 20,
+    "question_text": "산소포화도 정상 범위는?",
+    "choices": [
+      "85-90%",
+      "90-95%",
+      "95-100%",
+      "100-105%",
+      "105-110%"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "생리학",
+    "question_type": "생리적 지표"
+  },
+  {
+    "question_id": "nursing_021",
+    "question_number": 21,
+    "question_text": "당뇨병성 케톤산증의 주요 증상은?",
+    "choices": [
+      "고혈압",
+      "서맥",
+      "깊고 빠른 호흡",
+      "체온 상승",
+      "의식 명료"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "고급",
+    "domain": "성인간호학",
+    "question_type": "응급상황"
+  },
+  {
+    "question_id": "nursing_022",
+    "question_number": 22,
+    "question_text": "소아의 발달 단계 중 '대상 영속성' 개념이 발달하는 시기는?",
+    "choices": [
+      "0-2개월",
+      "2-6개월",
+      "6-12개월",
+      "12-18개월",
+      "18-24개월"
+    ],
+    "correct_answer": "4",
+    "difficulty_level": "중급",
+    "domain": "아동간호학",
+    "question_type": "발달이론"
+  },
+  {
+    "question_id": "nursing_023",
+    "question_number": 23,
+    "question_text": "분만 중 태아의 심박동수 정상 범위는?",
+    "choices": [
+      "100-120회/분",
+      "110-160회/분",
+      "120-180회/분",
+      "160-200회/분",
+      "200-220회/분"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "모성간호학",
+    "question_type": "태아모니터링"
+  },
+  {
+    "question_id": "nursing_024",
+    "question_number": 24,
+    "question_text": "조현병 환자의 양성 증상은?",
+    "choices": [
+      "감정 둔마",
+      "사회적 위축",
+      "환청, 망상",
+      "의욕 저하",
+      "언어 빈곤"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "정신간호학",
+    "question_type": "정신병리"
+  },
+  {
+    "question_id": "nursing_025",
+    "question_number": 25,
+    "question_text": "수술 후 깊은 호흡과 기침 격려의 목적은?",
+    "choices": [
+      "통증 완화",
+      "혈압 안정",
+      "폐합병증 예방",
+      "수면 증진",
+      "소화 촉진"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "수술간호학",
+    "question_type": "합병증 예방"
+  },
+  {
+    "question_id": "nursing_026",
+    "question_number": 26,
+    "question_text": "정맥주사 시 혈관 확보가 어려운 환자에게 우선 시도할 부위는?",
+    "choices": [
+      "목 정맥",
+      "발등 정맥",
+      "전박 정맥",
+      "손등 정맥",
+      "대퇴 정맥"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "기본간호학",
+    "question_type": "간호술기"
+  },
+  {
+    "question_id": "nursing_027",
+    "question_number": 27,
+    "question_text": "고혈압 환자의 생활습관 교육 중 가장 중요한 것은?",
+    "choices": [
+      "금연",
+      "저염식",
+      "규칙적 운동",
+      "체중 조절",
+      "스트레스 관리"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "성인간호학",
+    "question_type": "건강교육"
+  },
+  {
+    "question_id": "nursing_028",
+    "question_number": 28,
+    "question_text": "아동의 예방접종 후 이상반응으로 즉시 응급처치가 필요한 것은?",
+    "choices": [
+      "미열",
+      "접종 부위 발적",
+      "보챔",
+      "아나필락시스",
+      "식욕 부진"
+    ],
+    "correct_answer": "4",
+    "difficulty_level": "중급",
+    "domain": "아동간호학",
+    "question_type": "응급상황"
+  },
+  {
+    "question_id": "nursing_029",
+    "question_number": 29,
+    "question_text": "산후 출혈의 가장 흔한 원인은?",
+    "choices": [
+      "자궁 파열",
+      "자궁 수축 부전",
+      "태반 잔류",
+      "혈액응고 장애",
+      "산도 열상"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "모성간호학",
+    "question_type": "분만합병증"
+  },
+  {
+    "question_id": "nursing_030",
+    "question_number": 30,
+    "question_text": "우울증 환자의 자살 위험성 평가에서 가장 중요한 요소는?",
+    "choices": [
+      "나이",
+      "성별",
+      "구체적인 자살 계획",
+      "과거 병력",
+      "가족력"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "고급",
+    "domain": "정신간호학",
+    "question_type": "위험도 평가"
+  }
+]

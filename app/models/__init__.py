@@ -8,7 +8,12 @@ from .verification import VerificationRequest
 from .assignment import Assignment, AssignmentSubmission, ProblemBank
 from .analytics import StudentActivity, StudentWarning, LearningAnalytics, ClassStatistics, ProfessorDashboardData
 from .question import Question, AnswerOption, CorrectAnswer, Explanation, TestSet, TestQuestion, TestAttempt, UserAnswer
-from .diagnosis import TestSession, TestResponse, DiagnosisResult, LearningLevelHistory, MultiChoiceTestSession, MultiChoiceTestResponse
+from .diagnosis import (
+    TestSession, TestResponse, DiagnosisResult, LearningLevelHistory, 
+    MultiChoiceTestSession, MultiChoiceTestResponse,
+    DiagnosticSession, DiagnosticAnswer, DiagnosticAIAnalysis, DiagnosticStatistics
+)
+from .professor_student_match import ProfessorStudentMatch, StudentDiagnosisAlert, StudentMonitoringLog
 
 __all__ = [
     "User",
@@ -34,5 +39,12 @@ __all__ = [
     "DiagnosisResult",
     "LearningLevelHistory",
     "MultiChoiceTestSession",
-    "MultiChoiceTestResponse"
+    "MultiChoiceTestResponse",
+    "DiagnosticSession",
+    "DiagnosticAnswer", 
+    "DiagnosticAIAnalysis",
+    "DiagnosticStatistics",
+    "ProfessorStudentMatch",
+    "StudentDiagnosisAlert",
+    "StudentMonitoringLog"
 ] 

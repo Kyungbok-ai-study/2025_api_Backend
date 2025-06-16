@@ -1,0 +1,482 @@
+[
+  {
+    "question_id": "general_001",
+    "question_number": 1,
+    "question_text": "다음 중 올바른 학습 방법은?",
+    "choices": [
+      "장시간 한 번에 몰아서 공부",
+      "반복 학습과 복습",
+      "암기 위주의 학습",
+      "시험 전날에만 집중 학습",
+      "인터넷 검색에만 의존"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "학습방법론",
+    "question_type": "교육이론"
+  },
+  {
+    "question_id": "general_002",
+    "question_number": 2,
+    "question_text": "효과적인 시간 관리의 핵심은?",
+    "choices": [
+      "모든 일을 완벽하게 하기",
+      "우선순위 설정과 계획 수립",
+      "멀티태스킹 능력 향상",
+      "야근을 통한 시간 확보",
+      "모든 약속 거절하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "자기관리",
+    "question_type": "시간관리"
+  },
+  {
+    "question_id": "general_003",
+    "question_number": 3,
+    "question_text": "팀워크에서 가장 중요한 요소는?",
+    "choices": [
+      "개인의 능력",
+      "리더의 지시",
+      "의사소통과 협력",
+      "경쟁적 분위기",
+      "개별 성과 측정"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "조직행동",
+    "question_type": "협업능력"
+  },
+  {
+    "question_id": "general_004",
+    "question_number": 4,
+    "question_text": "창의적 사고를 촉진하는 방법은?",
+    "choices": [
+      "정해진 규칙만 따르기",
+      "다양한 관점에서 접근하기",
+      "기존 방식만 고수하기",
+      "빠른 결정 내리기",
+      "비판적 피드백 거부하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "창의성",
+    "question_type": "사고력"
+  },
+  {
+    "question_id": "general_005",
+    "question_number": 5,
+    "question_text": "스트레스 관리의 효과적인 방법은?",
+    "choices": [
+      "스트레스 원인 회피",
+      "과도한 음주나 흡연",
+      "규칙적인 운동과 휴식",
+      "모든 감정 억압하기",
+      "완벽주의 추구하기"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "정신건강",
+    "question_type": "스트레스관리"
+  },
+  {
+    "question_id": "general_006",
+    "question_number": 6,
+    "question_text": "비판적 사고의 핵심 요소는?",
+    "choices": [
+      "빠른 판단력",
+      "객관적 분석과 평가",
+      "주관적 느낌 중시",
+      "타인 의견 무조건 수용",
+      "기존 지식에만 의존"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "사고력",
+    "question_type": "분석능력"
+  },
+  {
+    "question_id": "general_007",
+    "question_number": 7,
+    "question_text": "효과적인 프레젠테이션의 핵심은?",
+    "choices": [
+      "화려한 시각 자료",
+      "긴 발표 시간",
+      "명확한 메시지 전달",
+      "복잡한 전문 용어 사용",
+      "일방적인 정보 전달"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "의사소통",
+    "question_type": "발표능력"
+  },
+  {
+    "question_id": "general_008",
+    "question_number": 8,
+    "question_text": "윤리적 의사결정 시 고려해야 할 요소는?",
+    "choices": [
+      "개인적 이익만 추구",
+      "법적 문제만 검토",
+      "이해관계자에 미치는 영향",
+      "단기적 결과만 고려",
+      "타인 의견 완전 무시"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "윤리학",
+    "question_type": "윤리적사고"
+  },
+  {
+    "question_id": "general_009",
+    "question_number": 9,
+    "question_text": "문제 해결의 첫 번째 단계는?",
+    "choices": [
+      "즉시 해결책 실행",
+      "문제 명확히 정의하기",
+      "다른 사람에게 맡기기",
+      "문제 무시하기",
+      "과거 경험에만 의존"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "문제해결",
+    "question_type": "분석능력"
+  },
+  {
+    "question_id": "general_010",
+    "question_number": 10,
+    "question_text": "지속적인 자기계발을 위한 핵심 태도는?",
+    "choices": [
+      "현재 상태에 만족",
+      "호기심과 학습 의욕",
+      "변화에 대한 거부",
+      "타인과의 비교 집착",
+      "완벽함만 추구"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "자기계발",
+    "question_type": "성장마인드"
+  },
+  {
+    "question_id": "general_011",
+    "question_number": 11,
+    "question_text": "리더십의 핵심 역량은?",
+    "choices": [
+      "권위와 통제",
+      "비전 제시와 동기부여",
+      "완벽한 업무 수행",
+      "모든 결정 독단적 처리",
+      "개인 성과만 중시"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "리더십",
+    "question_type": "관리능력"
+  },
+  {
+    "question_id": "general_012",
+    "question_number": 12,
+    "question_text": "디지털 시대의 정보 활용에서 중요한 것은?",
+    "choices": [
+      "많은 정보 수집",
+      "정보의 신뢰성 검증",
+      "빠른 정보 공유",
+      "모든 정보 수용",
+      "전문가 의견만 신뢰"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "정보활용",
+    "question_type": "정보처리"
+  },
+  {
+    "question_id": "general_013",
+    "question_number": 13,
+    "question_text": "갈등 상황에서 바람직한 대응 방식은?",
+    "choices": [
+      "상대방 비난하기",
+      "문제 회피하기",
+      "상호 이해와 타협",
+      "일방적 주장 고수",
+      "감정적 대응하기"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "갈등관리",
+    "question_type": "의사소통"
+  },
+  {
+    "question_id": "general_014",
+    "question_number": 14,
+    "question_text": "창업을 위한 기본 요소는?",
+    "choices": [
+      "충분한 자금만 있으면 됨",
+      "시장 분석과 사업 계획",
+      "인맥만 있으면 성공",
+      "아이디어만 좋으면 됨",
+      "운에만 의존하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "기업가정신",
+    "question_type": "사업계획"
+  },
+  {
+    "question_id": "general_015",
+    "question_number": 15,
+    "question_text": "지속가능한 발전을 위한 핵심 가치는?",
+    "choices": [
+      "경제적 이익만 추구",
+      "환경 파괴 무시",
+      "경제, 환경, 사회적 균형",
+      "현재 세대 이익만 고려",
+      "기술 발전에만 집중"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "지속가능성",
+    "question_type": "사회적책임"
+  },
+  {
+    "question_id": "general_016",
+    "question_number": 16,
+    "question_text": "다문화 사회에서 중요한 덕목은?",
+    "choices": [
+      "자문화만 고집하기",
+      "다양성 인정과 포용",
+      "타문화 무시하기",
+      "획일적 사고 강요",
+      "문화적 우월감 드러내기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "다문화이해",
+    "question_type": "사회통합"
+  },
+  {
+    "question_id": "general_017",
+    "question_number": 17,
+    "question_text": "비판적 피드백을 받을 때의 올바른 자세는?",
+    "choices": [
+      "즉시 반박하기",
+      "감정적으로 대응",
+      "열린 마음으로 경청",
+      "완전히 무시하기",
+      "자존심 상해하기"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "자기성찰",
+    "question_type": "성장마인드"
+  },
+  {
+    "question_id": "general_018",
+    "question_number": 18,
+    "question_text": "효과적인 목표 설정의 원칙은?",
+    "choices": [
+      "막연하고 추상적으로",
+      "측정 가능하고 구체적으로",
+      "비현실적으로 높게",
+      "기한 없이 설정",
+      "타인과 동일하게"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "목표관리",
+    "question_type": "계획수립"
+  },
+  {
+    "question_id": "general_019",
+    "question_number": 19,
+    "question_text": "네트워킹에서 가장 중요한 것은?",
+    "choices": [
+      "명함 많이 나누기",
+      "자신의 이익만 추구",
+      "진정성 있는 관계 구축",
+      "유명한 사람만 만나기",
+      "일방적 정보 요청"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "인적네트워크",
+    "question_type": "관계형성"
+  },
+  {
+    "question_id": "general_020",
+    "question_number": 20,
+    "question_text": "변화 관리에서 중요한 요소는?",
+    "choices": [
+      "변화 거부하기",
+      "급진적 변화만 추구",
+      "점진적 적응과 학습",
+      "과거에만 집착하기",
+      "변화 무조건 수용"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "변화관리",
+    "question_type": "적응능력"
+  },
+  {
+    "question_id": "general_021",
+    "question_number": 21,
+    "question_text": "일과 삶의 균형을 위한 핵심은?",
+    "choices": [
+      "일에만 몰두하기",
+      "사생활 완전 포기",
+      "우선순위와 경계 설정",
+      "모든 일 완벽하게 하기",
+      "휴식 시간 없애기"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "기본",
+    "domain": "워라밸",
+    "question_type": "라이프스타일"
+  },
+  {
+    "question_id": "general_022",
+    "question_number": 22,
+    "question_text": "혁신적 사고를 위한 조건은?",
+    "choices": [
+      "기존 방식만 고수",
+      "실패를 두려워하지 않는 용기",
+      "완벽한 계획만 추구",
+      "타인 의견 무시하기",
+      "변화 거부하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "혁신",
+    "question_type": "창의성"
+  },
+  {
+    "question_id": "general_023",
+    "question_number": 23,
+    "question_text": "효과적인 학습을 위한 환경 조성은?",
+    "choices": [
+      "소음이 많은 곳",
+      "집중할 수 있는 조용한 공간",
+      "침실에서 누워서",
+      "TV 보면서 동시에",
+      "스마트폰 계속 확인하며"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "학습환경",
+    "question_type": "학습전략"
+  },
+  {
+    "question_id": "general_024",
+    "question_number": 24,
+    "question_text": "글로벌 역량 개발을 위해 필요한 것은?",
+    "choices": [
+      "자국 문화만 알면 충분",
+      "외국어 능력과 문화적 이해",
+      "선진국 문화만 배우기",
+      "자문화 우월주의",
+      "타문화에 대한 편견 유지"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "글로벌역량",
+    "question_type": "국제감각"
+  },
+  {
+    "question_id": "general_025",
+    "question_number": 25,
+    "question_text": "지속적인 동기 유지를 위한 방법은?",
+    "choices": [
+      "큰 목표만 설정하기",
+      "작은 성공 경험 축적하기",
+      "타인과 비교하기",
+      "완벽함만 추구하기",
+      "결과에만 집중하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "동기부여",
+    "question_type": "자기관리"
+  },
+  {
+    "question_id": "general_026",
+    "question_number": 26,
+    "question_text": "효과적인 협상의 핵심 전략은?",
+    "choices": [
+      "일방적 주장 관철",
+      "상대방 이익 무시",
+      "상호 이익 추구(Win-Win)",
+      "감정적 대응하기",
+      "협상 회피하기"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "협상",
+    "question_type": "의사소통"
+  },
+  {
+    "question_id": "general_027",
+    "question_number": 27,
+    "question_text": "미래 사회에 필요한 핵심 역량은?",
+    "choices": [
+      "암기 능력만 있으면 됨",
+      "창의성과 비판적 사고",
+      "기존 지식에만 의존",
+      "단순 반복 업무 수행",
+      "변화에 대한 거부감"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "중급",
+    "domain": "미래역량",
+    "question_type": "핵심역량"
+  },
+  {
+    "question_id": "general_028",
+    "question_number": 28,
+    "question_text": "피드백을 줄 때 효과적인 방법은?",
+    "choices": [
+      "인격적 비난하기",
+      "행동에 초점을 맞춘 구체적 조언",
+      "감정적으로 표현하기",
+      "일방적으로 지적하기",
+      "공개적으로 비판하기"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "피드백",
+    "question_type": "의사소통"
+  },
+  {
+    "question_id": "general_029",
+    "question_number": 29,
+    "question_text": "의사결정 과정에서 고려할 요소는?",
+    "choices": [
+      "감정에만 의존하기",
+      "첫 번째 생각만 따르기",
+      "다양한 대안과 결과 분석",
+      "타인 의견 완전 무시",
+      "과거 경험만 참고"
+    ],
+    "correct_answer": "3",
+    "difficulty_level": "중급",
+    "domain": "의사결정",
+    "question_type": "분석능력"
+  },
+  {
+    "question_id": "general_030",
+    "question_number": 30,
+    "question_text": "평생 학습의 중요성이 대두되는 이유는?",
+    "choices": [
+      "학력만 중요해서",
+      "지식의 빠른 변화와 업데이트",
+      "경쟁에서 이기기 위해서만",
+      "자격증 취득이 목표",
+      "타인보다 우월해지기 위해"
+    ],
+    "correct_answer": "2",
+    "difficulty_level": "기본",
+    "domain": "평생학습",
+    "question_type": "학습태도"
+  }
+]

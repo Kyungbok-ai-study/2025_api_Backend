@@ -4,7 +4,7 @@
 ⚠️ 주의: 이 파일은 통합 진단 시스템(unified_diagnosis.py)으로 마이그레이션 예정입니다.
 새로운 개발은 unified_diagnosis.py를 사용하세요.
 """
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey, JSON, ARRAY
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey, JSON, ARRAY, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ENUM
@@ -213,4 +213,110 @@ class LearningLevelHistory(Base):
     diagnosis_result = relationship("DiagnosisResult")
 
     def __repr__(self):
-        return f"<LearningLevelHistory(id={self.id}, user_id={self.user_id}, level={self.learning_level:.2f}, measured_at={self.measured_at})>" 
+        return f"<LearningLevelHistory(id={self.id}, user_id={self.user_id}, level={self.learning_level:.2f}, measured_at={self.measured_at})>"
+
+class DiagnosticSession(Base):
+    """진단테스트 세션 모델"""
+    __tablename__ = "diagnostic_sessions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(50), unique=True, nullable=False, comment='세션 고유 ID')
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment='사용자 ID')
+    test_type = Column(String(50), nullable=False, comment='테스트 타입')
+    department = Column(String(50), nullable=False, comment='학과명')
+    round_number = Column(Integer, nullable=False, default=1, comment='진단테스트 회차 (1-10차)')
+    total_questions = Column(Integer, nullable=False, comment='총 문제 수')
+    time_limit_minutes = Column(Integer, nullable=False, comment='제한 시간(분)')
+    started_at = Column(DateTime, nullable=False, comment='시작 시간')
+    completed_at = Column(DateTime, nullable=True, comment='완료 시간')
+    total_score = Column(Float, nullable=True, comment='총 점수')
+    correct_answers = Column(Integer, nullable=True, comment='정답 수')
+    wrong_answers = Column(Integer, nullable=True, comment='오답 수')
+    total_time_ms = Column(BigInteger, nullable=True, comment='총 소요 시간(밀리초)')
+    status = Column(String(20), nullable=False, default='in_progress', comment='상태')
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    
+    # 관계 설정
+    answers = relationship("DiagnosticAnswer", back_populates="session", cascade="all, delete-orphan")
+    ai_analysis = relationship("DiagnosticAIAnalysis", back_populates="session", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<DiagnosticSession(session_id='{self.session_id}', round={self.round_number}, test_type='{self.test_type}', status='{self.status}')>"
+
+class DiagnosticAnswer(Base):
+    """진단테스트 답변 모델 (각 문제별 상세 정보)"""
+    __tablename__ = "diagnostic_answers"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(50), ForeignKey('diagnostic_sessions.session_id'), nullable=False, comment='세션 ID')
+    question_id = Column(String(50), nullable=False, comment='문제 ID')
+    question_number = Column(Integer, nullable=False, comment='문제 번호')
+    selected_answer = Column(String(10), nullable=True, comment='선택한 답')
+    correct_answer = Column(String(10), nullable=False, comment='정답')
+    is_correct = Column(Boolean, nullable=False, comment='정답 여부')
+    time_spent_ms = Column(BigInteger, nullable=False, comment='풀이 시간(밀리초)')
+    difficulty_level = Column(String(20), nullable=True, comment='난이도')
+    domain = Column(String(50), nullable=True, comment='영역')
+    question_type = Column(String(30), nullable=True, comment='문제 유형')
+    answered_at = Column(DateTime, server_default=func.now(), nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    
+    # 관계 설정
+    session = relationship("DiagnosticSession", back_populates="answers")
+    
+    def __repr__(self):
+        return f"<DiagnosticAnswer(question_id='{self.question_id}', is_correct={self.is_correct})>"
+
+class DiagnosticAIAnalysis(Base):
+    """AI 분석 결과 모델"""
+    __tablename__ = "diagnostic_ai_analysis"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(50), ForeignKey('diagnostic_sessions.session_id'), nullable=False, comment='세션 ID')
+    analysis_type = Column(String(30), nullable=False, comment='분석 타입')
+    analysis_data = Column(JSON, nullable=False, comment='분석 결과 JSON 데이터')
+    weak_areas = Column(JSON, nullable=True, comment='약한 영역 분석')
+    recommendations = Column(JSON, nullable=True, comment='개선 권장사항')
+    peer_comparison = Column(JSON, nullable=True, comment='다른 학생들과의 비교')
+    confidence_score = Column(Float, nullable=True, comment='분석 신뢰도 점수')
+    ai_model_version = Column(String(20), nullable=True, comment='사용된 AI 모델 버전')
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    
+    # 관계 설정
+    session = relationship("DiagnosticSession", back_populates="ai_analysis")
+    
+    def __repr__(self):
+        return f"<DiagnosticAIAnalysis(session_id='{self.session_id}', analysis_type='{self.analysis_type}')>"
+
+class DiagnosticStatistics(Base):
+    """진단테스트 통계 모델 (다른 학생들과 비교용)"""
+    __tablename__ = "diagnostic_statistics"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    test_type = Column(String(50), nullable=False, comment='테스트 타입')
+    department = Column(String(50), nullable=False, comment='학과명')
+    question_id = Column(String(50), nullable=False, comment='문제 ID')
+    total_attempts = Column(Integer, nullable=False, default=0, comment='총 시도 횟수')
+    correct_attempts = Column(Integer, nullable=False, default=0, comment='정답 횟수')
+    avg_time_ms = Column(BigInteger, nullable=False, default=0, comment='평균 풀이 시간')
+    difficulty_rating = Column(Float, nullable=True, comment='실제 난이도 평가')
+    last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    
+    def __repr__(self):
+        return f"<DiagnosticStatistics(test_type='{self.test_type}', question_id='{self.question_id}')>"
+
+# 진단테스트 세션 상태 열거형
+class SessionStatus:
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+    EXPIRED = "expired"
+
+# 분석 타입 열거형
+class AnalysisType:
+    COMPREHENSIVE = "comprehensive"
+    TIME_ANALYSIS = "time_analysis"
+    TYPE_ANALYSIS = "type_analysis"
+    DIFFICULTY_ANALYSIS = "difficulty_analysis"
+    PEER_COMPARISON = "peer_comparison" 

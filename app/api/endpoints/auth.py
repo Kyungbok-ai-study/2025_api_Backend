@@ -161,7 +161,7 @@ class UserResponse(BaseModel):
             diagnostic_test_completed=getattr(user, 'diagnostic_test_completed', False),
             diagnostic_test_completed_at=getattr(user, 'diagnostic_test_completed_at', None),
             created_at=user.created_at,
-            last_login_at=user.last_login_at
+            last_login_at=getattr(user, 'last_login_at', None)
         )
 
 class TokenResponse(BaseModel):
@@ -358,9 +358,10 @@ async def login(
         )
         
         # 마지막 로그인 시간 업데이트
-        user.last_login_at = datetime.utcnow()
+        user.update_last_login()
+        # is_first_login이 True면 False로 변경
         if user.is_first_login:
-            user.is_first_login = False
+            user.set_account_status(is_first_login=False)
         
         db.commit()
         
@@ -418,9 +419,10 @@ async def login_direct(
         )
         
         # 마지막 로그인 시간 업데이트
-        user.last_login_at = datetime.utcnow()
+        user.update_last_login()
+        # is_first_login이 True면 False로 변경
         if user.is_first_login:
-            user.is_first_login = False
+            user.set_account_status(is_first_login=False)
         
         db.commit()
         
@@ -497,11 +499,14 @@ async def refresh_token(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
     """
     현재 로그인한 사용자 정보 조회
     """
+    # 🎯 데이터베이스에서 최신 사용자 정보 새로고침
+    db.refresh(current_user)
     return UserResponse.from_user(current_user)
 
 @router.put("/me", response_model=UserResponse)

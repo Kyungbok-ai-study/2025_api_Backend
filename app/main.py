@@ -13,11 +13,14 @@ from .db.database import engine, Base
 # API 라우터 임포트 (실제 구조에 맞게 수정)
 from .api.endpoints import auth
 from .api import api as endpoints
-from .api.endpoints import student, professor, admin
+from .api.endpoints import student, admin
+from .api.endpoints import professor_clean as professor
 from .api import rag, advanced_rag, enterprise_rag
 
 # 진단 관련 라우터들
 from .api import diagnosis
+from .api.v1.diagnosis import department_tests
+from .routers import diagnosis as diagnosis_router  # 새로운 진단 라우터
 
 # 진단테스트 라우터는 통합 진단 시스템으로 대체됨 (unified_diagnosis.py 사용)
 
@@ -35,24 +38,34 @@ app = FastAPI(
     version="3.0.0"
 )
 
-# CORS 설정
+# CORS 설정 - 개발 환경용 관대한 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],  # 개발 환경에서는 모든 도메인 허용
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # 모든 HTTP 메소드 허용
+    allow_headers=["*"],  # 모든 헤더 허용
 )
 
 # API 라우터 등록
-app.include_router(auth.router)
+app.include_router(auth.router, prefix="/api/auth", tags=["인증"])
 app.include_router(endpoints.api_router)  
-app.include_router(student.router)
-app.include_router(professor.router)
-app.include_router(admin.router)
+app.include_router(student.router, prefix="/api/student", tags=["학생"])
+app.include_router(professor.router, prefix="/api/professor", tags=["교수-정리됨"])
+app.include_router(admin.router, prefix="/api/admin", tags=["관리자"])
 
 # 진단 라우터 등록
 app.include_router(diagnosis.router, prefix="/api/diagnosis", tags=["진단"])
+
+# 새로운 진단 라우터 등록 (문제 데이터 제공)
+app.include_router(diagnosis_router.router, prefix="/api/diagnosis", tags=["진단 데이터"])
+
+# 학과별 진단테스트 v1 라우터 등록
+app.include_router(department_tests.router, prefix="/api/diagnosis/v1", tags=["학과별 진단테스트"])
+
+# 진단테스트 차수 관리 라우터 등록
+from .api.endpoints import diagnosis_progress
+app.include_router(diagnosis_progress.router, prefix="/api/diagnosis/progress", tags=["진단테스트 차수 관리"])
 
 # 진단테스트는 통합 진단 시스템으로 대체됨 (/api/diagnosis 경로 사용)
 

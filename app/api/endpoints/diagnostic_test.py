@@ -426,6 +426,40 @@ async def complete_diagnostic_test(
         
         db.commit()
         
+        # 🔔 교수 알림 발송
+        try:
+            from app.services.diagnosis_alert_hook import diagnosis_alert_hook
+            
+            diagnosis_result_data = {
+                "test_id": submission.id,
+                "test_type": diagnostic_test.title or "진단테스트",
+                "started_at": submission.start_time.isoformat() if submission.start_time else None,
+                "completed_at": submission.end_time.isoformat() if submission.end_time else None,
+                "score": float(score_percentage),
+                "total_questions": diagnostic_test.total_questions,
+                "correct_answers": correct_count,
+                "time_taken": int((submission.end_time - submission.start_time).total_seconds() * 1000) if submission.end_time and submission.start_time else 0,
+                "department": diagnostic_test.department,
+                "level_classification": level_classification,
+                "performance_summary": {
+                    "accuracy": round((correct_count / diagnostic_test.total_questions) * 100, 1) if diagnostic_test.total_questions > 0 else 0,
+                    "level": level_classification,
+                    "total_time_seconds": int((submission.end_time - submission.start_time).total_seconds()) if submission.end_time and submission.start_time else 0
+                }
+            }
+            
+            alert_result = await diagnosis_alert_hook.on_diagnosis_completed(
+                db, current_user.id, diagnosis_result_data
+            )
+            
+            if alert_result["success"]:
+                print(f"📧 교수 알림 발송 완료: {alert_result['alerts_created']}개")
+            else:
+                print(f"❌ 교수 알림 발송 실패: {alert_result.get('error')}")
+                
+        except Exception as e:
+            print(f"⚠️ 교수 알림 발송 중 오류 (진단테스트는 정상 완료): {e}")
+        
         return {
             "submission_id": submission.id,
             "total_score": total_score,

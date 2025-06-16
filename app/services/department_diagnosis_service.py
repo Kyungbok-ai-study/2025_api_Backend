@@ -325,6 +325,9 @@ class DepartmentDiagnosisService:
             "간호학과": [
                 "nursing", "medical_laboratory"
             ],
+            "작업치료학과": [
+                "occupational_therapy", "clinical_pathology"
+            ],
             "경영학과": [
                 "business_administration", "economics", "statistics"
             ]

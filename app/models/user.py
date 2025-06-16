@@ -66,6 +66,13 @@ class User(Base):
     
     # 관계 설정 (기존 호환성 유지)
     verification_requests = relationship("VerificationRequest", back_populates="user", cascade="all, delete-orphan")
+    
+    # 교수-학생 매칭 관계
+    supervised_students = relationship("ProfessorStudentMatch", foreign_keys="ProfessorStudentMatch.professor_id", back_populates="professor")
+    supervisors = relationship("ProfessorStudentMatch", foreign_keys="ProfessorStudentMatch.student_id", back_populates="student")
+    
+    # 진단테스트 진행 상황 관계
+    diagnosis_progress = relationship("StudentDiagnosisProgress", back_populates="user", cascade="all, delete-orphan")
 
     
     def __repr__(self):

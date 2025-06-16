@@ -1,9 +1,9 @@
 """
-문제 검토 및 승인 서비스
+문제 검토 및 승인 서비스 - 모든 학과 지원 및 실시간 진행률 표시
 """
 import json
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -30,37 +30,143 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+# 학과 지원 매핑
+SUPPORTED_DEPARTMENTS = {
+    "물리치료학과": {
+        "short_name": "물리치료",
+        "keywords": ["물치", "물리치료", "pt", "physical"],
+        "areas": ["근골격계", "신경계", "심폐계", "소아발달", "스포츠의학"]
+    },
+    "작업치료학과": {
+        "short_name": "작업치료", 
+        "keywords": ["작치", "작업치료", "ot", "occupational"],
+        "areas": ["인지재활", "감각통합", "보조기구", "정신건강", "아동발달"]
+    },
+    "간호학과": {
+        "short_name": "간호",
+        "keywords": ["간호", "nursing", "너싱"],
+        "areas": ["기본간호", "성인간호", "아동간호", "모성간호", "정신간호", "지역사회간호"]
+    }
+}
+
 class QuestionReviewService:
-    """문제 검토 및 승인 서비스"""
+    """문제 검토 및 승인 서비스 - 모든 학과 지원"""
     
     def __init__(self):
         self.save_parser_dir = Path("data/save_parser")
         self.save_parser_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 진행률 추적용 상태 저장소
+        self.parsing_status = {}
+    
+    def detect_user_department(self, db: Session, user_id: int) -> str:
+        """
+        사용자 정보에서 학과 감지
+        
+        Args:
+            db: 데이터베이스 세션
+            user_id: 사용자 ID
+            
+        Returns:
+            str: 감지된 학과명
+        """
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return "물리치료학과"  # 기본값
+            
+            # 사용자 이름이나 부서 정보에서 학과 추정
+            user_info = (user.name or "").lower() + (user.department or "").lower()
+            
+            for dept_name, dept_info in SUPPORTED_DEPARTMENTS.items():
+                if any(keyword in user_info for keyword in dept_info["keywords"]):
+                    logger.info(f"사용자 {user_id} 학과 감지: {dept_name}")
+                    return dept_name
+            
+            # 기본값
+            return "물리치료학과"
+            
+        except Exception as e:
+            logger.warning(f"사용자 학과 감지 실패: {e}")
+            return "물리치료학과"
+    
+    def create_progress_callback(self, user_id: int, file_name: str) -> Callable[[str, float], None]:
+        """
+        진행률 콜백 함수 생성
+        
+        Args:
+            user_id: 사용자 ID
+            file_name: 파일명
+            
+        Returns:
+            Callable: 진행률 콜백 함수
+        """
+        def progress_callback(message: str, progress: float):
+            progress_key = f"{user_id}_{file_name}"
+            self.parsing_status[progress_key] = {
+                "message": message,
+                "progress": progress,
+                "timestamp": datetime.now().isoformat(),
+                "user_id": user_id,
+                "file_name": file_name
+            }
+            logger.info(f"📊 파싱 진행률 ({file_name}): {progress:.1f}% - {message}")
+        
+        return progress_callback
+    
+    def get_parsing_progress(self, user_id: int, file_name: str) -> Dict[str, Any]:
+        """
+        파싱 진행률 조회
+        
+        Args:
+            user_id: 사용자 ID  
+            file_name: 파일명
+            
+        Returns:
+            Dict: 진행률 정보
+        """
+        progress_key = f"{user_id}_{file_name}"
+        return self.parsing_status.get(progress_key, {
+            "message": "대기 중...",
+            "progress": 0.0,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    def clear_parsing_progress(self, user_id: int, file_name: str):
+        """
+        파싱 진행률 정리
+        """
+        progress_key = f"{user_id}_{file_name}"
+        if progress_key in self.parsing_status:
+            del self.parsing_status[progress_key]
     
     def save_parsed_data_to_json(
         self,
         parsed_data: List[Dict[str, Any]],
         source_file_name: str,
-        user_id: int
+        user_id: int,
+        department: str = "물리치료학과"
     ) -> str:
         """
-        파싱된 데이터를 JSON 파일로 저장
+        파싱된 데이터를 JSON 파일로 저장 (학과 정보 포함)
         
         Returns:
             str: 저장된 JSON 파일 경로
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_filename = f"{timestamp}_{user_id}_{source_file_name}"
+        safe_filename = f"{timestamp}_{user_id}_{department}_{source_file_name}"
         json_filename = f"{Path(safe_filename).stem}.json"
         json_path = self.save_parser_dir / json_filename
         
-        # JSON 데이터 준비
+        # JSON 데이터 준비 (학과 정보 추가)
         save_data = {
             "meta": {
                 "source_file": source_file_name,
+                "department": department,
                 "parsed_at": datetime.now().isoformat(),
                 "parsed_by": user_id,
-                "total_questions": len(parsed_data)
+                "total_questions": len(parsed_data),
+                "supported_areas": SUPPORTED_DEPARTMENTS.get(department, {}).get("areas", [])
             },
             "questions": parsed_data
         }
@@ -69,8 +175,136 @@ class QuestionReviewService:
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(save_data, f, ensure_ascii=False, indent=2)
         
-        logger.info(f"파싱된 데이터 JSON 저장 완료: {json_path}")
+        logger.info(f"파싱된 데이터 JSON 저장 완료: {json_path} ({department})")
         return str(json_path)
+    
+    async def parse_and_create_questions(
+        self,
+        db: Session,
+        file_path: str,
+        user_id: int,
+        content_type: str = "auto",
+        file_title: str = None,
+        file_category: str = None
+    ) -> Dict[str, Any]:
+        """
+        파일 파싱 및 문제 생성 (모든 학과 지원, 실시간 진행률)
+        
+        Args:
+            db: 데이터베이스 세션
+            file_path: 업로드된 파일 경로
+            user_id: 사용자 ID
+            content_type: 파일 타입 ("questions", "answers", "auto")
+            file_title: 파일 제목
+            file_category: 파일 카테고리
+            
+        Returns:
+            Dict: 파싱 결과 및 생성된 문제 정보
+        """
+        file_name = Path(file_path).name
+        
+        try:
+            # 1단계: 사용자 학과 감지
+            user_department = self.detect_user_department(db, user_id)
+            logger.info(f"🎯 사용자 {user_id} 학과: {user_department}")
+            
+            # 2단계: 진행률 콜백 생성
+            progress_callback = self.create_progress_callback(user_id, file_name)
+            progress_callback("🚀 파싱 시작 중...", 0.0)
+            
+            # 3단계: QuestionParser로 파싱 (학과 자동감지 + 진행률 콜백)
+            from .question_parser import question_parser
+            
+            parsing_result = question_parser.parse_any_file(
+                file_path=file_path,
+                content_type=content_type,
+                department=user_department,  # 사용자 학과 전달
+                progress_callback=progress_callback
+            )
+            
+            if parsing_result.get("error"):
+                progress_callback(f"❌ 파싱 실패: {parsing_result['error']}", 0.0)
+                return {
+                    "success": False,
+                    "error": parsing_result['error'],
+                    "department": user_department
+                }
+            
+            parsed_data = parsing_result.get("data", [])
+            detected_department = parsing_result.get("department", user_department)
+            
+            if not parsed_data:
+                progress_callback("⚠️ 파싱된 데이터가 없습니다", 0.0)
+                return {
+                    "success": False,
+                    "error": "파싱된 데이터가 없습니다",
+                    "department": detected_department
+                }
+            
+            # 4단계: JSON 파일 저장
+            progress_callback(f"💾 JSON 파일 저장 중... ({len(parsed_data)}개 문제)", 90.0)
+            
+            json_path = self.save_parsed_data_to_json(
+                parsed_data, file_name, user_id, detected_department
+            )
+            
+            # 5단계: 데이터베이스에 문제 생성
+            progress_callback("💾 데이터베이스에 저장 중...", 95.0)
+            
+            questions = await self.create_pending_questions(
+                db=db,
+                parsed_data=parsed_data,
+                source_file_path=file_path,
+                parsed_data_path=json_path,
+                user_id=user_id,
+                file_title=file_title,
+                file_category=file_category,
+                department=detected_department
+            )
+            
+            progress_callback("✅ 파싱 및 저장 완료!", 100.0)
+            
+            # 결과 반환
+            result = {
+                "success": True,
+                "message": f"{detected_department} 문제 {len(questions)}개 파싱 완료",
+                "department": detected_department,
+                "total_questions": len(questions),
+                "questions": [
+                    {
+                        "id": q.id,
+                        "question_number": q.question_number,
+                        "content": q.content[:100] + "..." if len(q.content) > 100 else q.content,
+                        "difficulty": q.difficulty,
+                        "area_name": q.area_name
+                    } for q in questions[:5]  # 처음 5개만 미리보기
+                ],
+                "json_path": json_path,
+                "supported_areas": SUPPORTED_DEPARTMENTS.get(detected_department, {}).get("areas", [])
+            }
+            
+            # 진행률 정리 (지연 후)
+            import asyncio
+            asyncio.create_task(self._cleanup_progress_later(user_id, file_name))
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"파싱 및 문제 생성 실패: {e}")
+            progress_callback(f"❌ 오류 발생: {str(e)}", 0.0)
+            return {
+                "success": False,
+                "error": str(e),
+                "department": "물리치료학과"
+            }
+    
+    async def _cleanup_progress_later(self, user_id: int, file_name: str):
+        """
+        진행률 정보 지연 삭제 (5분 후)
+        """
+        import asyncio
+        await asyncio.sleep(300)  # 5분 대기
+        self.clear_parsing_progress(user_id, file_name)
     
     async def create_pending_questions(
         self,
@@ -80,10 +314,11 @@ class QuestionReviewService:
         parsed_data_path: str,
         user_id: int,
         file_title: str = None,
-        file_category: str = None
+        file_category: str = None,
+        department: str = "물리치료학과"
     ) -> List[Question]:
         """
-        파싱된 데이터를 대기 상태 문제로 생성
+        파싱된 데이터를 대기 상태 문제로 생성 (모든 학과 지원)
         """
         questions = []
         
@@ -93,8 +328,10 @@ class QuestionReviewService:
         # 문제 번호 순서로 정렬
         limited_data.sort(key=lambda x: x.get("question_number", 0))
         
+        logger.info(f"📚 {department} 문제 {len(limited_data)}개 생성 시작")
+        
         for item in limited_data:
-            logger.info(f"문제 {item.get('question_number')} 생성 시도 중...")
+            logger.info(f"문제 {item.get('question_number')} 생성 시도 중... ({department})")
             
             # 기본 필드 추출 (데이터베이스 enum에 맞는 값 사용)
             question_type = item.get("file_type", "multiple_choice")
@@ -116,165 +353,64 @@ class QuestionReviewService:
             
             difficulty = item.get("difficulty", "중")
             
-            # AI 분석 실행 (기존 딥시크 분석기 사용)
+            # AI 분석 결과가 이미 있는지 확인 (question_parser에서 처리됨)
             ai_analysis = None
-            if AI_ANALYZER_AVAILABLE and content and content.strip():
-                try:
-                    # 사용자 부서 정보로 학과 판단
-                    department = "물리치료"  # TODO: 사용자 부서에서 가져오기
-                    question_number = item.get("question_number", 1)
-                    
-                    # 기존 딥시크 분석기 사용
-                    from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
-                    analyzer = DifficultyAnalyzer()
-                    
-                    # 문제 내용 기반 딥시크 분석
-                    result = analyzer.analyze_question_auto(content, question_number, department)
-                    
-                    if result:
-                        # 딥시크 분석 결과로 난이도 업데이트
-                        difficulty = result.get("difficulty", "중")
-                        ai_question_type = result.get("question_type", "객관식")
-                        ai_reasoning = result.get("ai_reasoning", "딥시크 AI 분석 완료")
-                        
-                        # AI 문제 유형을 DB enum으로 매핑
-                        type_mapping = {
-                            "객관식": "multiple_choice",
-                            "단답형": "short_answer", 
-                            "서술형": "essay",
-                            "계산형": "calculation",
-                            "임상형": "clinical"
-                        }
-                        db_question_type = type_mapping.get(ai_question_type, "multiple_choice")
-                        
-                        # AI 분석 결과 저장
-                        ai_analysis = {
-                            "ai_difficulty": difficulty,
-                            "ai_question_type": ai_question_type,
-                            "db_question_type": db_question_type,
-                            "ai_confidence": "high" if result.get("ai_reasoning") else "medium",
-                            "ai_reasoning": ai_reasoning,
-                            "analysis_method": "deepseek"
-                        }
-                        
-                        # DB에 저장할 때는 DB enum 타입 사용
-                        question_type = db_question_type
-                        
-                        # 영역이름은 AI 분석 결과 우선, 없으면 평가위원 데이터에서 조회
-                        area_name = result.get("area_name")
-                        if not area_name or area_name == "일반":
-                            year = item.get("year", 2024)
-                            question_number = item.get("question_number", 1)
-                            area_name = evaluator_type_mapper.get_area_name_for_question(
-                                department + "학과", year, question_number
-                            )
-                        item["area_name"] = area_name
-                        
-                        # JSON 파일에 AI 분석 결과 반영
-                        item["difficulty"] = difficulty
-                        item["ai_question_type"] = ai_question_type
-                        item["ai_analysis_complete"] = True
-                        item["ai_confidence"] = ai_analysis["ai_confidence"]
-                        item["ai_reasoning"] = ai_reasoning
-                        
-                        logger.info(f"🤖 문제 {question_number}: 딥시크 분석 완료 (난이도: {difficulty}, 유형: {ai_question_type})")
-                    else:
-                        # 딥시크 실패 시 폴백
-                        fallback_difficulty = analyzer.predict_difficulty_by_position(question_number, department)
-                        difficulty = fallback_difficulty
-                        
-                        ai_analysis = {
-                            "ai_difficulty": difficulty,
-                            "ai_question_type": "객관식",
-                            "db_question_type": "multiple_choice",
-                            "ai_confidence": "low",
-                            "ai_reasoning": f"딥시크 분석 실패, 문제 위치 기반 예측: {difficulty}",
-                            "analysis_method": "position_based"
-                        }
-                        
-                        question_type = "multiple_choice"
-                        
-                        # 평가위원 데이터에서 영역이름 조회
-                        year = item.get("year", 2024)
-                        question_number = item.get("question_number", 1)
-                        area_name = evaluator_type_mapper.get_area_name_for_question(
-                            department + "학과", year, question_number
-                        )
-                        item["area_name"] = area_name
-                        
-                        item["difficulty"] = difficulty
-                        item["ai_question_type"] = "객관식"
-                        item["ai_analysis_complete"] = True
-                        item["ai_confidence"] = "low"
-                        item["ai_reasoning"] = ai_analysis["ai_reasoning"]
-                        
-                        logger.warning(f"⚠️ 문제 {question_number}: 딥시크 실패, 위치 기반 예측 사용 (난이도: {difficulty})")
-                        
-                except Exception as e:
-                    # 완전 실패 시 위치 기반 폴백
-                    from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
-                    analyzer = DifficultyAnalyzer()
-                    department = "물리치료"
-                    question_number = item.get("question_number", 1)
-                    
-                    fallback_difficulty = analyzer.predict_difficulty_by_position(question_number, department)
-                    difficulty = fallback_difficulty
-                    
-                    ai_analysis = {
-                        "ai_difficulty": difficulty,
-                        "ai_question_type": "객관식",
-                        "db_question_type": "multiple_choice",
-                        "ai_confidence": "low",
-                        "ai_reasoning": f"AI 분석 오류로 위치 기반 예측 사용: {str(e)}",
-                        "analysis_method": "fallback"
-                    }
-                    
-                    question_type = "multiple_choice"
-                    
-                    # 평가위원 데이터에서 영역이름 조회
-                    year = item.get("year", 2024)
-                    question_number = item.get("question_number", 1)
-                    area_name = evaluator_type_mapper.get_area_name_for_question(
-                        department + "학과", year, question_number
-                    )
-                    item["area_name"] = area_name
-                    
-                    item["difficulty"] = difficulty
-                    item["ai_question_type"] = "객관식"
-                    item["ai_analysis_complete"] = False
-                    item["ai_confidence"] = "low"
-                    item["ai_reasoning"] = ai_analysis["ai_reasoning"]
-                    
-                    logger.warning(f"⚠️ AI 분석 실패 (문제 {question_number}): {e} - 위치 기반 폴백 사용 (난이도: {difficulty})")
+            if item.get("ai_analysis_complete"):
+                ai_analysis = {
+                    "ai_difficulty": item.get("ai_difficulty", "중"),
+                    "ai_question_type": item.get("ai_question_type", "객관식"),
+                    "ai_confidence": item.get("ai_confidence", "medium"),
+                    "ai_reasoning": item.get("ai_reasoning", "AI 분석 완료"),
+                    "analysis_method": "question_parser",
+                    "department": department
+                }
+                
+                # AI 분석 결과로 난이도 업데이트
+                difficulty = ai_analysis["ai_difficulty"]
+                
+                logger.info(f"🤖 문제 {item.get('question_number')}: AI 분석 결과 사용 (난이도: {difficulty})")
+            else:
+                # AI 분석이 없는 경우 기본값 설정
+                ai_analysis = {
+                    "ai_difficulty": difficulty,
+                    "ai_question_type": "객관식",
+                    "ai_confidence": "low",
+                    "ai_reasoning": "파싱 단계에서 AI 분석 미완료",
+                    "analysis_method": "default",
+                    "department": department
+                }
+                
+                logger.warning(f"⚠️ 문제 {item.get('question_number')}: AI 분석 결과 없음, 기본값 사용")
 
-            # AI 분석이 없는 경우에도 평가위원 데이터에서 영역이름 조회
-            if "area_name" not in item or not item.get("area_name"):
-                # TODO: 사용자 부서 정보에서 가져오기 (현재는 기본값 사용)
-                department = "물리치료"
+            # 영역명 확인 및 설정
+            area_name = item.get("area_name")
+            if not area_name or area_name == "일반":
+                # 평가위원 데이터에서 영역명 조회
                 year = item.get("year", 2024)
                 question_number = item.get("question_number", 1)
                 area_name = evaluator_type_mapper.get_area_name_for_question(
-                    department + "학과", year, question_number
+                    department, year, question_number
                 )
-                item["area_name"] = area_name
+                
+                # 학과별 기본 영역 할당
+                if not area_name:
+                    default_areas = SUPPORTED_DEPARTMENTS.get(department, {}).get("areas", [])
+                    if default_areas:
+                        area_name = default_areas[0]  # 첫 번째 영역을 기본값으로
+                    else:
+                        area_name = "일반"
 
             # AI 분석 정보를 메타데이터에 포함
-            ai_metadata = {}
-            if ai_analysis:
-                ai_metadata = {
-                    "ai_analysis_complete": True,
-                    "ai_confidence": ai_analysis.get("ai_confidence", "medium"),
-                    "ai_reasoning": ai_analysis.get("ai_reasoning", ""),
-                    "ai_question_type": ai_analysis.get("ai_question_type", "객관식"),
-                    "ai_difficulty": ai_analysis.get("ai_difficulty", "중"),
-                    "analysis_timestamp": datetime.now().isoformat()
-                }
-            else:
-                ai_metadata = {
-                    "ai_analysis_complete": False,
-                    "analysis_status": "대기 중",
-                    "fallback_mode": True
-                }
+            ai_metadata = {
+                "ai_analysis_complete": ai_analysis is not None,
+                "ai_confidence": ai_analysis.get("ai_confidence", "medium") if ai_analysis else "unknown",
+                "ai_reasoning": ai_analysis.get("ai_reasoning", "") if ai_analysis else "",
+                "ai_question_type": ai_analysis.get("ai_question_type", "객관식") if ai_analysis else "객관식",
+                "ai_difficulty": ai_analysis.get("ai_difficulty", "중") if ai_analysis else "중",
+                "analysis_timestamp": datetime.now().isoformat(),
+                "department": department,
+                "analysis_method": ai_analysis.get("analysis_method", "default") if ai_analysis else "default"
+            }
 
             question = Question(
                 question_number=item.get("question_number", 1),
@@ -284,7 +420,7 @@ class QuestionReviewService:
                 options=item.get("options", {}),
                 correct_answer=item.get("correct_answer", ""),
                 subject=item.get("subject", ""),
-                area_name=item.get("area_name", ""),
+                area_name=area_name,
                 difficulty=difficulty,
                 year=item.get("year"),
                 approval_status="pending",
@@ -300,64 +436,21 @@ class QuestionReviewService:
             
             db.add(question)
             questions.append(question)
-            logger.info(f"문제 {item.get('question_number')} 추가 완료")
-        
-        # AI 분석 결과로 JSON 파일 업데이트
-        if parsed_data_path and os.path.exists(parsed_data_path):
-            self.update_json_with_ai_results(parsed_data_path, limited_data)
+            logger.info(f"문제 {item.get('question_number')} 추가 완료 ({department})")
         
         db.commit()
-        logger.info(f"대기 상태 문제 {len(questions)}개 생성 완료")
+        logger.info(f"✅ {department} 대기 상태 문제 {len(questions)}개 생성 완료")
         return questions
 
-    def update_json_with_ai_results(self, json_path: str, updated_data: List[Dict[str, Any]]) -> bool:
-        """
-        AI 분석 결과로 JSON 파일 업데이트
-        """
-        try:
-            if not os.path.exists(json_path):
-                return False
-            
-            with open(json_path, 'r', encoding='utf-8') as f:
-                json_data = json.load(f)
-            
-            # 기존 questions 배열을 AI 분석 결과로 업데이트
-            if "questions" in json_data:
-                for i, question in enumerate(json_data["questions"]):
-                    if i < len(updated_data):
-                        # AI 분석 결과 필드 업데이트
-                        updated_question = updated_data[i]
-                        question["difficulty"] = updated_question.get("difficulty", question.get("difficulty"))
-                        question["ai_question_type"] = updated_question.get("ai_question_type", "객관식")
-                        question["ai_analysis_complete"] = updated_question.get("ai_analysis_complete", False)
-                        question["ai_confidence"] = updated_question.get("ai_confidence", "medium")
-                        question["ai_reasoning"] = updated_question.get("ai_reasoning", "")
-                        question["updated_at"] = datetime.now().isoformat()
-            
-            # 메타 정보 업데이트
-            if "meta" in json_data:
-                json_data["meta"]["ai_analysis_completed"] = True
-                json_data["meta"]["last_ai_update"] = datetime.now().isoformat()
-            
-            # 파일 저장
-            with open(json_path, 'w', encoding='utf-8') as f:
-                json.dump(json_data, f, ensure_ascii=False, indent=2)
-            
-            logger.info(f"✅ JSON 파일 AI 분석 결과 업데이트 완료: {json_path}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"❌ JSON 파일 업데이트 실패: {e}")
-            return False
-    
     def get_pending_questions(
         self, 
         db: Session, 
         user_id: Optional[int] = None,
-        limit: int = 300  # 88개 + 여유분으로 200개로 증가
+        limit: int = 300,
+        department_filter: Optional[str] = None
     ) -> List[QuestionPreviewItem]:
         """
-        승인 대기 중인 문제들 조회 (교수 ID 기반 지속성)
+        승인 대기 중인 문제들 조회 (교수 ID 기반 지속성) - 학과 필터 지원
         """
         query = db.query(Question).filter(
             Question.approval_status == "pending"
@@ -366,6 +459,14 @@ class QuestionReviewService:
         if user_id:
             # last_modified_by로 교수 문제 필터링 (생성자 추적)
             query = query.filter(Question.last_modified_by == user_id)
+        
+        # 학과 필터링 (메타데이터 기반)
+        if department_filter:
+            # JSON 메타데이터에서 학과 정보 필터링 (PostgreSQL JSON 연산자 사용)
+            from sqlalchemy import text
+            query = query.filter(
+                text("metadata->>'department' = :dept").params(dept=department_filter)
+            )
         
         questions = query.order_by(Question.question_number.asc(), desc(Question.created_at)).limit(limit).all()
         
@@ -379,6 +480,8 @@ class QuestionReviewService:
                 else:
                     ai_metadata = {}
             
+            # 학과 정보 추출
+            question_department = ai_metadata.get("department", "물리치료학과")
             ai_status = "🤖 AI 분석 완료" if ai_metadata.get("ai_analysis_complete") else "🤖 AI가 난이도 분석 중..."
             
             result.append(QuestionPreviewItem(
@@ -392,7 +495,7 @@ class QuestionReviewService:
                 area_name=q.area_name,
                 difficulty=q.difficulty if q.difficulty else "중",
                 year=q.year,
-                file_title=q.file_title,
+                file_title=f"[{question_department}] {q.file_title}" if q.file_title else f"[{question_department}] 파일",
                 file_category=q.file_category,
                 last_modified_by=q.last_modified_by,
                 last_modified_at=q.last_modified_at,
@@ -755,5 +858,95 @@ class QuestionReviewService:
                 "difficulty_accuracy": {},
                 "error_rate": 100.0,
                 "average_confidence": 0.0,
+                "error": str(e)
+            }
+
+    def get_department_statistics(self, db: Session, user_id: Optional[int] = None) -> Dict[str, Any]:
+        """
+        학과별 문제 통계 조회
+        
+        Args:
+            db: 데이터베이스 세션
+            user_id: 사용자 ID (None인 경우 전체 통계)
+            
+        Returns:
+            Dict: 학과별 통계 정보
+        """
+        try:
+            query = db.query(Question)
+            
+            if user_id:
+                query = query.filter(Question.last_modified_by == user_id)
+            
+            all_questions = query.all()
+            
+            # 학과별 분류
+            department_stats = {}
+            
+            for q in all_questions:
+                # 메타데이터에서 학과 정보 추출
+                ai_metadata = {}
+                if hasattr(q, 'metadata') and q.metadata:
+                    if isinstance(q.metadata, dict):
+                        ai_metadata = q.metadata
+                
+                department = ai_metadata.get("department", "물리치료학과")
+                
+                if department not in department_stats:
+                    department_stats[department] = {
+                        "total_questions": 0,
+                        "pending": 0,
+                        "approved": 0,
+                        "rejected": 0,
+                        "difficulty_distribution": {"하": 0, "중": 0, "상": 0},
+                        "areas": set(),
+                        "latest_upload": None
+                    }
+                
+                stats = department_stats[department]
+                stats["total_questions"] += 1
+                
+                # 상태별 카운트
+                if q.approval_status == "pending":
+                    stats["pending"] += 1
+                elif q.approval_status == "approved":
+                    stats["approved"] += 1
+                elif q.approval_status == "rejected":
+                    stats["rejected"] += 1
+                
+                # 난이도별 카운트
+                if q.difficulty:
+                    difficulty = str(q.difficulty)
+                    if difficulty in stats["difficulty_distribution"]:
+                        stats["difficulty_distribution"][difficulty] += 1
+                
+                # 영역 수집
+                if q.area_name:
+                    stats["areas"].add(q.area_name)
+                
+                # 최신 업로드 시간
+                if not stats["latest_upload"] or q.created_at > stats["latest_upload"]:
+                    stats["latest_upload"] = q.created_at
+            
+            # set을 list로 변환
+            for dept_name, stats in department_stats.items():
+                stats["areas"] = list(stats["areas"])
+                if stats["latest_upload"]:
+                    stats["latest_upload"] = stats["latest_upload"].isoformat()
+            
+            return {
+                "department_statistics": department_stats,
+                "supported_departments": list(SUPPORTED_DEPARTMENTS.keys()),
+                "total_departments": len(department_stats),
+                "overall_total": sum(stats["total_questions"] for stats in department_stats.values())
+            }
+            
+        except Exception as e:
+            logger.error(f"학과별 통계 조회 실패: {e}")
+            return {
+                "department_statistics": {},
+                "supported_departments": list(SUPPORTED_DEPARTMENTS.keys()),
+                "total_departments": 0,
+                "overall_total": 0,
                 "error": str(e)
             } 

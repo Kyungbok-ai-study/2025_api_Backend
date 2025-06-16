@@ -1,10 +1,10 @@
 """
 문제 및 정답 데이터 파싱 서비스 (Gemini 2.0 Flash 기반)
 
-모든 파일 형식을 Gemini API로 통합 처리
+모든 파일 형식을 Gemini API로 통합 처리 - 모든 학과 지원
 """
 import json
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Union, Callable
 from datetime import datetime, timezone
 import google.generativeai as genai
 import os
@@ -30,8 +30,18 @@ POPPLER_PATH = os.getenv(
     r'C:\Users\jaewo\Desktop\2025\2025_backend\Release-24.08.0-0\poppler-24.08.0\Library\bin'
 )
 
+# 학과 매핑
+DEPARTMENT_MAPPING = {
+    "물리치료학과": "물리치료",
+    "작업치료학과": "작업치료", 
+    "간호학과": "간호",
+    "물리치료": "물리치료",
+    "작업치료": "작업치료",
+    "간호": "간호"
+}
+
 class QuestionParser:
-    """gemini-2.0-flash-exp 기반 통합 파서"""
+    """gemini-2.0-flash-exp 기반 통합 파서 - 모든 학과 지원"""
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -50,18 +60,66 @@ class QuestionParser:
             self.model = None
             logger.warning("Gemini API 키가 설정되지 않았습니다.")
     
-    def parse_any_file(self, file_path: str, content_type: str = "auto", department: str = "일반") -> Dict[str, Any]:
+    def detect_department_from_content(self, file_path: str, content_sample: str = "") -> str:
         """
-        모든 파일 형식을 Gemini로 파싱 (분할 파싱 지원)
+        파일명과 내용으로부터 학과 자동 감지
+        
+        Args:
+            file_path: 파일 경로
+            content_sample: 파일 내용 샘플
+            
+        Returns:
+            str: 감지된 학과명
+        """
+        file_name = Path(file_path).name.lower()
+        content_lower = content_sample.lower()
+        
+        # 파일명 기반 감지
+        if any(keyword in file_name for keyword in ['물치', '물리치료', 'pt', 'physical']):
+            return "물리치료학과"
+        elif any(keyword in file_name for keyword in ['작치', '작업치료', 'ot', 'occupational']):
+            return "작업치료학과"
+        elif any(keyword in file_name for keyword in ['간호', 'nursing', '너싱']):
+            return "간호학과"
+        
+        # 내용 기반 감지
+        if any(keyword in content_lower for keyword in ['물리치료', '재활의학', '운동치료', '전기치료']):
+            return "물리치료학과"
+        elif any(keyword in content_lower for keyword in ['작업치료', '인지치료', '감각통합', '보조기구']):
+            return "작업치료학과"
+        elif any(keyword in content_lower for keyword in ['간호학', '간호사', '환자간호', '임상간호']):
+            return "간호학과"
+        
+        # 기본값 (파일명에서 추정)
+        if '2.' in file_name or '3.' in file_name:
+            return "작업치료학과"  # 작업치료 파일 패턴
+        elif '1.' in file_name:
+            return "물리치료학과"
+        
+        return "물리치료학과"  # 최종 기본값
+    
+    def parse_any_file(
+        self, 
+        file_path: str, 
+        content_type: str = "auto", 
+        department: str = "auto",
+        progress_callback: Optional[Callable[[str, float], None]] = None
+    ) -> Dict[str, Any]:
+        """
+        모든 파일 형식을 Gemini로 파싱 (분할 파싱 지원) - 모든 학과 지원
         
         Args:
             file_path: 파일 경로
             content_type: "questions", "answers", 또는 "auto" (자동 감지)
-            department: 학과 정보 (딥시크 분석용)
+            department: 학과 정보 ("auto"인 경우 자동 감지)
+            progress_callback: 진행률 콜백 함수 (message: str, progress: float)
             
         Returns:
             파싱된 데이터
         """
+        if progress_callback:
+            progress_callback("🚀 파싱 시작 중...", 0.0)
+        
         if not self.model:
             logger.error("Gemini API가 초기화되지 않았습니다.")
             return {"type": content_type, "data": [], "error": "Gemini API not initialized"}
@@ -72,19 +130,36 @@ class QuestionParser:
 
         # 파일 크기 확인
         file_size = os.path.getsize(file_path)
-        logger.info(f"파일 크기: {file_size / (1024*1024):.2f} MB")
+        logger.info(f"📄 파일 크기: {file_size / (1024*1024):.2f} MB")
+        
+        if progress_callback:
+            progress_callback(f"📄 파일 분석 중... ({file_size / (1024*1024):.2f} MB)", 5.0)
+
+        # 학과 자동 감지
+        if department == "auto":
+            try:
+                # 파일명으로 먼저 감지 시도
+                detected_dept = self.detect_department_from_content(file_path)
+                logger.info(f"🎯 학과 자동 감지: {detected_dept}")
+                department = detected_dept
+                
+                if progress_callback:
+                    progress_callback(f"🎯 학과 감지 완료: {department}", 10.0)
+            except Exception as e:
+                logger.warning(f"학과 자동 감지 실패: {e}, 기본값 사용")
+                department = "물리치료학과"
 
         # DB 스키마 정보
-        db_schema = """
-우리 데이터베이스 구조:
+        db_schema = f"""
+우리 데이터베이스 구조 ({department} 전용):
 Question 테이블:
 - question_number: 문제 번호 (정수, 1~22까지만)
 - content: 문제 내용 (텍스트)
 - description: 문제 설명/지문 (문자열 배열, 예: ["- 설명1", "- 설명2"])
-- options: {"1": "선택지1", "2": "선택지2", ..., "5": "선택지5"}
+- options: {{"1": "선택지1", "2": "선택지2", ..., "5": "선택지5"}}
 - correct_answer: 정답 (문자열, 예: "3")
-- subject: 과목명
-- area_name: 영역이름
+- subject: 과목명 ({department} 관련)
+- area_name: 영역이름 ({department} 전문 영역)
 - difficulty: "하", "중", "상" 중 하나
 - year: 연도 (정수)
 중요: 22번 문제까지만 파싱하세요. 더 많은 문제가 있어도 22번까지만 처리하고 중단하세요.
@@ -95,38 +170,56 @@ Question 테이블:
             file_extension = Path(file_path).suffix.lower()
 
             if file_extension in ['.xlsx', '.xls']:
-                all_data = self._process_excel_file_chunked(file_path, content_type, db_schema, department)
+                if progress_callback:
+                    progress_callback("📊 Excel 파일 처리 중...", 15.0)
+                all_data = self._process_excel_file_chunked(file_path, content_type, db_schema, department, progress_callback)
             elif file_extension == '.pdf':
-                all_data = self._process_pdf_with_images(file_path, content_type, db_schema)
+                if progress_callback:
+                    progress_callback("📖 PDF 파일 처리 중...", 15.0)
+                all_data = self._process_pdf_with_images(file_path, content_type, db_schema, progress_callback)
             else:
-                all_data = self._process_text_file_chunked(file_path, content_type, db_schema)
+                if progress_callback:
+                    progress_callback("📝 텍스트 파일 처리 중...", 15.0)
+                all_data = self._process_text_file_chunked(file_path, content_type, db_schema, progress_callback)
 
             # 22개 제한 적용
             if isinstance(all_data, list):
                 all_data = [item for item in all_data if item.get('question_number', 0) <= 22][:22]
+
+            if progress_callback:
+                progress_callback(f"📋 기본 파싱 완료: {len(all_data)}개 문제", 70.0)
 
             logger.info(f"분할 파싱 완료: {file_path}, 총 데이터 개수: {len(all_data)}")
             
             # 📊 3단계: AI 기반 문제 분석 (content_type이 questions인 경우)
             if content_type == "questions" and all_data:
                 try:
-                    logger.info(f"🤖 AI 문제 분석 시작: {len(all_data)}개 문제")
+                    if progress_callback:
+                        progress_callback(f"🤖 AI 문제 분석 시작: {len(all_data)}개 문제", 75.0)
+                    
+                    logger.info(f"🤖 AI 문제 분석 시작: {len(all_data)}개 문제 ({department})")
                     
                     # AI 분석기 초기화
                     from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
                     ai_analyzer = DifficultyAnalyzer()
                     
-                    # 학과 정보 추출 (department 파라미터 사용)
-                    ai_department = department if department != "일반" else "물리치료학과"
+                    # 학과 정보 매핑
+                    ai_department = DEPARTMENT_MAPPING.get(department, "물리치료")
                     
                     # 각 문제별 AI 분석
-                    for item in all_data:
+                    total_questions = len(all_data)
+                    for idx, item in enumerate(all_data):
                         try:
                             content = item.get("content", "")
                             question_number = item.get("question_number", 1)
                             
+                            # 진행률 업데이트
+                            ai_progress = 75.0 + (idx / total_questions) * 20.0
+                            if progress_callback:
+                                progress_callback(f"🤖 문제 {question_number} AI 분석 중... ({idx+1}/{total_questions})", ai_progress)
+                            
                             if content and content.strip():
-                                # 딥시크 AI 분석
+                                # AI 분석
                                 ai_result = ai_analyzer.analyze_question_auto(content, question_number, ai_department)
                                 
                                 if ai_result:
@@ -146,7 +239,7 @@ Question 테이블:
                                     if not area_name or area_name == "일반":
                                         year = item.get("year", 2024)
                                         area_name = evaluator_type_mapper.get_area_name_for_question(
-                                            ai_department, year, question_number
+                                            department, year, question_number
                                         )
                                     item["area_name"] = area_name
                                     
@@ -159,7 +252,7 @@ Question 테이블:
                                     # 영역명은 평가위원 데이터에서 조회
                                     year = item.get("year", 2024)
                                     area_name = evaluator_type_mapper.get_area_name_for_question(
-                                        ai_department, year, question_number
+                                        department, year, question_number
                                     )
                                     item["area_name"] = area_name
                                     
@@ -170,7 +263,7 @@ Question 테이블:
                                 # 영역명은 평가위원 데이터에서 조회
                                 year = item.get("year", 2024)
                                 area_name = evaluator_type_mapper.get_area_name_for_question(
-                                    ai_department, year, question_number
+                                    department, year, question_number
                                 )
                                 item["area_name"] = area_name
                                 
@@ -183,20 +276,35 @@ Question 테이블:
                             year = item.get("year", 2024)
                             question_number = item.get("question_number", 1)
                             area_name = evaluator_type_mapper.get_area_name_for_question(
-                                ai_department, year, question_number
+                                department, year, question_number
                             )
                             item["area_name"] = area_name
+                    
+                    if progress_callback:
+                        progress_callback(f"🎯 AI 분석 완료: {len(all_data)}개 문제 처리됨", 95.0)
                     
                     logger.info(f"🎯 AI 분석 완료: {len(all_data)}개 문제 처리됨")
                     
                 except Exception as e:
                     logger.error(f"❌ AI 분석 전체 실패: {e}")
+                    if progress_callback:
+                        progress_callback(f"⚠️ AI 분석 실패, 기본 파싱 결과 사용", 95.0)
                     # AI 분석 실패해도 파싱은 계속 진행
             
-            return {"type": content_type if content_type != "auto" else "questions", "data": all_data}
+            if progress_callback:
+                progress_callback("✅ 파싱 완료!", 100.0)
+            
+            return {
+                "type": content_type if content_type != "auto" else "questions", 
+                "data": all_data,
+                "department": department,
+                "total_questions": len(all_data)
+            }
 
         except Exception as e:
             logger.error(f"분할 파싱 오류 ({file_path}): {e}")
+            if progress_callback:
+                progress_callback(f"❌ 파싱 오류: {str(e)}", 0.0)
             return {"type": content_type, "data": [], "error": str(e)}
     
     def _generate_prompt(self, file_path: str, content_type: str, db_schema: str) -> str:
@@ -273,17 +381,11 @@ Question 테이블:
   {
     "question_number": 1,
     "correct_answer": "2",
-    "subject": null,
-    "area_name": null,
-    "difficulty": null,
     "year": 2020
   },
   {
     "question_number": 2,
     "correct_answer": "1",
-    "subject": null,
-    "area_name": null,
-    "difficulty": null,
     "year": 2020
   }
 ]
@@ -294,10 +396,15 @@ Question 테이블:
 - 문제 번호가 명확하지 않은 경우 순서대로 1,2,3... 배정
 - JSON 형식으로만 응답하세요"""
     
-
-
-    async def _process_excel_file_chunked(self, file_path: str, content_type: str, db_schema: str, department: str = "일반") -> List[Dict[str, Any]]:
-        """Excel 파일 분할 처리 (openpyxl 사용) - 문제 유형 자동 배정 포함"""
+    async def _process_excel_file_chunked(
+        self, 
+        file_path: str, 
+        content_type: str, 
+        db_schema: str, 
+        department: str = "물리치료학과",
+        progress_callback: Optional[Callable[[str, float], None]] = None
+    ) -> List[Dict[str, Any]]:
+        """Excel 파일 분할 처리 (openpyxl 사용) - 모든 학과 지원"""
         try:
             from openpyxl import load_workbook
         except ImportError:
@@ -306,11 +413,17 @@ Question 테이블:
         
         all_data = []
         
+        if progress_callback:
+            progress_callback(f"📊 Excel 파일 로드 중... ({department})", 20.0)
+        
         # 📊 1단계: 문제 유형 매핑 데이터 생성 (content_type이 questions인 경우)
         if content_type == "questions":
             try:
                 # 교수명 추출 (파일명에서)
                 professor_name = self._extract_professor_from_filename(file_path)
+                
+                if progress_callback:
+                    progress_callback(f"🎯 문제 유형 자동 배정 중... ({professor_name})", 25.0)
                 
                 # 문제 유형 매핑 처리
                 logger.info(f"🎯 문제 유형 자동 배정 시작: {professor_name} ({department})")
@@ -333,9 +446,17 @@ Question 테이블:
             workbook = load_workbook(file_path, read_only=True)
             logger.info(f"Excel 파일 시트 목록: {workbook.sheetnames}")
             
-            for sheet_name in workbook.sheetnames:
+            if progress_callback:
+                progress_callback(f"📊 시트 분석 중: {len(workbook.sheetnames)}개 시트", 30.0)
+            
+            total_sheets = len(workbook.sheetnames)
+            for sheet_idx, sheet_name in enumerate(workbook.sheetnames):
                 worksheet = workbook[sheet_name]
-                logger.info(f"시트 '{sheet_name}' 처리 중...")
+                logger.info(f"시트 '{sheet_name}' 처리 중... ({sheet_idx+1}/{total_sheets})")
+                
+                sheet_progress = 30.0 + (sheet_idx / total_sheets) * 30.0
+                if progress_callback:
+                    progress_callback(f"📄 시트 '{sheet_name}' 처리 중... ({sheet_idx+1}/{total_sheets})", sheet_progress)
                 
                 # 시트 데이터를 텍스트로 변환
                 sheet_data = []
@@ -354,7 +475,7 @@ Question 테이블:
                     # Gemini로 구조화 요청
                     prompt = self._generate_prompt(f"{file_path} (시트: {sheet_name})", content_type, db_schema)
                     structured_prompt = f"""
-다음은 Excel 시트 '{sheet_name}'의 데이터입니다.
+다음은 Excel 시트 '{sheet_name}'의 데이터입니다 ({department} 전용).
 이 데이터를 분석하여 구조화된 JSON으로 변환해주세요.
 
 {prompt}
@@ -363,6 +484,7 @@ Excel 데이터:
 {sheet_text}
 
 중요: 22번 문제까지만 처리하세요.
+학과: {department}
 """
                     
                     try:
@@ -388,6 +510,9 @@ Excel 데이터:
                                     if not item.get('year') or item.get('year') in [0, None, '']:
                                         item['year'] = year_in_sheet
                                     
+                                    # 학과 정보 추가
+                                    item['department'] = department
+                                    
                                     # 문제 유형 자동 배정 (questions인 경우만)
                                     if content_type == "questions" and hasattr(self, 'question_type_file_key'):
                                         question_content = item.get('content', '')
@@ -408,80 +533,6 @@ Excel 데이터:
                                         
                                         logger.debug(f"   문제 {question_number}: {question_type} ({item['type_name']})")
                                 
-                                # 📊 3단계: 딥시크 AI 기반 문제 분석 (content_type이 questions인 경우)
-                                if content_type == "questions" and sheet_data_parsed:
-                                    try:
-                                        logger.info(f"🤖 딥시크 AI 문제 분석 시작: {len(sheet_data_parsed)}개 문제")
-                                        
-                                        # 딥시크 분석기 초기화
-                                        from app.services.ai_difficulty_analyzer import DifficultyAnalyzer
-                                        ai_analyzer = DifficultyAnalyzer()
-                                        
-                                        # 학과 정보 변환 (딥시크 분석기 형식에 맞게)
-                                        dept_map = {
-                                            "물리치료학과": "물리치료",
-                                            "작업치료학과": "작업치료",
-                                            "간호학과": "간호"  # 기본값
-                                        }
-                                        ai_department = dept_map.get(department, "물리치료")
-                                        
-                                        # 각 문제별 딥시크 분석
-                                        for item in sheet_data_parsed:
-                                            question_content = item.get('content')
-                                            question_number = item.get('question_number', 1)
-                                            
-                                            if question_content:
-                                                try:
-                                                    # 딥시크 자동 분석 실행
-                                                    deepseek_result = ai_analyzer.analyze_question_auto(
-                                                        question_content, question_number, ai_department
-                                                    )
-                                                    
-                                                    if deepseek_result:
-                                                        # 딥시크 분석 결과를 아이템에 추가
-                                                        item['ai_difficulty'] = deepseek_result.get('difficulty', '중')
-                                                        item['ai_question_type'] = deepseek_result.get('question_type', '객관식')
-                                                        item['ai_reasoning'] = deepseek_result.get('ai_reasoning', '딥시크 AI 분석')
-                                                        item['ai_confidence'] = deepseek_result.get('confidence', 'medium')
-                                                        item['ai_analysis_complete'] = True
-                                                        item['difficulty'] = deepseek_result.get('difficulty', '중')  # 난이도 업데이트
-                                                        
-                                                        logger.debug(f"   문제 {question_number}: 딥시크 분석 완료 (난이도: {item['ai_difficulty']})")
-                                                    else:
-                                                        # 딥시크 실패 시 기본값
-                                                        item['ai_difficulty'] = '중'
-                                                        item['ai_question_type'] = '객관식' 
-                                                        item['ai_reasoning'] = '딥시크 분석 실패, 기본값 사용'
-                                                        item['ai_confidence'] = 'low'
-                                                        item['ai_analysis_complete'] = False
-                                                        item['difficulty'] = '중'
-                                                        
-                                                except Exception as e:
-                                                    logger.debug(f"   문제 {question_number} AI 분석 실패: {e}")
-                                                    # 개별 문제 분석 실패해도 계속 진행
-                                                    item['ai_difficulty'] = '중'
-                                                    item['ai_question_type'] = '객관식'
-                                                    item['ai_reasoning'] = f'AI 분석 오류: {str(e)}'
-                                                    item['ai_confidence'] = 'low'
-                                                    item['ai_analysis_complete'] = False
-                                                    item['difficulty'] = '중'
-                                            else:
-                                                logger.warning(f"   문제 {question_number}: 내용이 없어 AI 분석 스킵")
-                                        
-                                        logger.info(f"✅ 딥시크 AI 문제 분석 완료: {len(sheet_data_parsed)}개")
-                                        
-                                    except Exception as e:
-                                        logger.warning(f"⚠️ 딥시크 AI 문제 분석 실패: {e}")
-                                        # AI 분석 실패해도 기본 파싱은 계속 진행
-                                        for item in sheet_data_parsed:
-                                            if 'ai_difficulty' not in item:
-                                                item['ai_difficulty'] = '중'
-                                                item['ai_question_type'] = '객관식'
-                                                item['ai_reasoning'] = '딥시크 분석기 초기화 실패'
-                                                item['ai_confidence'] = 'low'
-                                                item['ai_analysis_complete'] = False
-                                                item['difficulty'] = '중'
-                                
                                 logger.info(f"시트 '{sheet_name}': {len(sheet_data_parsed)}개 항목 파싱 성공 (연도 보정: {year_in_sheet})")
                                 all_data.extend(sheet_data_parsed)
                             else:
@@ -497,35 +548,8 @@ Excel 데이터:
             
             workbook.close()
             
-            # 📊 4단계: AI 분석 및 유형 배정 요약 출력
-            if content_type == "questions" and all_data:
-                # 기존 규칙 기반 유형 통계
-                type_summary = {}
-                # AI 분석 결과 통계
-                ai_type_summary = {}
-                ai_difficulty_summary = {}
-                ai_confidence_summary = {}
-                
-                for item in all_data:
-                    # 기존 규칙 기반 유형
-                    qtype = item.get('question_type', 'unknown')
-                    type_summary[qtype] = type_summary.get(qtype, 0) + 1
-                    
-                    # AI 분석 결과
-                    ai_qtype = item.get('ai_question_type', 'unknown')
-                    ai_type_summary[ai_qtype] = ai_type_summary.get(ai_qtype, 0) + 1
-                    
-                    ai_difficulty = item.get('ai_difficulty', 'unknown')
-                    ai_difficulty_summary[ai_difficulty] = ai_difficulty_summary.get(ai_difficulty, 0) + 1
-                    
-                    ai_confidence = item.get('ai_confidence', 'unknown')
-                    ai_confidence_summary[ai_confidence] = ai_confidence_summary.get(ai_confidence, 0) + 1
-                
-                logger.info(f"🎯 문제 분석 완료 요약:")
-                logger.info(f"   📋 규칙 기반 유형: {type_summary}")
-                logger.info(f"   🤖 AI 분석 유형: {ai_type_summary}")
-                logger.info(f"   📈 AI 난이도 분포: {ai_difficulty_summary}")
-                logger.info(f"   🎯 AI 신뢰도 분포: {ai_confidence_summary}")
+            if progress_callback:
+                progress_callback(f"📊 Excel 파싱 완료: {len(all_data)}개 문제", 60.0)
             
             logger.info(f"Excel 파일 처리 완료: 총 {len(all_data)}개 항목")
             return all_data
@@ -552,8 +576,14 @@ Excel 데이터:
             logger.warning(f"교수명 추출 실패: {e}")
             return "Unknown"
     
-    def _process_pdf_with_images(self, file_path: str, content_type: str, db_schema: str) -> List[Dict[str, Any]]:
-        """PDF 파일을 이미지로 변환하여 Gemini로 처리 (PyPDF2 사용 안함)"""
+    def _process_pdf_with_images(
+        self, 
+        file_path: str, 
+        content_type: str, 
+        db_schema: str,
+        progress_callback: Optional[Callable[[str, float], None]] = None
+    ) -> List[Dict[str, Any]]:
+        """PDF 파일을 이미지로 변환하여 Gemini로 처리 (실시간 진행률 표시)"""
         try:
             from pdf2image import convert_from_path
         except ImportError:
@@ -563,6 +593,9 @@ Excel 데이터:
         all_questions = []
         
         try:
+            if progress_callback:
+                progress_callback("📖 PDF → 이미지 변환 중...", 20.0)
+            
             # PDF를 이미지로 변환 (pdf2image의 역할)
             logger.info("PDF를 이미지로 변환 중...")
             page_images = convert_from_path(
@@ -572,6 +605,9 @@ Excel 데이터:
             )
             
             logger.info(f"총 {len(page_images)}개 페이지 이미지 생성됨")
+            
+            if progress_callback:
+                progress_callback(f"📄 {len(page_images)}개 페이지 이미지 생성 완료", 40.0)
             
             # 파일 타입별 프롬프트 생성
             if content_type == "answers":
@@ -636,9 +672,14 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             
             # 💀 CRITICAL: 모든 페이지에서 문제 추출 (22개까지)
             question_numbers_found = set()
+            total_pages = len(page_images)
             
             for page_num, page_image in enumerate(page_images, 1):
-                logger.info(f"📖 페이지 {page_num}/{len(page_images)} 이미지 분석 중...")
+                page_progress = 40.0 + (page_num / total_pages) * 50.0
+                if progress_callback:
+                    progress_callback(f"📖 페이지 {page_num}/{total_pages} 이미지 분석 중...", page_progress)
+                
+                logger.info(f"📖 페이지 {page_num}/{total_pages} 이미지 분석 중...")
                 
                 try:
                     # Gemini 분석
@@ -709,6 +750,8 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                     # 22개 달성 확인
                     if len(question_numbers_found) >= 22:
                         logger.info(f"🎯 22문제 달성! 더 이상 처리하지 않음")
+                        if progress_callback:
+                            progress_callback("🎯 22문제 달성! 파싱 완료", 90.0)
                         break
                     
                 except Exception as e:
@@ -717,16 +760,20 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             
             # 최종 22개 제한 적용
             all_questions = all_questions[:22]
+            
+            if progress_callback:
+                progress_callback(f"📖 PDF 이미지 분석 완료: {len(all_questions)}개 문제", 90.0)
+            
             logger.info(f"PDF 이미지 분석 완료: 총 {len(all_questions)}개 문제")
             return all_questions
             
         except Exception as e:
             logger.error(f"PDF 이미지 처리 실패: {e}")
-            raise  # PyPDF2 폴백 제거, 에러 발생시 예외 발생
+            if progress_callback:
+                progress_callback(f"❌ PDF 처리 실패: {str(e)}", 0.0)
+            raise
 
-
-
-    def _process_text_file_chunked(self, file_path: str, content_type: str, db_schema: str) -> List[Dict[str, Any]]:
+    def _process_text_file_chunked(self, file_path: str, content_type: str, db_schema: str, progress_callback: Optional[Callable[[str, float], None]] = None) -> List[Dict[str, Any]]:
         """텍스트 파일 분할 처리"""
         encodings = ['utf-8', 'cp949', 'euc-kr', 'latin-1']
         
@@ -740,9 +787,9 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
         else:
             raise UnicodeDecodeError(f"파일 인코딩을 감지할 수 없습니다: {file_path}")
         
-        return self._process_text_chunks(content, content_type, db_schema)
+        return self._process_text_chunks(content, content_type, db_schema, progress_callback)
 
-    def _process_text_chunks(self, content: str, content_type: str, db_schema: str) -> List[Dict[str, Any]]:
+    def _process_text_chunks(self, content: str, content_type: str, db_schema: str, progress_callback: Optional[Callable[[str, float], None]] = None) -> List[Dict[str, Any]]:
         """텍스트 내용을 청크로 분할 처리"""
         all_data = []
         chunk_size = 15000  # 문자 단위 청크 크기
@@ -786,8 +833,6 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
         
         return all_data
 
-
-    
     def _clean_json_text(self, text: str) -> str:
         """JSON 텍스트에서 주석 및 불필요한 요소 제거"""
         lines = text.split('\n')
@@ -1101,7 +1146,6 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             "answer_options": answer_options,
             "correct_answers": correct_answers
         }
-
 
 # 싱글톤 인스턴스
 question_parser = QuestionParser()

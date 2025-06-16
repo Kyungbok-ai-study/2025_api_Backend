@@ -1,0 +1,466 @@
+{
+  "diagnostic_tests": {
+    "version": "1.0",
+    "last_updated": "2025-06-16T15:00:26.128637",
+    "departments": {
+      "물리치료학과": {
+        "code": "PT",
+        "description": "물리치료사 국가고시 기반 진단테스트",
+        "total_rounds": 10,
+        "available_rounds": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tests": {
+          "1": {
+            "round": 1,
+            "title": "물리치료학과 수준 진단테스트",
+            "focus_area": "물리치료학 기초",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round1.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-11T20:33:24.934692",
+            "version": "1.0"
+          },
+          "2": {
+            "round": 2,
+            "title": "물리치료학과 진단테스트 2차 - 운동치료학",
+            "focus_area": "운동치료학",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round2.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.185791",
+            "version": "2.0"
+          },
+          "3": {
+            "round": 3,
+            "title": "물리치료학과 진단테스트 3차 - 신경계 물리치료",
+            "focus_area": "신경계 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round3.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.187790",
+            "version": "3.0"
+          },
+          "4": {
+            "round": 4,
+            "title": "물리치료학과 진단테스트 4차 - 근골격계 물리치료",
+            "focus_area": "근골격계 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round4.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.189791",
+            "version": "4.0"
+          },
+          "5": {
+            "round": 5,
+            "title": "물리치료학과 진단테스트 5차 - 심폐 물리치료",
+            "focus_area": "심폐 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round5.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.191791",
+            "version": "5.0"
+          },
+          "6": {
+            "round": 6,
+            "title": "물리치료학과 진단테스트 6차 - 소아 물리치료",
+            "focus_area": "소아 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round6.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.193790",
+            "version": "6.0"
+          },
+          "7": {
+            "round": 7,
+            "title": "물리치료학과 진단테스트 7차 - 노인 물리치료",
+            "focus_area": "노인 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round7.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.195686",
+            "version": "7.0"
+          },
+          "8": {
+            "round": 8,
+            "title": "물리치료학과 진단테스트 8차 - 스포츠 물리치료",
+            "focus_area": "스포츠 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round8.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.197685",
+            "version": "8.0"
+          },
+          "9": {
+            "round": 9,
+            "title": "물리치료학과 진단테스트 9차 - 정형외과 물리치료",
+            "focus_area": "정형외과 물리치료",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round9.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.199686",
+            "version": "9.0"
+          },
+          "10": {
+            "round": 10,
+            "title": "물리치료학과 진단테스트 10차 - 종합 평가",
+            "focus_area": "종합 평가",
+            "file_path": "data/departments/medical/diagnostic_test_physics_therapy_round10.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:53:20.201686",
+            "version": "10.0"
+          }
+        }
+      },
+      "작업치료학과": {
+        "code": "OT",
+        "description": "작업치료사 국가고시 기반 진단테스트",
+        "total_rounds": 10,
+        "available_rounds": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "tests": {
+          "1": {
+            "round": 1,
+            "title": "작업치료학과 진단테스트 1차 - 작업치료학 기초",
+            "focus_area": "작업치료학 기초",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round1.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.640846",
+            "version": "1.0"
+          },
+          "2": {
+            "round": 2,
+            "title": "작업치료학과 진단테스트 2차 - 일상생활활동(ADL)",
+            "focus_area": "일상생활활동(ADL)",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round2.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.642847",
+            "version": "2.0"
+          },
+          "3": {
+            "round": 3,
+            "title": "작업치료학과 진단테스트 3차 - 인지재활치료",
+            "focus_area": "인지재활치료",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round3.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.644847",
+            "version": "3.0"
+          },
+          "4": {
+            "round": 4,
+            "title": "작업치료학과 진단테스트 4차 - 작업수행분석",
+            "focus_area": "작업수행분석",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round4.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.647145",
+            "version": "4.0"
+          },
+          "5": {
+            "round": 5,
+            "title": "작업치료학과 진단테스트 5차 - 정신사회작업치료",
+            "focus_area": "정신사회작업치료",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round5.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.649266",
+            "version": "5.0"
+          },
+          "6": {
+            "round": 6,
+            "title": "작업치료학과 진단테스트 6차 - 소아작업치료",
+            "focus_area": "소아작업치료",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round6.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.651265",
+            "version": "6.0"
+          },
+          "7": {
+            "round": 7,
+            "title": "작업치료학과 진단테스트 7차 - 신체장애작업치료",
+            "focus_area": "신체장애작업치료",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round7.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.653266",
+            "version": "7.0"
+          },
+          "8": {
+            "round": 8,
+            "title": "작업치료학과 진단테스트 8차 - 감각통합치료",
+            "focus_area": "감각통합치료",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round8.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.655266",
+            "version": "8.0"
+          },
+          "9": {
+            "round": 9,
+            "title": "작업치료학과 진단테스트 9차 - 보조공학",
+            "focus_area": "보조공학",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round9.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.657273",
+            "version": "9.0"
+          },
+          "10": {
+            "round": 10,
+            "title": "작업치료학과 진단테스트 10차 - 종합 평가",
+            "focus_area": "종합 평가",
+            "file_path": "data/departments/medical/diagnostic_test_occupational_therapy_round10.json",
+            "questions_count": 30,
+            "time_limit": 60,
+            "difficulty_levels": [
+              "쉬움",
+              "보통",
+              "어려움"
+            ],
+            "scoring": {
+              "total_score": 100,
+              "score_per_question": 3.3,
+              "pass_score": 60
+            },
+            "status": "active",
+            "created_at": "2025-06-16T14:56:52.658386",
+            "version": "10.0"
+          }
+        }
+      }
+    }
+  }
+}
