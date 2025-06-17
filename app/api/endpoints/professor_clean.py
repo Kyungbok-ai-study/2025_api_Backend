@@ -251,7 +251,7 @@ async def get_student_analysis(
             ai_analyses = []
             for session in legacy_sessions[:5]:  # 최근 5개 세션의 AI 분석
                 analysis = db.query(DiagnosticAIAnalysis).filter(
-                    DiagnosticAIAnalysis.session_id == session.id
+                    DiagnosticAIAnalysis.session_id == session.session_id
                 ).first()
                 
                 if analysis:
