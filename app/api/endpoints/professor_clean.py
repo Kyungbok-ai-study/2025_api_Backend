@@ -229,7 +229,7 @@ async def get_student_analysis(
             
             # 기존 시스템 결과 추가
             for session in legacy_sessions:
-                if session.status == 'completed' and session.final_score:
+                if session.status == 'completed' and session.total_score:
                     diagnosis_results.append({
                         "session_id": session.id,
                         "test_type": session.test_type or "진단테스트",
