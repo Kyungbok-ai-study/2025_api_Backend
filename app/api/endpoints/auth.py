@@ -274,24 +274,37 @@ async def register(
         # 비밀번호 암호화
         hashed_password = get_password_hash(user_data.password)
         
-        # 새 사용자 생성
+        # 새 사용자 생성 (기본 Column 필드만)
         db_user = User(
             user_id=user_data.user_id,
             name=user_data.name,
             email=user_data.email,
             hashed_password=hashed_password,
             school=user_data.school,
+            role="student"
+        )
+        
+        # JSON 기반 필드들은 전용 setter 메서드 사용
+        db_user.set_profile_info(
             department=user_data.department,
             admission_year=user_data.admission_year,
-            phone_number=user_data.phone_number,
-            verification_method=user_data.verification_method,
-            role="student",
+            phone_number=user_data.phone_number
+        )
+        
+        db_user.set_agreements(
             terms_agreed=user_data.terms_agreed,
             privacy_agreed=user_data.privacy_agreed,
             privacy_optional_agreed=user_data.privacy_optional_agreed,
-            marketing_agreed=user_data.marketing_agreed,
+            marketing_agreed=user_data.marketing_agreed
+        )
+        
+        db_user.set_verification_status(
             identity_verified=user_data.identity_verified,
             age_verified=user_data.age_verified,
+            verification_method=user_data.verification_method
+        )
+        
+        db_user.set_account_status(
             is_active=True,
             is_first_login=True
         )
@@ -540,7 +553,7 @@ async def update_user_profile(
             current_user.email = email
         
         if department is not None:
-            current_user.department = department
+            current_user.set_profile_info(department=department)
         
         current_user.updated_at = datetime.utcnow()
         
@@ -623,7 +636,7 @@ async def deactivate_account(
             )
         
         # 계정 비활성화
-        current_user.is_active = False
+        current_user.set_account_status(is_active=False)
         current_user.updated_at = datetime.utcnow()
         
         db.commit()
