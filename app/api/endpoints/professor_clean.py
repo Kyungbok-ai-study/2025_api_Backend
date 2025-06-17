@@ -205,7 +205,7 @@ async def get_student_analysis(
             # 기존 진단 시스템 세션들
             legacy_sessions = db.query(DiagnosticSession).filter(
                 DiagnosticSession.user_id == student_id
-            ).order_by(desc(DiagnosticSession.start_time)).limit(20).all()
+            ).order_by(desc(DiagnosticSession.started_at)).limit(20).all()
             
             # 진단테스트 결과 통합
             diagnosis_results = []
@@ -233,9 +233,9 @@ async def get_student_analysis(
                     diagnosis_results.append({
                         "session_id": session.id,
                         "test_type": session.test_type or "진단테스트",
-                        "started_at": session.start_time.isoformat() if session.start_time else None,
-                        "completed_at": session.end_time.isoformat() if session.end_time else None,
-                        "score": session.final_score,
+                        "started_at": session.started_at.isoformat() if session.started_at else None,
+                        "completed_at": session.completed_at.isoformat() if session.completed_at else None,
+                        "score": session.total_score,
                         "total_questions": session.total_questions or 30,
                         "correct_answers": session.correct_answers or 0,
                         "time_taken_seconds": round(session.total_time_ms / 1000) if session.total_time_ms else 0,
