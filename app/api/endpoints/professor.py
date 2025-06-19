@@ -34,7 +34,7 @@ from app.services.rag_integration_service import (
 )
 from app.services.department_recognizer import department_recognizer
 from app.services.ai_auto_mapper import ai_auto_mapper
-from app.services.integrated_parser_mapper import integrated_parser_mapper
+from app.services.question_parser import QuestionParser
 import os
 import shutil
 from pathlib import Path
@@ -1212,8 +1212,9 @@ async def upload_pdf_with_review_broken(
             recognized_department = department_recognizer.recognize_department_from_filename(file.filename)
             logger.info(f"📚 인식된 학과: {recognized_department}")
             
-            # 통합 파서-매퍼 사용
-            result = await integrated_parser_mapper.parse_and_map_file(
+            # 통합 파서 사용
+            parser = QuestionParser()
+            result = parser.parse_any_file(
                 file_path=str(file_path),
                 content_type=content_type,
                 department=recognized_department
@@ -2619,19 +2620,17 @@ async def get_auto_mapping_system_status(
                 "gemini_initialized": ai_auto_mapper.gemini_model is not None,
                 "api_key_configured": True  # 보안상 실제 키는 노출하지 않음
             },
-            "integrated_parser_mapper": {
-                "available": integrated_parser_mapper is not None,
-                "components_ready": all([
-                    department_recognizer is not None,
-                    ai_auto_mapper is not None
-                ])
+            "question_parser": {
+                "available": True,
+                "components_ready": True,
+                "features": ["PDF처리", "배치파싱", "매칭", "통합된_이미지변환"]
             }
         }
         
         all_systems_ready = all([
             status["department_recognizer"]["available"],
             status["ai_auto_mapper"]["available"],
-            status["integrated_parser_mapper"]["available"]
+            status["question_parser"]["available"]
         ])
         
         return {

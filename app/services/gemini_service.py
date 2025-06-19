@@ -205,31 +205,13 @@ class GeminiService:
         return prompt
     
     async def _convert_pdf_to_images(self, file_path: str) -> List[str]:
-        """PDF를 이미지로 변환"""
+        """PDF를 이미지로 변환 (통합 파서 사용)"""
         try:
-            # PyMuPDF나 pdf2image 등을 사용하여 PDF를 이미지로 변환
-            # 여기서는 간단한 대체 구현
-            import fitz  # PyMuPDF
-            
-            doc = fitz.open(file_path)
-            images = []
-            
-            for page_num in range(min(len(doc), 10)):  # 최대 10페이지
-                page = doc[page_num]
-                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2배 확대
-                img_data = pix.tobytes("png")
-                img_base64 = base64.b64encode(img_data).decode()
-                images.append(img_base64)
-            
-            doc.close()
-            return images
-            
-        except ImportError:
-            # PyMuPDF 없는 경우 대체 방법
-            logger.warning("PyMuPDF가 설치되지 않았습니다. PDF 이미지 변환을 건너뜁니다.")
-            return []
+            from app.services.question_parser import QuestionParser
+            parser = QuestionParser()
+            return parser._convert_pdf_to_images_unified(file_path, max_pages=10)
         except Exception as e:
-            logger.error(f"PDF 이미지 변환 실패: {e}")
+            logger.error(f"통합 PDF 이미지 변환 실패: {e}")
             return []
     
     def _process_gemini_response(
@@ -305,54 +287,31 @@ class GeminiService:
         file_path: str, 
         department: str
     ) -> Dict[str, Any]:
-        """Gemini 사용 불가시 대체 PDF 파싱"""
+        """Gemini 사용 불가시 대체 PDF 파싱 (통합 파서 사용)"""
         try:
             logger.info(f"📄 대체 PDF 파싱 방법 사용: {file_path}")
             
-            # PyPDF2나 다른 라이브러리를 사용한 기본 텍스트 추출
-            try:
-                import PyPDF2
-                
-                with open(file_path, 'rb') as file:
-                    pdf_reader = PyPDF2.PdfReader(file)
-                    content = ""
-                    
-                    for page_num in range(len(pdf_reader.pages)):
-                        page = pdf_reader.pages[page_num]
-                        content += page.extract_text() + "\n\n"
-                
-                if not content.strip():
-                    raise Exception("PDF에서 텍스트를 추출할 수 없습니다.")
-                
-                return {
-                    "success": True,
-                    "content": content.strip(),
-                    "metadata": {
-                        "source_file": Path(file_path).name,
-                        "department": department,
-                        "content_length": len(content),
-                        "pages_processed": len(pdf_reader.pages),
-                        "parser": "PyPDF2 (fallback)",
-                        "extracted_at": datetime.now().isoformat()
-                    },
-                    "extraction_type": "fallback",
+            from app.services.question_parser import QuestionParser
+            parser = QuestionParser()
+            content = parser._extract_pdf_text_fallback(file_path)
+            
+            if not content.strip():
+                raise Exception("PDF에서 텍스트를 추출할 수 없습니다.")
+            
+            return {
+                "success": True,
+                "content": content.strip(),
+                "metadata": {
+                    "source_file": Path(file_path).name,
                     "department": department,
-                    "parsed_at": datetime.now().isoformat()
-                }
-                
-            except ImportError:
-                logger.warning("PyPDF2가 설치되지 않았습니다.")
-                
-                # 최후의 대체 방법: 빈 결과 반환
-                return {
-                    "success": False,
-                    "error": "PDF 파싱 라이브러리가 없습니다.",
-                    "content": "",
-                    "metadata": {},
-                    "extraction_type": "failed",
-                    "department": department,
-                    "parsed_at": datetime.now().isoformat()
-                }
+                    "content_length": len(content),
+                    "parser": "통합 파서 (fallback)",
+                    "extracted_at": datetime.now().isoformat()
+                },
+                "extraction_type": "fallback",
+                "department": department,
+                "parsed_at": datetime.now().isoformat()
+            }
                 
         except Exception as e:
             logger.error(f"❌ 대체 PDF 파싱 실패: {e}")
@@ -407,7 +366,17 @@ JSON 형식으로 결과를 제공해주세요:
             import re
             json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
             if json_match:
-                return json.loads(json_match.group())
+                # 통합 AI JSON 파서 사용
+                from app.services.question_parser import QuestionParser
+                result = QuestionParser.parse_ai_json_response(
+                    json_match.group(),
+                    fallback_data={"error": "JSON 파싱 실패"}
+                )
+                
+                if "error" not in result:
+                    return result
+                else:
+                    return json.loads(json_match.group())
             
         except Exception as e:
             logger.warning(f"Gemini 구조 분석 실패: {e}")

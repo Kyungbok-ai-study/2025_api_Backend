@@ -302,11 +302,14 @@ JSON 형식으로만 답변해주세요.
         if result["success"]:
             try:
                 content = result["content"]
-                # JSON 파싱 시도
-                import re
-                json_match = re.search(r'\{.*\}', content, re.DOTALL)
-                if json_match:
-                    question_data = json.loads(json_match.group())
+                # 통합 AI JSON 파서 사용
+                from app.services.question_parser import QuestionParser
+                question_data = QuestionParser.parse_ai_json_response(
+                    content,
+                    fallback_data=None
+                )
+                
+                if "error" not in question_data:
                     return {
                         "success": True,
                         "question": question_data,

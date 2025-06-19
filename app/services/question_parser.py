@@ -2,6 +2,7 @@
 문제 및 정답 데이터 파싱 서비스 (Gemini 2.0 Flash 기반)
 
 모든 파일 형식을 Gemini API로 통합 처리 - 모든 학과 지원
+통합된 PDF 처리 및 배치 파싱 기능 포함
 """
 import json
 from typing import List, Dict, Any, Optional, Union, Callable
@@ -14,6 +15,7 @@ import logging
 import re
 import requests
 import pandas as pd
+import asyncio
 
 from app.models.question import DifficultyLevel
 from app.core.config import settings
@@ -41,7 +43,7 @@ DEPARTMENT_MAPPING = {
 }
 
 class QuestionParser:
-    """gemini-2.0-flash-exp 기반 통합 파서 - 모든 학과 지원"""
+    """gemini-2.0-flash-exp 기반 통합 파서 - 모든 학과 지원 + 통합 PDF 처리"""
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -583,31 +585,30 @@ Excel 데이터:
         db_schema: str,
         progress_callback: Optional[Callable[[str, float], None]] = None
     ) -> List[Dict[str, Any]]:
-        """PDF 파일을 이미지로 변환하여 Gemini로 처리 (실시간 진행률 표시)"""
-        try:
-            from pdf2image import convert_from_path
-        except ImportError:
-            logger.error("pdf2image 라이브러리가 설치되지 않았습니다.")
-            raise ImportError("pdf2image가 필요합니다. pip install pdf2image로 설치하세요.")
-        
+        """PDF 파일을 이미지로 변환하여 Gemini로 처리 (통합 PDF 처리 사용)"""
         all_questions = []
         
         try:
             if progress_callback:
                 progress_callback("📖 PDF → 이미지 변환 중...", 20.0)
             
-            # PDF를 이미지로 변환 (pdf2image의 역할)
+            # 통합된 PDF → 이미지 변환 사용
             logger.info("PDF를 이미지로 변환 중...")
-            page_images = convert_from_path(
-                file_path, 
-                poppler_path=POPPLER_PATH,
-                dpi=200  # 고품질 이미지
-            )
+            page_images_base64 = self._convert_pdf_to_images_unified(file_path, max_pages=20)
             
-            logger.info(f"총 {len(page_images)}개 페이지 이미지 생성됨")
+            if not page_images_base64:
+                # 이미지 변환 실패시 텍스트 추출 시도
+                logger.warning("이미지 변환 실패, 텍스트 추출 시도...")
+                text_content = self._extract_pdf_text_fallback(file_path)
+                if text_content:
+                    return self._process_text_chunks(text_content, content_type, db_schema, progress_callback)
+                else:
+                    raise Exception("PDF 처리 실패: 이미지 변환과 텍스트 추출 모두 실패")
+            
+            logger.info(f"총 {len(page_images_base64)}개 페이지 이미지 생성됨")
             
             if progress_callback:
-                progress_callback(f"📄 {len(page_images)}개 페이지 이미지 생성 완료", 40.0)
+                progress_callback(f"📄 {len(page_images_base64)}개 페이지 이미지 생성 완료", 40.0)
             
             # 파일 타입별 프롬프트 생성
             if content_type == "answers":
@@ -672,9 +673,20 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             
             # 💀 CRITICAL: 모든 페이지에서 문제 추출 (22개까지)
             question_numbers_found = set()
-            total_pages = len(page_images)
+            total_pages = len(page_images_base64)
             
-            for page_num, page_image in enumerate(page_images, 1):
+            for page_num, page_image_base64 in enumerate(page_images_base64, 1):
+                # base64를 Gemini용 이미지 객체로 변환
+                import io
+                import base64
+                from PIL import Image
+                
+                try:
+                    image_data = base64.b64decode(page_image_base64)
+                    page_image = Image.open(io.BytesIO(image_data))
+                except Exception as e:
+                    logger.error(f"페이지 {page_num} 이미지 디코딩 실패: {e}")
+                    continue
                 page_progress = 40.0 + (page_num / total_pages) * 50.0
                 if progress_callback:
                     progress_callback(f"📖 페이지 {page_num}/{total_pages} 이미지 분석 중...", page_progress)
@@ -833,140 +845,52 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
         
         return all_data
 
-    def _clean_json_text(self, text: str) -> str:
-        """JSON 텍스트에서 주석 및 불필요한 요소 제거"""
-        lines = text.split('\n')
-        cleaned_lines = []
-        
-        for line in lines:
-            # // 주석 제거
-            if '//' in line:
-                # JSON 문자열 내부의 //는 보존
-                in_string = False
-                escaped = False
-                cleaned_line = ""
-                
-                for i, char in enumerate(line):
-                    if escaped:
-                        cleaned_line += char
-                        escaped = False
-                        continue
-                    
-                    if char == '\\':
-                        escaped = True
-                        cleaned_line += char
-                        continue
-                    
-                    if char == '"' and not escaped:
-                        in_string = not in_string
-                        cleaned_line += char
-                        continue
-                    
-                    if not in_string and char == '/' and i + 1 < len(line) and line[i + 1] == '/':
-                        # 주석 시작, 나머지 줄 무시
-                        break
-                    
-                    cleaned_line += char
-                
-                line = cleaned_line
-            
-            # /* */ 주석 제거 (단순 버전)
-            while '/*' in line and '*/' in line:
-                start = line.find('/*')
-                end = line.find('*/', start) + 2
-                line = line[:start] + line[end:]
-            
-            # 빈 줄이 아니면 추가
-            if line.strip():
-                cleaned_lines.append(line)
-        
-        return '\n'.join(cleaned_lines)
-    
-    def _aggressive_json_clean(self, text: str) -> str:
-        """더 적극적인 JSON 정리"""
-        import re
-        
-        # 마지막 } 또는 ] 이후의 모든 텍스트 제거
-        text = text.strip()
-        
-        # JSON 배열인지 객체인지 확인
-        if text.startswith('['):
-            # 마지막 ]의 위치 찾기
-            last_bracket = text.rfind(']')
-            if last_bracket != -1:
-                text = text[:last_bracket + 1]
-        elif text.startswith('{'):
-            # 마지막 }의 위치 찾기
-            last_brace = text.rfind('}')
-            if last_brace != -1:
-                text = text[:last_brace + 1]
-        
-        # 여러 개의 공백을 하나로 압축
-        text = re.sub(r'\s+', ' ', text)
-        
-        # 줄바꿈 정리
-        text = text.replace('\n', ' ').replace('\r', '')
-        
-        # 문자열 외부의 주석 제거 (간단한 버전)
-        text = re.sub(r'//[^\n\r]*', '', text)
-        
-        return text.strip()
+    # 중복된 JSON 정리 메소드들은 통합 static 메소드로 대체됨
+    # _clean_json_text_unified 및 _aggressive_json_clean_unified 사용
     
     def _parse_gemini_response(self, response_text: str, content_type: str) -> Dict[str, Any]:
-        """Gemini 응답 파싱"""
-        text = response_text.strip()
+        """Gemini 응답 파싱 (통합 유틸리티 사용)"""
         
-        # JSON 추출
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0]
-        elif "```" in text:
-            json_parts = text.split("```")
-            for part in json_parts:
-                if part.strip().startswith('{') or part.strip().startswith('['):
-                    text = part
-                    break
-        
-        # JSON 주석 제거 (Gemini가 종종 주석을 포함함)
-        text = self._clean_json_text(text)
-        
-        # JSON 파싱 시도
         try:
-            result = json.loads(text.strip())
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON 파싱 오류: {e}")
-            logger.error(f"정리된 텍스트: {text[:500]}...")
+            # 통합 AI JSON 파서 사용
+            result = self.parse_ai_json_response(
+                response_text,
+                fallback_data={"error": "파싱 실패", "data": [], "type": content_type}
+            )
             
-            # 두 번째 시도: 더 적극적인 정리
-            cleaned_text = self._aggressive_json_clean(text)
-            try:
-                result = json.loads(cleaned_text)
-                logger.info("두 번째 시도로 JSON 파싱 성공")
-            except json.JSONDecodeError as e2:
-                logger.error(f"두 번째 JSON 파싱도 실패: {e2}")
-                logger.error(f"최종 텍스트: {cleaned_text[:500]}...")
-            raise ValueError(f"Invalid JSON response: {e}")
+            # 에러 응답 확인
+            if "error" in result:
+                logger.error(f"JSON 파싱 실패: {result['error']}")
+                return {"type": content_type, "data": []}
+            
+            # 자동 감지 모드인 경우
+            if content_type == "auto" and isinstance(result, dict) and "type" in result:
+                data = result.get("data", [])
+                # 22번 제한 적용
+                data = [item for item in data if item.get('question_number', 0) <= 22][:22]
+                return {
+                    "type": result["type"],
+                    "data": data
+                }
+            else:
+                # 지정된 타입인 경우 - 데이터 정규화
+                if isinstance(result, list):
+                    data = result
+                elif isinstance(result, dict):
+                    data = result.get("data", [result] if result else [])
+                else:
+                    data = []
+                
+                # 22번 제한 적용
+                data = [item for item in data if item.get('question_number', 0) <= 22][:22]
+                return {
+                    "type": content_type,
+                    "data": data
+                }
+                
         except Exception as e:
-            logger.error(f"예상치 못한 오류: {e}")
-            raise ValueError(f"Unexpected error in JSON parsing: {e}")
-        
-        # 자동 감지 모드인 경우
-        if content_type == "auto" and isinstance(result, dict) and "type" in result:
-            data = result.get("data", [])
-            # 22번 제한 적용
-            data = [item for item in data if item.get('question_number', 0) <= 22][:22]
-            return {
-                "type": result["type"],
-                "data": data
-            }
-        else:
-            # 지정된 타입인 경우
-            data = result if isinstance(result, list) else result.get("data", [])
-            # 22번 제한 적용
-            data = [item for item in data if item.get('question_number', 0) <= 22][:22]
-            return {
-                "type": content_type,
-                "data": data
-            }
+            logger.error(f"❌ Gemini 응답 파싱 중 예외: {e}")
+            return {"type": content_type, "data": []}
     
     def match_questions_with_answers(
         self, 
@@ -1146,6 +1070,224 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             "answer_options": answer_options,
             "correct_answers": correct_answers
         }
+
+    # ============= 통합 AI 응답 처리 유틸리티들 =============
+    
+    @staticmethod
+    def parse_ai_json_response(response_text: str, fallback_data: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        AI 응답에서 JSON 추출 및 파싱 (모든 AI 서비스에서 공통 사용)
+        
+        Args:
+            response_text: AI 응답 텍스트
+            fallback_data: 파싱 실패시 기본값
+            
+        Returns:
+            파싱된 JSON 데이터
+        """
+        try:
+            # 1단계: JSON 블록 추출 시도
+            import re
+            
+            # ```json ... ``` 블록 찾기
+            json_block_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
+            if json_block_match:
+                json_str = json_block_match.group(1).strip()
+            else:
+                # { ... } 패턴 찾기
+                json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group().strip()
+                else:
+                    # [ ... ] 배열 패턴 찾기
+                    array_match = re.search(r'\[.*\]', response_text, re.DOTALL)
+                    if array_match:
+                        json_str = array_match.group().strip()
+                    else:
+                        json_str = response_text.strip()
+            
+            # 2단계: JSON 파싱 시도
+            cleaned_json = QuestionParser._clean_json_text_unified(json_str)
+            result = json.loads(cleaned_json)
+            
+            logger.debug(f"✅ AI JSON 파싱 성공: {len(str(result))} 문자")
+            return result
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"⚠️ AI JSON 파싱 실패, 적극적 정리 시도: {e}")
+            
+            try:
+                # 3단계: 적극적 JSON 정리
+                aggressive_cleaned = QuestionParser._aggressive_json_clean_unified(response_text)
+                result = json.loads(aggressive_cleaned)
+                
+                logger.info("✅ 적극적 JSON 정리로 파싱 성공")
+                return result
+                
+            except json.JSONDecodeError as e2:
+                logger.error(f"❌ 모든 JSON 파싱 시도 실패: {e2}")
+                
+                # 4단계: 폴백 데이터 반환
+                if fallback_data:
+                    logger.info("📋 폴백 데이터 사용")
+                    return fallback_data
+                else:
+                    logger.info("📋 기본 에러 구조 반환")
+                    return {
+                        "error": "JSON 파싱 실패",
+                        "raw_response": response_text[:200] + "..." if len(response_text) > 200 else response_text,
+                        "parse_attempted": True
+                    }
+        
+        except Exception as e:
+            logger.error(f"❌ AI 응답 처리 중 예외 발생: {e}")
+            return fallback_data or {"error": str(e), "parse_attempted": True}
+    
+    @staticmethod
+    def _clean_json_text_unified(text: str) -> str:
+        """통합 JSON 텍스트 정리 (모든 서비스 공통 사용)"""
+        lines = text.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            # // 주석 제거
+            if '//' in line:
+                # JSON 문자열 내부의 //는 보존
+                in_string = False
+                escaped = False
+                cleaned_line = ""
+                
+                for i, char in enumerate(line):
+                    if escaped:
+                        cleaned_line += char
+                        escaped = False
+                        continue
+                    
+                    if char == '\\':
+                        escaped = True
+                        cleaned_line += char
+                        continue
+                    
+                    if char == '"' and not escaped:
+                        in_string = not in_string
+                        cleaned_line += char
+                        continue
+                    
+                    if not in_string and char == '/' and i + 1 < len(line) and line[i + 1] == '/':
+                        # 주석 시작, 나머지 줄 무시
+                        break
+                    
+                    cleaned_line += char
+                
+                line = cleaned_line
+            
+            # /* */ 주석 제거 (단순 버전)
+            while '/*' in line and '*/' in line:
+                start = line.find('/*')
+                end = line.find('*/', start) + 2
+                line = line[:start] + line[end:]
+            
+            # 빈 줄이 아니면 추가
+            if line.strip():
+                cleaned_lines.append(line)
+        
+        return '\n'.join(cleaned_lines)
+    
+    @staticmethod
+    def _aggressive_json_clean_unified(text: str) -> str:
+        """적극적 JSON 정리 (모든 서비스 공통 사용)"""
+        import re
+        
+        # 마지막 } 또는 ] 이후의 모든 텍스트 제거
+        text = text.strip()
+        
+        # JSON 배열인지 객체인지 확인
+        if text.startswith('['):
+            # 마지막 ]의 위치 찾기
+            last_bracket = text.rfind(']')
+            if last_bracket != -1:
+                text = text[:last_bracket + 1]
+        elif text.startswith('{'):
+            # 마지막 }의 위치 찾기
+            last_brace = text.rfind('}')
+            if last_brace != -1:
+                text = text[:last_brace + 1]
+        
+        # 불완전한 JSON 키-값 수정
+        text = re.sub(r',\s*}', '}', text)  # 마지막 콤마 제거
+        text = re.sub(r',\s*]', ']', text)  # 배열 마지막 콤마 제거
+        text = re.sub(r'([^"])\s*:\s*([^"\[\{].*?)([,\}\]])', r'\1: "\3"\3', text)  # 값 따옴표 추가
+        
+        return text
+    
+    @staticmethod 
+    def extract_ai_content_patterns(response_text: str, patterns: Dict[str, str]) -> Dict[str, str]:
+        """
+        AI 응답에서 특정 패턴 추출 (모든 AI 서비스 공통)
+        
+        Args:
+            response_text: AI 응답 텍스트
+            patterns: {"key": "regex_pattern"} 형태의 추출 패턴들
+            
+        Returns:
+            추출된 데이터 딕셔너리
+        """
+        import re
+        
+        extracted = {}
+        
+        for key, pattern in patterns.items():
+            try:
+                match = re.search(pattern, response_text, re.IGNORECASE | re.DOTALL)
+                if match:
+                    if match.groups():
+                        extracted[key] = match.group(1).strip()
+                    else:
+                        extracted[key] = match.group(0).strip()
+                else:
+                    extracted[key] = ""
+                    
+            except Exception as e:
+                logger.warning(f"패턴 추출 실패 ({key}): {e}")
+                extracted[key] = ""
+        
+        return extracted
+    
+    @staticmethod
+    def validate_ai_analysis_result(
+        analysis_result: Dict[str, Any], 
+        required_fields: List[str],
+        default_values: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """
+        AI 분석 결과 검증 및 보완 (모든 AI 분석 서비스 공통)
+        
+        Args:
+            analysis_result: AI 분석 결과
+            required_fields: 필수 필드 목록
+            default_values: 기본값 딕셔너리
+            
+        Returns:
+            검증된 분석 결과
+        """
+        validated = analysis_result.copy() if analysis_result else {}
+        defaults = default_values or {}
+        
+        # 필수 필드 확인 및 기본값 설정
+        for field in required_fields:
+            if field not in validated or not validated[field]:
+                if field in defaults:
+                    validated[field] = defaults[field]
+                    logger.debug(f"📋 기본값 적용: {field} = {defaults[field]}")
+                else:
+                    validated[field] = None
+                    logger.warning(f"⚠️ 필수 필드 누락: {field}")
+        
+        # 메타데이터 추가
+        validated["validation_timestamp"] = datetime.now().isoformat()
+        validated["validation_applied"] = True
+        
+        return validated
 
 # 싱글톤 인스턴스
 question_parser = QuestionParser()

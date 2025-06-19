@@ -286,33 +286,49 @@ class AIService:
             raise
 
     def _parse_generated_content(self, content: str) -> Dict[str, Any]:
-        """생성된 내용 파싱"""
+        """생성된 내용 파싱 (통합 파서 사용)"""
         try:
-            # JSON 형태로 파싱 시도
-            import re
-            json_match = re.search(r'\{.*\}', content, re.DOTALL)
-            if json_match:
-                parsed_data = json.loads(json_match.group())
-                return parsed_data
+            from app.services.question_parser import QuestionParser
             
-            # JSON 파싱 실패시 기본 구조 반환
-            return {
-                "question": content.split('\n')[0] if content else "생성된 문제",
-                "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
-                "correct_answer": "1",
-                "explanation": "Exaone에서 생성된 문제입니다.",
-                "generated_by": "Exaone Deep 7.8B"
-            }
+            # 통합 AI JSON 파서 사용
+            result = QuestionParser.parse_ai_json_response(
+                content,
+                fallback_data={
+                    "question": content.split('\n')[0] if content else "생성된 문제",
+                    "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
+                    "correct_answer": "1",
+                    "explanation": "Exaone에서 생성된 문제입니다.",
+                    "generated_by": "Exaone Deep 7.8B"
+                }
+            )
+            
+            # 성공적으로 파싱된 경우 메타데이터 추가
+            if "error" not in result:
+                result["generated_by"] = "Exaone Deep 7.8B"
+                return result
+            else:
+                # 파싱 실패시 폴백 데이터에 메타데이터 추가
+                logger.warning("⚠️ Exaone 응답 JSON 파싱 실패, 기본 구조 사용")
+                fallback = {
+                    "question": content[:200] if content else "파싱 실패",
+                    "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
+                    "correct_answer": "1",
+                    "explanation": "생성된 내용을 파싱하는데 실패했습니다.",
+                    "raw_content": content,
+                    "generated_by": "Exaone Deep 7.8B"
+                }
+                return fallback
             
         except Exception as e:
-            logger.warning("⚠️ Exaone 응답 JSON 파싱 실패, 기본 구조 사용")
+            logger.warning(f"⚠️ 내용 파싱 중 예외 발생: {e}")
             return {
                 "question": content[:200] if content else "파싱 실패",
                 "options": {"1": "선택지1", "2": "선택지2", "3": "선택지3", "4": "선택지4"},
                 "correct_answer": "1",
                 "explanation": "생성된 내용을 파싱하는데 실패했습니다.",
                 "raw_content": content,
-                "generated_by": "Exaone Deep 7.8B"
+                "generated_by": "Exaone Deep 7.8B",
+                "error": str(e)
             }
 
     async def _generate_explanation(self, problem: Question) -> Dict[str, Any]:

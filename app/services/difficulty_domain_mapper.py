@@ -297,11 +297,10 @@ class DifficultyDomainMapper:
             if self.gemini_model:
                 response = await self._call_gemini_async(prompt)
                 try:
-                    # JSON 파싱
-                    import re
-                    json_match = re.search(r'\{.*\}', response, re.DOTALL)
-                    if json_match:
-                        result = json.loads(json_match.group())
+                    # 통합 JSON 파서 사용
+                    from app.services.question_parser import QuestionParser
+                    result = QuestionParser.parse_ai_json_response(response)
+                    if "error" not in result:
                         return result
                 except:
                     pass
@@ -341,10 +340,9 @@ class DifficultyDomainMapper:
             if self.gemini_model:
                 response = await self._call_gemini_async(prompt)
                 try:
-                    import re
-                    json_match = re.search(r'\{.*\}', response, re.DOTALL)
-                    if json_match:
-                        result = json.loads(json_match.group())
+                    from app.services.question_parser import QuestionParser
+                    result = QuestionParser.parse_ai_json_response(response)
+                    if "error" not in result:
                         return result
                 except:
                     pass
@@ -488,10 +486,9 @@ class DifficultyDomainMapper:
             if self.gemini_model:
                 response = await self._call_gemini_async(prompt)
                 try:
-                    import re
-                    json_match = re.search(r'\{.*\}', response, re.DOTALL)
-                    if json_match:
-                        result = json.loads(json_match.group())
+                    from app.services.question_parser import QuestionParser
+                    result = QuestionParser.parse_ai_json_response(response)
+                    if "error" not in result:
                         return result
                 except:
                     pass

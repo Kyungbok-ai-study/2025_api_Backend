@@ -241,24 +241,26 @@ JSON 외의 다른 설명은 하지 마세요.
         return prompt
     
     def _parse_ai_response(self, response_text: str) -> Dict[str, Any]:
-        """AI 응답 파싱"""
+        """AI 응답 파싱 (통합 파서 사용)"""
         
         try:
-            # JSON 블록 추출
-            json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
-            if json_match:
-                json_str = json_match.group(1)
-            else:
-                # JSON 블록이 없으면 전체 텍스트에서 JSON 찾기
-                json_str = response_text
+            from app.services.question_parser import QuestionParser
             
-            # JSON 파싱
-            parsed_data = json.loads(json_str)
+            # 통합 AI JSON 파서 사용
+            result = QuestionParser.parse_ai_json_response(
+                response_text,
+                fallback_data=None  # 실패시 텍스트 파싱으로 대체
+            )
             
-            return parsed_data
+            # 파싱 실패시 텍스트 파싱 시도
+            if "error" in result:
+                logger.warning(f"JSON 파싱 실패, 텍스트 파싱 시도: {result['error']}")
+                return self._parse_text_response(response_text)
             
-        except json.JSONDecodeError as e:
-            logger.warning(f"AI 응답 JSON 파싱 실패: {e}")
+            return result
+            
+        except Exception as e:
+            logger.warning(f"AI 응답 파싱 실패: {e}")
             logger.warning(f"원본 응답: {response_text[:200]}...")
             
             # 간단한 텍스트 파싱 시도
