@@ -74,6 +74,18 @@ app.include_router(rag.router)
 app.include_router(advanced_rag.router)
 app.include_router(enterprise_rag.router)  # 🏢 엔터프라이즈 RAG API
 
+# 새로운 진단테스트 분석 API 추가
+from app.api.v1.diagnosis.progress_analysis import router as progress_analysis_router
+app.include_router(progress_analysis_router, tags=["diagnosis-analysis"])
+
+# 통합 진단테스트 API 추가 (전체 학과 지원)
+from .api.endpoints import universal_diagnosis
+app.include_router(universal_diagnosis.router, prefix="/api/universal-diagnosis", tags=["통합 진단테스트"])
+
+# 교수 학생 모니터링 API 추가
+from .api.endpoints import professor_student_monitoring
+app.include_router(professor_student_monitoring.router, prefix="/api/professor-monitoring", tags=["교수 학생 모니터링"])
+
 @app.get("/")
 async def root():
     """루트 엔드포인트"""
