@@ -15,8 +15,6 @@ import logging
 import re
 import requests
 import pandas as pd
-import asyncio
-
 from app.models.question import DifficultyLevel
 from app.core.config import settings
 from app.services.question_type_mapper import question_type_mapper
@@ -26,11 +24,9 @@ from app.services.ai_question_analyzer import get_ai_analyzer
 
 logger = logging.getLogger(__name__)
 
-# Poppler 경로 설정 (PDF→이미지 변환용)
-POPPLER_PATH = os.getenv(
-    'POPPLER_PATH', 
-    r'C:\Users\jaewo\Desktop\2025\2025_backend\Release-24.08.0-0\poppler-24.08.0\Library\bin'
-)
+# Poppler 경로 설정 (PDF→이미지 변환용) - 클라우드 환경 최적화
+_default_poppler = '/usr/bin'
+POPPLER_PATH = os.getenv('POPPLER_PATH', _default_poppler)
 
 # 학과 매핑
 DEPARTMENT_MAPPING = {
@@ -44,6 +40,12 @@ DEPARTMENT_MAPPING = {
 
 class QuestionParser:
     """gemini-2.0-flash-exp 기반 통합 파서 - 모든 학과 지원 + 통합 PDF 처리"""
+    
+    # 클래스 상수
+    MAX_QUESTIONS = 22
+    DEFAULT_YEAR = 2024
+    DEFAULT_DIFFICULTY = "중"
+    DEFAULT_DEPARTMENT = "물리치료학과"
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -61,6 +63,45 @@ class QuestionParser:
         else:
             self.model = None
             logger.warning("Gemini API 키가 설정되지 않았습니다.")
+    
+    def _apply_question_limit(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """22개 제한 로직 통합 메서드"""
+        if not isinstance(data, list):
+            return data
+        
+        # 문제번호가 22 이하인 것만 필터링 후 22개로 제한
+        filtered_data = [item for item in data if item.get('question_number', 0) <= self.MAX_QUESTIONS]
+        limited_data = filtered_data[:self.MAX_QUESTIONS]
+        
+        if len(filtered_data) > self.MAX_QUESTIONS:
+            logger.info(f"📋 문제 제한 적용: {len(filtered_data)}개 → {len(limited_data)}개")
+        
+        return limited_data
+    
+    def _normalize_year(self, item: Dict[str, Any], fallback_year: Optional[int] = None) -> int:
+        """연도 정규화 통합 메서드"""
+        year = item.get('year')
+        
+        # 유효한 연도 체크
+        if year and isinstance(year, int) and 2000 <= year <= 2030:
+            return year
+        
+        # 문자열 연도 변환 시도
+        if isinstance(year, str) and year.isdigit():
+            year_int = int(year)
+            if 2000 <= year_int <= 2030:
+                return year_int
+        
+        # 폴백 연도 사용
+        if fallback_year and 2000 <= fallback_year <= 2030:
+            return fallback_year
+        
+        # 기본값
+        return self.DEFAULT_YEAR
+    
+    def _get_normalized_department(self, department: str) -> str:
+        """학과명 정규화 통합 메서드"""
+        return DEPARTMENT_MAPPING.get(department, "물리치료")
     
     def detect_department_from_content(self, file_path: str, content_sample: str = "") -> str:
         """
@@ -185,8 +226,7 @@ Question 테이블:
                 all_data = self._process_text_file_chunked(file_path, content_type, db_schema, progress_callback)
 
             # 22개 제한 적용
-            if isinstance(all_data, list):
-                all_data = [item for item in all_data if item.get('question_number', 0) <= 22][:22]
+            all_data = self._apply_question_limit(all_data)
 
             if progress_callback:
                 progress_callback(f"📋 기본 파싱 완료: {len(all_data)}개 문제", 70.0)
@@ -496,7 +536,7 @@ Excel 데이터:
                             sheet_data_parsed = sheet_results.get("data", [])
                             
                             # 22번 제한 적용
-                            sheet_data_parsed = [item for item in sheet_data_parsed if item.get('question_number', 0) <= 22]
+                            sheet_data_parsed = self._apply_question_limit(sheet_data_parsed)
                             
                             if sheet_data_parsed:
                                 # year 보정: Gemini가 year를 못 뽑았거나 0/None이면 시트명에서 추출
@@ -544,8 +584,8 @@ Excel 데이터:
                         continue
                         
                 # 22개 달성하면 중단
-                if len(all_data) >= 22:
-                    all_data = all_data[:22]
+                if len(all_data) >= self.MAX_QUESTIONS:
+                    all_data = self._apply_question_limit(all_data)
                     break
             
             workbook.close()
@@ -829,14 +869,14 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                 chunk_data = self._parse_gemini_response(response.text, content_type).get("data", [])
                 
                 # 22번 제한 적용
-                chunk_data = [item for item in chunk_data if item.get('question_number', 0) <= 22]
+                chunk_data = self._apply_question_limit(chunk_data)
                 
                 all_data.extend(chunk_data)
                 logger.info(f"텍스트 청크 처리 완료: {len(chunk_data)}개 데이터")
                 
                 # 22개 달성하면 중단
-                if len(all_data) >= 22:
-                    all_data = all_data[:22]
+                if len(all_data) >= self.MAX_QUESTIONS:
+                    all_data = self._apply_question_limit(all_data)
                     break
                     
             except Exception as e:
@@ -867,7 +907,7 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
             if content_type == "auto" and isinstance(result, dict) and "type" in result:
                 data = result.get("data", [])
                 # 22번 제한 적용
-                data = [item for item in data if item.get('question_number', 0) <= 22][:22]
+                data = self._apply_question_limit(data)
                 return {
                     "type": result["type"],
                     "data": data
@@ -882,7 +922,7 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                     data = []
                 
                 # 22번 제한 적용
-                data = [item for item in data if item.get('question_number', 0) <= 22][:22]
+                data = self._apply_question_limit(data)
                 return {
                     "type": content_type,
                     "data": data
@@ -904,14 +944,14 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
         22번 문제까지만 처리합니다.
         """
         # 입력 데이터에 22개 제한 적용
-        questions = [q for q in questions if q.get('question_number', 0) <= 22][:22]
-        answers = [a for a in answers if a.get('question_number', 0) <= 22]
+        questions = [q for q in questions if q.get('question_number', 0) <= self.MAX_QUESTIONS][:self.MAX_QUESTIONS]
+        answers = [a for a in answers if a.get('question_number', 0) <= self.MAX_QUESTIONS]
 
         # 정답을 문제번호로 인덱싱
         answer_map = {}
         for ans in answers:
             q_num = ans.get("question_number")
-            if q_num is not None and q_num <= 22:  # 22번까지만
+            if q_num is not None and q_num <= self.MAX_QUESTIONS:  # 22번까지만
                 answer_map[str(q_num)] = ans
 
         matched_data = []
@@ -963,7 +1003,7 @@ JSON 배열로만 응답하세요. 22번 문제까지만 처리하세요.
                 logger.warning(f"문제 {q_num}: content가 없어 제외")
 
         # 22개 제한 재적용
-        matched_data = matched_data[:22]
+        matched_data = matched_data[:self.MAX_QUESTIONS]
 
         # 매칭 결과 로깅
         total_questions = len(questions)
